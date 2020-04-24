@@ -30,9 +30,15 @@ public class AdminController {
         model.addAttribute("packCount", cardPackRepository.count());
         model.addAttribute("cardCount", cardRepository.count());
         model.addAttribute("printCount", cardInPackRepository.count());
-        model.addAttribute("lastCycle", cardCycleRepository.findLast().getName());
-        model.addAttribute("lastPack", cardPackRepository.findLast().getName());
-        model.addAttribute("lastPrint", cardRepository.findLast().getTitle());
+        if (cardCycleRepository.count() > 0) {
+            model.addAttribute("lastCycle", cardCycleRepository.findLast().getName());
+            model.addAttribute("lastPack", cardPackRepository.findLast().getName());
+            model.addAttribute("lastPrint", cardRepository.findLast().getTitle());
+        } else {
+            model.addAttribute("lastCycle", "none");
+            model.addAttribute("lastPack", "none");
+            model.addAttribute("lastPrint", "none");
+        }
         model.addAttribute("stampNetrunnerDB", operations.getTimeStamp(STAMP_NETRUNNERDB_UPDATE));
         return "admin";
     }
