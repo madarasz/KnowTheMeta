@@ -3,6 +3,8 @@ package com.madarasz.knowthemeta.database.DOs;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
+
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -15,11 +17,10 @@ public class CardPack {
     private String name;
     private int position;
     private CardCycle cycle;
-    @Relationship(type = "CARD_IN_PACK", direction = Relationship.UNDIRECTED)
-    private Set<Card> cards;
+    @Relationship(type = "CARD_IN_PACK")
+    private Set<CardInPack> cards = new HashSet<CardInPack>();
 
     public CardPack() {
-        this.cards = new HashSet<Card>();
     }
 
     public CardPack(String code, String name, int position, CardCycle cycle) {
@@ -27,7 +28,6 @@ public class CardPack {
         this.name = name;
         this.position = position;
         this.cycle = cycle;
-        this.cards = new HashSet<Card>();
     }    
 
     public String getCode() {
@@ -62,12 +62,12 @@ public class CardPack {
         this.cycle = cycle;
     }
 
-    public Set<Card> getCards() {
-        return cards;
+    public Set<CardInPack> getCards() {
+        return this.cards;
     }
 
-    public void addCard(Card card) {
-        this.cards.add(card);
+    public void addCards(CardInPack cardInPack) {
+        this.cards.add(cardInPack);
     }
 
     @Override

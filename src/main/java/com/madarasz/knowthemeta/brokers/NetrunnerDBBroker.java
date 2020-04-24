@@ -100,21 +100,19 @@ public class NetrunnerDBBroker {
             if (card == null) {
                 // new card
                 card = gson.fromJson(item, Card.class);
-                CardInPack cardInPack = new CardInPack(card, pack, code, imageUrl);
-                cardRepository.save(card);
+                pack.addCards(new CardInPack(card, pack, code, imageUrl));
                 cardPackRepository.save(pack);
                 newCount++;
-                log.debug(String.format("New card: %s - %s", card.getTitle(), cardInPack.getCardPack().getName()));
+                log.debug(String.format("New card: %s - %s", card.getTitle(), pack.getName()));
             } else {
                 // card exists
                 Card cardWithCode = cardRepository.findByCode(code);
                 if (cardWithCode == null) {
                     // new reprint
-                    CardInPack cardInPack = new CardInPack(card, pack, code, imageUrl);
-                    cardRepository.save(card);
+                    pack.addCards(new CardInPack(card, pack, code, imageUrl));
                     cardPackRepository.save(pack);
                     reprintCount++;
-                    log.debug(String.format("New reprint: %s - %s", card.getTitle(), cardInPack.getCardPack().getName()));
+                    log.debug(String.format("New reprint: %s - %s", card.getTitle(), pack.getName()));
                 }
             }
         });

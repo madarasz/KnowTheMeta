@@ -14,8 +14,8 @@ import org.neo4j.ogm.annotation.StartNode;
 @RelationshipEntity(type="CARD_IN_PACK")
 public class CardInPack {
     @Id @GeneratedValue private Long id;
-    @StartNode private Card card;
-    @EndNode private CardPack cardPack;
+    @StartNode private CardPack cardPack;
+    @EndNode private Card card;
     @Property String code;
     @Property @Nullable private String image_url;
 
@@ -27,9 +27,6 @@ public class CardInPack {
         this.cardPack = cardPack;
         this.code = code;
         this.image_url = image_url;
-        // add relationships
-        this.cardPack.addCard(card);
-        this.card.addPack(cardPack);
     }
 
     public Card getCard() {

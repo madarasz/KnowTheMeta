@@ -30,11 +30,8 @@ public class Card {
     @Index(unique = true) String title;
     private String type_code;
     private Boolean uniqueness;
-    @Relationship(type = "CARD_IN_PACK", direction = Relationship.UNDIRECTED)
-    private Set<CardPack> packs;
 
     public Card() {
-        this.packs = new HashSet<CardPack>();
     }
 
     public Card(int cost, int deck_limit, String faction_code, int faction_cost, int influence_limit,
@@ -58,7 +55,6 @@ public class Card {
         this.title = title;
         this.type_code = type_code;
         this.uniqueness = uniqueness;
-        this.packs = new HashSet<CardPack>();
     }
 
     public int getCost() {
@@ -197,16 +193,5 @@ public class Card {
         this.uniqueness = uniqueness;
     }
 
-    public Set<CardPack> getPacks() {
-        return packs;
-    }
-
-    public void setPacks(Set<CardPack> packs) {
-        this.packs = packs;
-    }
-
-    public void addPack(CardPack pack) {
-        this.packs.add(pack);
-    }
 
 }
