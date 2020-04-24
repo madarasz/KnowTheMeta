@@ -15,7 +15,7 @@ public class CardPack {
     private String name;
     private int position;
     private CardCycle cycle;
-    @Relationship(type = "CARD_IN_PACK")
+    @Relationship(type = "CARD_IN_PACK", direction = Relationship.UNDIRECTED)
     private Set<Card> cards;
 
     public CardPack() {
@@ -64,6 +64,10 @@ public class CardPack {
 
     public Set<Card> getCards() {
         return cards;
+    }
+
+    public void addCard(Card card) {
+        this.cards.add(card);
     }
 
     @Override

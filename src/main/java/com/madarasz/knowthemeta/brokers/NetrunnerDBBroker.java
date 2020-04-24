@@ -13,6 +13,7 @@ import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
+import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
 
@@ -20,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 @Component
 public class NetrunnerDBBroker {
@@ -28,11 +31,13 @@ public class NetrunnerDBBroker {
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
     @Autowired CardRepository cardRepository;
+    @Autowired CardInPackRepository cardInPackRepository;
 
     private final static String NETRUNNERDB_API_URL = "https://netrunnerdb.com/api/2.0/public/";
     private final static String NETRUNNERDB_PRIVATEDECK_URL = "https://netrunnerdb.com/en/deck/view/";
     private final static String NETRUNNERDB_DECKLIST_URL = "https://netrunnerdb.com/en/decklist/";
     private final static Logger log = LoggerFactory.getLogger(NetrunnerDBBroker.class);
+    private final static StopWatch stopwatch = new StopWatch();
     private int newCount;
     private int reprintCount;
 
@@ -68,12 +73,16 @@ public class NetrunnerDBBroker {
     }
 
     // loads Cards from NetrunnerDB, ALSO performs DB update
+    @Transactional
     public void loadCards() {
         log.info("Loading cards");
+        stopwatch.start();
         newCount = 0;
         reprintCount = 0;
+
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards");
         String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
+
         packData.get("data").getAsJsonArray().forEach(item -> {
             // get fields
             JsonObject packItem = (JsonObject) item;
@@ -93,8 +102,9 @@ public class NetrunnerDBBroker {
                 card = gson.fromJson(item, Card.class);
                 CardInPack cardInPack = new CardInPack(card, pack, code, imageUrl);
                 cardRepository.save(card);
+                cardPackRepository.save(pack);
                 newCount++;
-                log.info(String.format("New card: %s - %s", card.getTitle(), cardInPack.getCardPack().getName()));
+                log.debug(String.format("New card: %s - %s", card.getTitle(), cardInPack.getCardPack().getName()));
             } else {
                 // card exists
                 Card cardWithCode = cardRepository.findByCode(code);
@@ -102,17 +112,19 @@ public class NetrunnerDBBroker {
                     // new reprint
                     CardInPack cardInPack = new CardInPack(card, pack, code, imageUrl);
                     cardRepository.save(card);
+                    cardPackRepository.save(pack);
                     reprintCount++;
-                    log.info(String.format("New reprint: %s - %s", card.getTitle(), cardInPack.getCardPack().getName()));
+                    log.debug(String.format("New reprint: %s - %s", card.getTitle(), cardInPack.getCardPack().getName()));
                 }
             }
         });
 
         // logging
+        stopwatch.stop();
         if (newCount + reprintCount == 0) {
-            log.info("Cards: no updates");
+            log.info(String.format("Cards: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
         } else {
-            log.info(String.format("Cards: %d new cards, %d reprints", newCount, reprintCount));
+            log.info(String.format("Cards: %d new cards, %d reprints (%.3f sec)", newCount, reprintCount, stopwatch.getTotalTimeSeconds()));
         }
     }
 }
