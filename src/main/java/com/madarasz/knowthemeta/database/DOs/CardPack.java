@@ -16,6 +16,7 @@ public class CardPack {
     private String code;
     private String name;
     private int position;
+    @Relationship(type = "CYCLE", direction = Relationship.OUTGOING)
     private CardCycle cycle;
     @Relationship(type = "CARD_IN_PACK")
     private Set<CardInPack> cards = new HashSet<CardInPack>();

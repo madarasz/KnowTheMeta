@@ -68,7 +68,10 @@ public class Operations {
             CardPack found = cardPackRepository.findByCode(cardPack.getCode());
             if (found == null) {
                 cardPackRepository.save(cardPack);
-                log.debug("New pack: " + cardPack.getName());
+                CardCycle cardCycle = cardPack.getCycle();
+                cardCycle.addPack(cardPack);
+                cardCycleRepository.save(cardCycle);
+                log.debug(String.format("New pack: %s (cycle: %s)", cardPack.getName(), cardPack.getCycle().getName()));
                 createCount++;
             } 
         }

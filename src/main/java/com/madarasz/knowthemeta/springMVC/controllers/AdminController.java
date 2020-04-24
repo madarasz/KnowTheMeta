@@ -26,19 +26,18 @@ public class AdminController {
 
     @GetMapping("/")
     public String adminPage(Model model) {
-        model.addAttribute("cycleCount", cardCycleRepository.count());
-        model.addAttribute("packCount", cardPackRepository.count());
-        model.addAttribute("cardCount", cardRepository.count());
-        model.addAttribute("printCount", cardInPackRepository.count());
-        if (cardCycleRepository.count() > 0) {
-            model.addAttribute("lastCycle", cardCycleRepository.findLast().getName());
-            model.addAttribute("lastPack", cardPackRepository.findLast().getName());
-            model.addAttribute("lastPrint", cardRepository.findLast().getTitle());
-        } else {
-            model.addAttribute("lastCycle", "none");
-            model.addAttribute("lastPack", "none");
-            model.addAttribute("lastPrint", "none");
-        }
+        long cycleCount = cardCycleRepository.count();
+        long packCount = cardPackRepository.count();
+        long cardCount = cardRepository.count();
+        long printCount = cardInPackRepository.count();
+        model.addAttribute("cycleCount", cycleCount);
+        model.addAttribute("packCount", packCount);
+        model.addAttribute("cardCount", cardCount);
+        model.addAttribute("printCount", printCount);
+        model.addAttribute("lastCycle", cycleCount > 0 ? cardCycleRepository.findLast().getName() : "none");
+        model.addAttribute("lastPack", packCount > 0 ? cardPackRepository.findLast().getName() : "none");
+        model.addAttribute("lastPrint", cardCount > 0 ? cardRepository.findLast().getTitle() : "none");
+
         model.addAttribute("stampNetrunnerDB", operations.getTimeStamp(STAMP_NETRUNNERDB_UPDATE));
         return "admin";
     }
