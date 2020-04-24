@@ -1,17 +1,25 @@
 package com.madarasz.knowthemeta.brokers;
 
 import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
+import com.madarasz.knowthemeta.database.DOs.relationships.MWLCard;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
@@ -27,19 +35,25 @@ import org.springframework.util.StopWatch;
 @Component
 public class NetrunnerDBBroker {
 
-    @Autowired HttpBroker httpBroker;
-    @Autowired CardCycleRepository cardCycleRepository;
-    @Autowired CardPackRepository cardPackRepository;
-    @Autowired CardRepository cardRepository;
-    @Autowired CardInPackRepository cardInPackRepository;
+    @Autowired
+    HttpBroker httpBroker;
+    @Autowired
+    CardCycleRepository cardCycleRepository;
+    @Autowired
+    CardPackRepository cardPackRepository;
+    @Autowired
+    CardRepository cardRepository;
+    @Autowired
+    CardInPackRepository cardInPackRepository;
 
     private final static String NETRUNNERDB_API_URL = "https://netrunnerdb.com/api/2.0/public/";
     private final static String NETRUNNERDB_PRIVATEDECK_URL = "https://netrunnerdb.com/en/deck/view/";
     private final static String NETRUNNERDB_DECKLIST_URL = "https://netrunnerdb.com/en/decklist/";
     private final static Logger log = LoggerFactory.getLogger(NetrunnerDBBroker.class);
     private final static StopWatch stopwatch = new StopWatch();
+    private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private int newCount;
-    private int reprintCount;
+    private int editCount;
 
     private final static Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -78,7 +92,7 @@ public class NetrunnerDBBroker {
         log.info("Loading cards");
         stopwatch.start();
         newCount = 0;
-        reprintCount = 0;
+        editCount = 0;
 
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards");
         String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
@@ -89,7 +103,8 @@ public class NetrunnerDBBroker {
             String title = packItem.get("title").getAsString();
             String code = packItem.get("code").getAsString();
             String packCode = packItem.get("pack_code").getAsString();
-            String imageUrl = packItem.has("image_url") ? packItem.get("image_url").getAsString() : imageUrlTemplate.replaceAll("\\{code\\}", code);
+            String imageUrl = packItem.has("image_url") ? packItem.get("image_url").getAsString()
+                    : imageUrlTemplate.replaceAll("\\{code\\}", code);
 
             // get existing objects
             Card card = cardRepository.findByTitle(title);
@@ -111,7 +126,7 @@ public class NetrunnerDBBroker {
                     // new reprint
                     pack.addCards(new CardInPack(card, pack, code, imageUrl));
                     cardPackRepository.save(pack);
-                    reprintCount++;
+                    editCount++;
                     log.debug(String.format("New reprint: %s - %s", card.getTitle(), pack.getName()));
                 }
             }
@@ -119,10 +134,48 @@ public class NetrunnerDBBroker {
 
         // logging
         stopwatch.stop();
-        if (newCount + reprintCount == 0) {
+        if (newCount + editCount == 0) {
             log.info(String.format("Cards: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
         } else {
-            log.info(String.format("Cards: %d new cards, %d reprints (%.3f sec)", newCount, reprintCount, stopwatch.getTotalTimeSeconds()));
+            log.info(String.format("Cards: %d new cards, %d reprints (%.3f sec)", newCount, editCount,
+                    stopwatch.getTotalTimeSeconds()));
         }
+    }
+
+    public Set<MWL> loadMWL() {
+        log.info("Loading MWLs");
+        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "mwl");
+        Set<MWL> result = new HashSet<MWL>();
+
+        // iterate on MWL entries
+        packData.get("data").getAsJsonArray().forEach(item -> {
+            JsonObject mwlItem = (JsonObject) item;
+            String name = mwlItem.get("name").getAsString();
+            String code = mwlItem.get("code").getAsString();
+            Boolean active = mwlItem.get("active").getAsBoolean();
+            String date_start_string = mwlItem.get("date_start").getAsString();
+            Date date_start = new Date();
+            try {
+                date_start = dateFormatter.parse(date_start_string);
+            } catch (ParseException e) {
+                log.error("Could not format MWL start date: " + date_start_string);
+            }
+            MWL mwl = new MWL(code, name, active, date_start);
+            // iterate on cards
+            for (Map.Entry<String, JsonElement> card : mwlItem.get("cards").getAsJsonObject().entrySet()) {
+                String cardCode = card.getKey();
+                JsonObject penalty = card.getValue().getAsJsonObject();
+                MWLCard mwlCard = new MWLCard(mwl, cardRepository.findByCode(cardCode), false, 0, false, false);
+                // update with penalty
+                if (penalty.has("global_penalty")) mwlCard.setGlobal_penalty(true);
+                if (penalty.has("universal_faction_cost")) mwlCard.setUniversal_faction_cost(penalty.get("universal_faction_cost").getAsInt());
+                if (penalty.has("is_restricted")) mwlCard.setIs_restricted(true);
+                if (penalty.has("deck_limit")) mwlCard.setIs_restricted(true);
+                // add to MWL
+                mwl.addCard(mwlCard);
+            }
+            result.add(mwl);
+        });
+        return result;
     }
 }

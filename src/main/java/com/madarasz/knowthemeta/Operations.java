@@ -8,10 +8,12 @@ import java.util.Set;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
+import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,11 @@ public class Operations {
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
     @Autowired AdminStampRepository adminStampRepository;
+    @Autowired MWLRepository mwlRepository;
 
     private static final Logger log = LoggerFactory.getLogger(Operations.class);
     private static final StopWatch stopwatch = new StopWatch();
-    private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Transactional
     public String getTimeStamp(String entry) {
@@ -38,7 +41,7 @@ public class Operations {
         if (adminEntry == null) {
             return "not happened yet";
         }
-        return dateFormatter.format(adminEntry.getTimestamp());
+        return dateTimeFormatter.format(adminEntry.getTimestamp());
     }
 
     @Transactional
@@ -53,16 +56,24 @@ public class Operations {
     }
 
     public void updateFromNetrunnerDB() {
+        log.info("Starting NetrunnerDB update");
+        StopWatch netrunnerTimer = new StopWatch();
+        netrunnerTimer.start();
+
         this.updateCycles();
         this.updatePacks();
         netrunnerDBBroker.loadCards();
+        this.updateMWLs();
+
+        netrunnerTimer.stop();
+        log.info(String.format("Finished NetrunnerDB update (%.3f sec)", netrunnerTimer.getTotalTimeSeconds()));
     }
 
     @Transactional
     private void updatePacks() {
+        stopwatch.start();
         Set<CardPack> packs = netrunnerDBBroker.loadPacks();
         int createCount = 0;
-        stopwatch.start();
 
         for (CardPack cardPack : packs) {
             CardPack found = cardPackRepository.findByCode(cardPack.getCode());
@@ -87,10 +98,10 @@ public class Operations {
 
     @Transactional
     private void updateCycles() {
+        stopwatch.start();
         Set<CardCycle> cycles = netrunnerDBBroker.loadCycles();
         int updateCount = 0;
         int createCount = 0;
-        stopwatch.start();
 
         for (CardCycle cardCycle : cycles) {
             CardCycle found = cardCycleRepository.findByCode(cardCycle.getCode());
@@ -113,6 +124,38 @@ public class Operations {
             log.info(String.format("Cardcycles: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
         } else {
             log.info(String.format("Cardcycles: %d added, %d updated (%.3f sec)", createCount, updateCount, stopwatch.getTotalTimeSeconds()));
+        }
+    }
+
+    @Transactional
+    private void updateMWLs() {
+        stopwatch.start();
+        Set<MWL> mwls = netrunnerDBBroker.loadMWL();
+        int createCount = 0;
+        int updateCount = 0;
+
+        for (MWL mwl : mwls) {
+            MWL existing = mwlRepository.findByCode(mwl.getCode());
+            if (existing == null) {
+                // add MWL
+                mwlRepository.save(mwl);
+                createCount++;
+            } else {
+                // update if active property is different
+                if (existing.getActive() != mwl.getActive()) {
+                    existing.setActive(mwl.getActive());
+                    mwlRepository.save(existing);
+                    updateCount++;
+                }
+            }
+        }
+
+        // logging
+        stopwatch.stop();
+        if (updateCount + createCount == 0) {
+            log.info(String.format("MWL: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
+        } else {
+            log.info(String.format("MWL: %d added, %d updated (%.3f sec)", createCount, updateCount, stopwatch.getTotalTimeSeconds()));
         }
     }
 
