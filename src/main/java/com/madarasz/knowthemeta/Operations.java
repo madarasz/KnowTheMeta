@@ -25,6 +25,7 @@ public class Operations {
     public void updateFromNetrunnerDB() {
         this.updateCycles();
         this.updatePacks();
+        netrunnerDBBroker.loadCards();
     }
 
     private void updatePacks() {
@@ -54,10 +55,10 @@ public class Operations {
                 cardCycleRepository.save(cardCycle);
                 createCount++;
             } else {
-                log.info(found.toString());
                 if (!found.equals(cardCycle)) {
                     // TODO: update
                     updateCount++;
+                    log.error("UPDATE NOT IMPLEMENTED");
                 }
             }
         }
