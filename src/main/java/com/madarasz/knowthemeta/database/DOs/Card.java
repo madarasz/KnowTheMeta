@@ -1,13 +1,9 @@
 package com.madarasz.knowthemeta.database.DOs;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
 public class Card {
@@ -29,11 +25,8 @@ public class Card {
     private String title;
     private String type_code;
     private Boolean uniqueness;
-    @Relationship(type = "CARD_IN_PACK")
-    private Set<CardPack> packs;
 
     public Card() {
-        this.packs = new HashSet<CardPack>();
     }
 
     public Card(int cost, int deck_limit, String faction_code, int faction_cost, int influence_limit,
@@ -57,7 +50,6 @@ public class Card {
         this.title = title;
         this.type_code = type_code;
         this.uniqueness = uniqueness;
-        this.packs = new HashSet<CardPack>();
     }
 
     public int getCost() {
@@ -194,10 +186,6 @@ public class Card {
 
     public void setUniqueness(Boolean uniqueness) {
         this.uniqueness = uniqueness;
-    }
-
-    public Set<CardPack> getPacks() {
-        return packs;
     }
 
 }

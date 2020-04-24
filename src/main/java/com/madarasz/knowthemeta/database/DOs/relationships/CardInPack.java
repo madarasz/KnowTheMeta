@@ -23,8 +23,7 @@ public class CardInPack {
         this.cardPack = cardPack;
         this.code = code;
         this.image_url = image_url;
-        // add relationships
-        this.card.getPacks().add(cardPack);
+        // add relationship
         this.cardPack.getCards().add(card);
     }
 
