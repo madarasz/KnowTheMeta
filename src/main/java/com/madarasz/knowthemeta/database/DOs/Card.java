@@ -1,14 +1,10 @@
 package com.madarasz.knowthemeta.database.DOs;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
 public class Card {

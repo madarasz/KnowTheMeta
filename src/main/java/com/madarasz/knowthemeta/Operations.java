@@ -1,10 +1,15 @@
 package com.madarasz.knowthemeta;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
+import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 
@@ -21,9 +26,31 @@ public class Operations {
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
+    @Autowired AdminStampRepository adminStampRepository;
 
     private static final Logger log = LoggerFactory.getLogger(Operations.class);
     private static final StopWatch stopwatch = new StopWatch();
+    private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Transactional
+    public String getTimeStamp(String entry) {
+        AdminStamp adminEntry = adminStampRepository.findByEntry(entry);
+        if (adminEntry == null) {
+            return "not happened yet";
+        }
+        return dateFormatter.format(adminEntry.getTimestamp());
+    }
+
+    @Transactional
+    public void setTimeStamp(String entry) {
+        AdminStamp adminEntry = adminStampRepository.findByEntry(entry);
+        if (adminEntry == null) {
+            adminEntry = new AdminStamp(entry, new Date());
+        } else {
+            adminEntry.setTimestamp(new Date());
+        }
+        adminStampRepository.save(adminEntry);
+    }
 
     public void updateFromNetrunnerDB() {
         this.updateCycles();

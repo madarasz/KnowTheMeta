@@ -15,12 +15,25 @@
                 <div class="float-right">
                     <a href="/load-netrunnerdb" class="btn btn-primary">Update</a>
                 </div>
-                <h5 class="card-title">NetrunnerDB</h5>
+                <h5 class="card-title">
+                    NetrunnerDB<br/>
+                    <small>
+                        last update: <em th:text="${stampNetrunnerDB}"/>
+                    </small>
+                </h5>
+                <hr/>
                 <div>
-                    <strong>CardCycles:</strong> <em th:text="${cycleCount}"/>
+                    <strong>CardCycles:</strong> <span th:text="${cycleCount}"/>
+                    - last: <em th:text="${lastCycle}"/>
                 </div>
                 <div>
-                    <strong>CardPacks:</strong> <em th:text="${packCount}"/>
+                    <strong>CardPacks:</strong> <span th:text="${packCount}"/>
+                    - last: <em th:text="${lastPack}"/>
+                </div>
+                <div>
+                    <strong>Cards:</strong> <span th:text="${cardCount}"/>
+                    <strong>Prints:</strong> <span th:text="${printCount}"/>
+                    - last: <em th:text="${lastPrint}"/>
                 </div>
             </div>
         </div>
