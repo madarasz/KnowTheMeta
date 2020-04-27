@@ -60,16 +60,15 @@ public class NetrunnerDBBroker {
     // loads Cycles from NetrunnerDB
     public Set<CardCycle> loadCycles() {
         log.info("Loading cycles");
-        JsonObject cycleData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cycles");
-        Type collectionType = new TypeToken<Set<CardCycle>>() {
-        }.getType();
+        JsonObject cycleData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cycles").getAsJsonObject();
+        Type collectionType = new TypeToken<Set<CardCycle>>() {}.getType();
         return gson.fromJson(cycleData.get("data").toString(), collectionType);
     }
 
     // loads Packs from NetrunnerDB
     public Set<CardPack> loadPacks() {
         log.info("Loading packs");
-        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "packs");
+        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "packs").getAsJsonObject();
         Set<CardPack> results = new HashSet<CardPack>();
         packData.get("data").getAsJsonArray().forEach(item -> {
             JsonObject packItem = (JsonObject) item;
@@ -94,7 +93,7 @@ public class NetrunnerDBBroker {
         newCount = 0;
         editCount = 0;
 
-        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards");
+        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards").getAsJsonObject();
         String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
 
         packData.get("data").getAsJsonArray().forEach(item -> {
@@ -144,7 +143,7 @@ public class NetrunnerDBBroker {
 
     public Set<MWL> loadMWL() {
         log.info("Loading MWLs");
-        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "mwl");
+        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "mwl").getAsJsonObject();
         Set<MWL> result = new HashSet<MWL>();
 
         // iterate on MWL entries

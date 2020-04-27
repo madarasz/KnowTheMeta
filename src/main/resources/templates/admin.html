@@ -85,16 +85,18 @@
                                 <span th:if="${meta.newCards}">&#10004;</span>
                             </td>
                             <td>
-
+                                <em th:if="${meta.lastUpdate == null}">no data</em>
+                                <span th:if="${meta.lastUpdate != null}" th:text="${meta.lastUpdate}"/>
                             </td>
                             <td th:text="${meta.tournamentCount}" class="text-center"/>
                             <td th:text="${meta.decksPlayedCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
                             <td>
+                                <a th:href="${'/get-meta?id=' + meta.id}">
+                                    <button class="btn btn-primary btn-sm" type="button">&#8634;</button>    
+                                </a>
                                 <a th:href="${'/delete-meta?id=' + meta.id}">
-                                    <button class="btn btn-outline-danger btn-sm" type="button">
-                                        &#10060;
-                                    </button>    
+                                    <button class="btn btn-outline-danger btn-sm" type="button">&#10060;</button>    
                                 </a>
                             </td>
                         </tr>

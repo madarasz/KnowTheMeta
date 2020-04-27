@@ -3,17 +3,22 @@ package com.madarasz.knowthemeta;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
+import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.MWL;
+import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
+import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +31,12 @@ import org.springframework.util.StopWatch;
 public class Operations {
 
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
+    @Autowired ABRBroker abrBroker;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
     @Autowired AdminStampRepository adminStampRepository;
     @Autowired MWLRepository mwlRepository;
+    @Autowired TournamentRepository tournamentRepository;
 
     private static final Logger log = LoggerFactory.getLogger(Operations.class);
     private static final StopWatch stopwatch = new StopWatch();
@@ -160,4 +167,25 @@ public class Operations {
         }
     }
 
+    @Transactional
+    public String getMetaData(Meta meta) {
+        stopwatch.start();
+        int tournamentCreatedCount = 0;
+
+        List<Tournament> tournaments = abrBroker.getTournamentData(meta);
+        for (Tournament tournament : tournaments) {
+            Tournament found = tournamentRepository.findById(tournament.getId());
+            if (found == null) {
+                // new tournament
+                log.debug("New tournament saved: " + tournament.toString());
+                tournamentCreatedCount++;
+            }
+        }
+        // logging
+        stopwatch.stop();
+        String message = String.format("Meta update \"%s\" finished (%.3f sec) - New tournament: %d", meta.getTitle(), 
+            stopwatch.getTotalTimeSeconds(), tournamentCreatedCount);
+        log.info(message);
+        return message;
+    }
 }

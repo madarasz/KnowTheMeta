@@ -97,7 +97,15 @@ public class Meta {
 
     public Long getId() {
         return id;
-    }      
+    }
+    
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
 
     @Override
     public String toString() {

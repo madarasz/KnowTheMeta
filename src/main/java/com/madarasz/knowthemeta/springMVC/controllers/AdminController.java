@@ -2,6 +2,7 @@ package com.madarasz.knowthemeta.springMVC.controllers;
 
 import com.madarasz.knowthemeta.Operations;
 import com.madarasz.knowthemeta.Statistics;
+import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
@@ -76,6 +77,14 @@ public class AdminController {
     public RedirectView deleteMeta(@RequestParam(name = "id") Long id, RedirectAttributes redirectAttributes) {
         statistics.deleteMeta(id);
         redirectAttributes.addFlashAttribute("message", "Meta deleted");
+        return new RedirectView("/");
+    }
+
+    @GetMapping("/get-meta")
+    public RedirectView getMeta(@RequestParam(name = "id") Long id, RedirectAttributes redirectAttributes) {
+        Meta meta = metaRepository.findById(id).get();
+        String message = operations.getMetaData(meta);
+        redirectAttributes.addFlashAttribute("message", message);
         return new RedirectView("/");
     }
 }
