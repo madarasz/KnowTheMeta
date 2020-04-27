@@ -33,13 +33,13 @@ public class Statistics {
     }
 
     @Transactional
-    public void deleteMeta(String title) {
-        Meta meta = metaRepository.findByTitle(title);
+    public void deleteMeta(Long id) {
+        Meta meta = metaRepository.findById(id).get();
         if (meta == null) {
-            log.error("Meta not found: " + title);
+            log.error("Meta not found: " + id);
         } else {
+            log.info("Deleting meta: " + meta.getTitle());
             metaRepository.delete(meta);
-            log.info("Deleted meta: " + title);
         }
     }
 }

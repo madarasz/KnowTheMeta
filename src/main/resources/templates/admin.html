@@ -90,6 +90,13 @@
                             <td th:text="${meta.tournamentCount}" class="text-center"/>
                             <td th:text="${meta.decksPlayedCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
+                            <td>
+                                <a th:href="${'/delete-meta?id=' + meta.id}">
+                                    <button class="btn btn-outline-danger btn-sm" type="button">
+                                        &#10060;
+                                    </button>    
+                                </a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

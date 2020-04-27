@@ -95,10 +95,13 @@ public class Meta {
         this.title = title;
     }
 
+    public Long getId() {
+        return id;
+    }      
+
     @Override
     public String toString() {
         return "Meta [cardpool=" + cardpool +  ", mwl=" + mwl + ", title=" + title + "]";
     }
-    
-    
+
 }
