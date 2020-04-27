@@ -10,6 +10,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface MetaRepository extends CrudRepository<Meta, Long> {
     Meta findByTitle(String title);
 
-    @Query("MATCH (:MWL)-[w:MWL]-(m:Meta)-[p:CARDPOOL]-(:CardPack) RETURN m, p, w ORDER BY w.date_start DESC")
+    @Query("MATCH (a:MWL)-[w:MWL]-(m:Meta)-[p:CARDPOOL]-(b:CardPack) RETURN m, p, w ORDER BY b.date_release DESC, a.date_start DESC")
     List<Meta> listMetas();
 }
