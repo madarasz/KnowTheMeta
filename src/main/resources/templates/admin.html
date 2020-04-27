@@ -8,9 +8,10 @@
 </head>
 <body>
     <div class="container">
-        <h2>Admin page</h2>
+        <h3 class="m-2 mb-4">Admin page</h2>
         <div class="alert alert-success" role="alert" th:text="${message}" th:if="${message != null}"/>
-        <div class="card">
+        <!-- NetrunnerDB -->
+        <div class="card mb-3 shadow-sm">
             <div class="card-body">
                 <div class="float-right">
                     <a href="/load-netrunnerdb" class="btn btn-primary">Update</a>
@@ -39,6 +40,59 @@
                     <strong>MWLS:</strong> <span th:text="${mwlCount}"/>
                     - last: <em th:text="${lastMWL}"/>
                 </div>
+            </div>
+        </div>
+        <!-- Meta -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5>Metas</h5>
+                <!-- New Meta form -->
+                <form class="form-inline" th:if="${packCount > 0}" action="/add-meta">
+                    <input type="text" class="form-control mr-sm-2" id="metaTitle" name="metaTitle" placeholder="title of meta"/>
+                    <select class="form-control mr-sm-2" name="metaPack">
+                        <option th:each="pack : ${packs}" th:value="${pack.code}" th:utext="${pack.name}"/>
+                    </select>
+                    <select class="form-control mr-sm-2" name="metaMWL">
+                        <option th:each="mwl : ${mwls}" th:value="${mwl.code}" th:utext="${mwl.name}"/>
+                    </select>
+                    <div class="form-check form-check-inline mr-sm-2">
+                        <input class="form-check-input" type="checkbox" id="metaNewCards" name="metaNewCards">
+                        <label class="form-check-label" for="metaNewCards">new cards</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+                <em th:if="${packCount == 0}">Update NetrunnerDB first!</em>
+                <hr/>
+                <!-- Existing Metas -->
+                <table class="table">
+                    <thead class="thead-dark">
+                        <th>title</th>
+                        <th>cardpool</th>
+                        <th>MWL</th>
+                        <th class="text-center">new cards</th>
+                        <th class="text-center">update</th>
+                        <th class="text-center">tournaments</th>
+                        <th class="text-center">decks</th>
+                        <th class="text-center">matches</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr th:each="meta : ${metas}">
+                            <td th:text="${meta.title}"/>
+                            <td th:text="${meta.cardpool?.name}"/>
+                            <td th:text="${meta.mwl?.name}"/>
+                            <td class="text-center">
+                                <span th:if="${meta.newCards}">&#10004;</span>
+                            </td>
+                            <td>
+
+                            </td>
+                            <td th:text="${meta.tournamentCount}" class="text-center"/>
+                            <td th:text="${meta.decksPlayedCount}" class="text-center"/>
+                            <td th:text="${meta.matchesCount}" class="text-center"/>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

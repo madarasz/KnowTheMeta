@@ -2,7 +2,7 @@ HELP.md
 .gradle
 build/
 bin/
-app.log
+app.log*
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
