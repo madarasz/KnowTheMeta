@@ -9,8 +9,6 @@ import com.madarasz.knowthemeta.database.DRs.CardRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,7 +30,6 @@ public class AdminController {
     @Autowired Statistics statistics;
 
     private static final String STAMP_NETRUNNERDB_UPDATE = "NetrunnerDB update";
-    private final static Logger log = LoggerFactory.getLogger(AdminController.class);
 
     @GetMapping("/")
     public String adminPage(Model model) {
@@ -59,8 +56,8 @@ public class AdminController {
 
     @GetMapping("/load-netrunnerdb")
     public RedirectView loadNetrunnerDB(RedirectAttributes redirectAttributes) {
-        operations.updateFromNetrunnerDB();
-        redirectAttributes.addFlashAttribute("message", "Updated from NetrunnerDB");
+        double timer = operations.updateFromNetrunnerDB();
+        redirectAttributes.addFlashAttribute("message", String.format("Updated from NetrunnerDB (%.3f sec)", timer));
         operations.setTimeStamp(STAMP_NETRUNNERDB_UPDATE);
         return new RedirectView("/");
     }

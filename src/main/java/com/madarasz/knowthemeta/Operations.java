@@ -55,7 +55,7 @@ public class Operations {
         adminStampRepository.save(adminEntry);
     }
 
-    public void updateFromNetrunnerDB() {
+    public double updateFromNetrunnerDB() {
         log.info("Starting NetrunnerDB update");
         StopWatch netrunnerTimer = new StopWatch();
         netrunnerTimer.start();
@@ -67,6 +67,7 @@ public class Operations {
 
         netrunnerTimer.stop();
         log.info(String.format("Finished NetrunnerDB update (%.3f sec)", netrunnerTimer.getTotalTimeSeconds()));
+        return netrunnerTimer.getTotalTimeSeconds();
     }
 
     @Transactional
