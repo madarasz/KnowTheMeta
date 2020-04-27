@@ -154,13 +154,14 @@ public class NetrunnerDBBroker {
             String code = mwlItem.get("code").getAsString();
             Boolean active = mwlItem.get("active").getAsBoolean();
             String date_start_string = mwlItem.get("date_start").getAsString();
+            int id = mwlItem.get("id").getAsInt();
             Date date_start = new Date();
             try {
                 date_start = dateFormatter.parse(date_start_string);
             } catch (ParseException e) {
                 log.error("Could not format MWL start date: " + date_start_string);
             }
-            MWL mwl = new MWL(code, name, active, date_start);
+            MWL mwl = new MWL(code, name, active, date_start, id);
             // iterate on cards
             for (Map.Entry<String, JsonElement> card : mwlItem.get("cards").getAsJsonObject().entrySet()) {
                 String cardCode = card.getKey();

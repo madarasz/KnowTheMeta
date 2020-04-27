@@ -14,7 +14,8 @@ import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
 public class MWL {
-    @Id @GeneratedValue private Long id;
+    @Id @GeneratedValue private Long graphId;
+    private int id; // coming from NetrunnerDB, needed for ABR query
     private String code;
     private String name;
     private Boolean active;
@@ -25,11 +26,12 @@ public class MWL {
     public MWL() {
     }
 
-    public MWL(String code, String name, Boolean active, Date date_start) {
+    public MWL(String code, String name, Boolean active, Date date_start, int id) {
         this.code = code;
         this.name = name;
         this.active = active;
         this.date_start = date_start;
+        this.id = id;
     }
 
     public String getCode() {
@@ -72,9 +74,16 @@ public class MWL {
         this.cards.add(card);
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "MWL [active=" + active + ", code=" + code + ", date_start=" + date_start + ", name=" + name + ", size =" + cards.size() + "]";
     }
-    
 }
