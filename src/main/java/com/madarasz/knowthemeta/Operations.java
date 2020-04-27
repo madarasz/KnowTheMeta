@@ -12,13 +12,16 @@ import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
+import com.madarasz.knowthemeta.database.DRs.CardRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
+import com.madarasz.knowthemeta.database.DRs.queryresult.CardCode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,7 @@ public class Operations {
     @Autowired ABRBroker abrBroker;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
+    @Autowired CardRepository cardRepository;
     @Autowired AdminStampRepository adminStampRepository;
     @Autowired MWLRepository mwlRepository;
     @Autowired TournamentRepository tournamentRepository;
@@ -172,9 +176,11 @@ public class Operations {
         stopwatch.start();
         int tournamentCreatedCount = 0;
 
+        List<CardCode> identities = cardRepository.listIdentities();
         List<Tournament> tournaments = abrBroker.getTournamentData(meta);
         for (Tournament tournament : tournaments) {
             Tournament found = tournamentRepository.findById(tournament.getId());
+            List<Standing> standings = abrBroker.getStadingData(tournament, identities);
             if (found == null) {
                 // new tournament
                 log.debug("New tournament saved: " + tournament.toString());
