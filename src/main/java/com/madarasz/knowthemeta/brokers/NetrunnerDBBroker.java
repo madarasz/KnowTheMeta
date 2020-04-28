@@ -4,11 +4,11 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -26,14 +26,11 @@ import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
-import com.madarasz.knowthemeta.database.DRs.queryresult.CardCode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 
 @Component
 public class NetrunnerDBBroker {
@@ -53,10 +50,7 @@ public class NetrunnerDBBroker {
     private final static String NETRUNNERDB_PRIVATEDECK_URL = "https://netrunnerdb.com/en/deck/view/";
     private final static String NETRUNNERDB_DECKLIST_URL = "https://netrunnerdb.com/en/decklist/";
     private final static Logger log = LoggerFactory.getLogger(NetrunnerDBBroker.class);
-    private final static StopWatch stopwatch = new StopWatch();
     private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    private int newCount;
-    private int editCount;
 
     private final static Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -88,17 +82,13 @@ public class NetrunnerDBBroker {
         return results;
     }
 
-    // loads Cards from NetrunnerDB, ALSO performs DB update
-    @Transactional
-    public void loadCards() {
+    // loads Cards from NetrunnerDB
+    public List<CardInPack> loadCards() {
         log.info("Loading cards");
-        stopwatch.start();
-        newCount = 0;
-        editCount = 0;
-
+        
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards").getAsJsonObject();
         String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
-        List<CardCode> existingCards = cardRepository.listCards();
+        List<CardInPack> results = new ArrayList<CardInPack>();
 
         packData.get("data").getAsJsonArray().forEach(item -> {
             // get fields
@@ -109,41 +99,15 @@ public class NetrunnerDBBroker {
             String imageUrl = packItem.has("image_url") ? packItem.get("image_url").getAsString()
                     : imageUrlTemplate.replaceAll("\\{code\\}", code);
 
-            // get existing objects
-            Optional<CardCode> cardExists = existingCards.stream().filter(x -> x.getCard().getTitle().equals(title)).findFirst();
             CardPack pack = cardPackRepository.findByCode(packCode);
             if (pack == null) {
                 log.error(title + " - No pack found for code: " + packCode);
             }
-            if (!cardExists.isPresent()) {
-                // new card
-                Card card = gson.fromJson(item, Card.class);
-                pack.addCards(new CardInPack(card, pack, code, imageUrl));
-                cardPackRepository.save(pack);
-                newCount++;
-                log.debug(String.format("New card: %s - %s", card.getTitle(), pack.getName()));
-            } else {
-                // card exists
-                Optional<CardCode> printExists = existingCards.stream().filter(x -> x.getCode().equals(code)).findFirst();
-                if (!printExists.isPresent()) {
-                    // new reprint
-                    Card card = cardExists.get().getCard();
-                    pack.addCards(new CardInPack(card, pack, code, imageUrl));
-                    cardPackRepository.save(pack);
-                    editCount++;
-                    log.debug(String.format("New reprint: %s - %s", card.getTitle(), pack.getName()));
-                }
-            }
+            Card card = gson.fromJson(item, Card.class);
+            results.add(new CardInPack(card, pack, code, imageUrl));
         });
 
-        // logging
-        stopwatch.stop();
-        if (newCount + editCount == 0) {
-            log.info(String.format("Cards: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
-        } else {
-            log.info(String.format("Cards: %d new cards, %d reprints (%.3f sec)", newCount, editCount,
-                    stopwatch.getTotalTimeSeconds()));
-        }
+        return results;
     }
 
     public Set<MWL> loadMWL() {

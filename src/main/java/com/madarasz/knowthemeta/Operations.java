@@ -4,10 +4,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
+import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.MWL;
@@ -15,6 +17,7 @@ import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
@@ -73,12 +76,58 @@ public class Operations {
 
         this.updateCycles();
         this.updatePacks();
-        netrunnerDBBroker.loadCards();
+        this.updateCards();  
         this.updateMWLs();
 
         netrunnerTimer.stop();
         log.info(String.format("Finished NetrunnerDB update (%.3f sec)", netrunnerTimer.getTotalTimeSeconds()));
         return netrunnerTimer.getTotalTimeSeconds();
+    }
+
+    @Transactional
+    private void updateCards() {
+        stopwatch.start();
+        int newCount = 0;
+        int editCount = 0;
+        List<CardCode> existingCards = cardRepository.listCards();
+        List<CardInPack> cards = netrunnerDBBroker.loadCards();
+
+        for (CardInPack cardInPack : cards) {
+            String title = cardInPack.getCard().getTitle();
+            CardPack pack = cardInPack.getCardPack();
+            String code = cardInPack.getCode();    
+
+            Optional<CardCode> cardExists = existingCards.stream().filter(x -> x.getCard().getTitle().equals(title)).findFirst();
+            if (!cardExists.isPresent()) {
+                // new card
+                Card card = cardInPack.getCard();
+                pack.addCards(cardInPack);
+                cardPackRepository.save(pack);
+                existingCards.add(new CardCode(card, code));
+                newCount++;
+                log.debug(String.format("New card: %s - %s", card.getTitle(), pack.getName()));
+            } else {
+                // card exists
+                Optional<CardCode> printExists = existingCards.stream().filter(x -> x.getCode().equals(code)).findFirst();
+                if (!printExists.isPresent()) {
+                    // new reprint
+                    Card card = cardExists.get().getCard();
+                    pack.addCards(new CardInPack(card, pack, code, cardInPack.getImage_url()));
+                    cardPackRepository.save(pack);
+                    editCount++;
+                    log.debug(String.format("New reprint: %s - %s", card.getTitle(), pack.getName()));
+                }
+            }
+        }
+
+        // logging
+        stopwatch.stop();
+        if (newCount + editCount == 0) {
+            log.info(String.format("Cards: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
+        } else {
+            log.info(String.format("Cards: %d new cards, %d reprints (%.3f sec)", newCount, editCount,
+                    stopwatch.getTotalTimeSeconds()));
+        }
     }
 
     @Transactional
@@ -193,5 +242,10 @@ public class Operations {
             stopwatch.getTotalTimeSeconds(), tournamentCreatedCount);
         log.info(message);
         return message;
+    }
+
+    @Transactional
+    public void dropDB() {
+        // TODO
     }
 }
