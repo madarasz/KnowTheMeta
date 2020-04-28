@@ -6,7 +6,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -24,6 +26,7 @@ import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.queryresult.CardCode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +98,7 @@ public class NetrunnerDBBroker {
 
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards").getAsJsonObject();
         String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
+        List<CardCode> existingCards = cardRepository.listCards();
 
         packData.get("data").getAsJsonArray().forEach(item -> {
             // get fields
@@ -106,23 +110,24 @@ public class NetrunnerDBBroker {
                     : imageUrlTemplate.replaceAll("\\{code\\}", code);
 
             // get existing objects
-            Card card = cardRepository.findByTitle(title);
+            Optional<CardCode> cardExists = existingCards.stream().filter(x -> x.getCard().getTitle().equals(title)).findFirst();
             CardPack pack = cardPackRepository.findByCode(packCode);
             if (pack == null) {
                 log.error(title + " - No pack found for code: " + packCode);
             }
-            if (card == null) {
+            if (!cardExists.isPresent()) {
                 // new card
-                card = gson.fromJson(item, Card.class);
+                Card card = gson.fromJson(item, Card.class);
                 pack.addCards(new CardInPack(card, pack, code, imageUrl));
                 cardPackRepository.save(pack);
                 newCount++;
                 log.debug(String.format("New card: %s - %s", card.getTitle(), pack.getName()));
             } else {
                 // card exists
-                Card cardWithCode = cardRepository.findByCode(code);
-                if (cardWithCode == null) {
+                Optional<CardCode> printExists = existingCards.stream().filter(x -> x.getCode().equals(code)).findFirst();
+                if (!printExists.isPresent()) {
                     // new reprint
+                    Card card = cardExists.get().getCard();
                     pack.addCards(new CardInPack(card, pack, code, imageUrl));
                     cardPackRepository.save(pack);
                     editCount++;
