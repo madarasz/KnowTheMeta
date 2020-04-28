@@ -157,7 +157,6 @@ public class NetrunnerDBBroker {
         }
 
         // load deck
-        log.debug("Loading deck: " + deckId);
         JsonObject deckData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "decklist/" + deckId).getAsJsonObject().get("data").getAsJsonArray().get(0).getAsJsonObject();
         Deck deck = gson.fromJson(deckData, Deck.class);
         deck.setPlayer(new User(deckData.get("user_id").getAsInt(), deckData.get("user_name").getAsString()));

@@ -261,23 +261,30 @@ public class Operations {
             for (Standing standing : standings) {
                 // decks
                 if (standing.getDeck() != null) {
-                    Deck deck = standing.getDeck();
+                    Deck deck = standing.getDeck();     
                     // player
                     int userId = deck.getPlayer().getUser_id();
-                    if (!existingUsers.stream().filter(x -> x.getUser_id() == userId).findFirst().isPresent()) {
+                    Optional<User> existingPlayer = existingUsers.stream().filter(x -> x.getUser_id() == userId).findFirst();
+                    if (!existingPlayer.isPresent()) {
                         User player = deck.getPlayer();
                         userRepository.save(player);
                         existingUsers.add(player);
                         userCreatedCount++;
+                    } else {
+                        deck.setPlayer(existingPlayer.get());
                     }
                     // deck
                     int deckId = deck.getId();
-                    if (!existingDecks.stream().filter(x -> x.getId() == deckId).findFirst().isPresent()) {
+                    Optional<Deck> existingDeck = existingDecks.stream().filter(x -> x.getId() == deckId).findFirst();
+                    if (!existingDeck.isPresent()) {
                         deckRepository.save(deck);
                         existingDecks.add(deck);
                         deckCreatedCount++;
+                    } else {
+                        standing.setDeck(existingDeck.get());
                     }
                 }
+                // TODO: without DB
                 Standing existingStanding = standingRepository.findByTournamentSideRank(tournament.getId(), standing.getIsRunner(), standing.getRank());
                 if (existingStanding == null) {
                     // new standing
