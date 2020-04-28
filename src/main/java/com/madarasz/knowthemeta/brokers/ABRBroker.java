@@ -55,6 +55,8 @@ public class ABRBroker {
             // TODO deck
             Card runner = identities.stream().filter(id -> id.getCode().equals(runnerId)).findFirst().get().getCard();
             Card corp = identities.stream().filter(id -> id.getCode().equals(corpId)).findFirst().get().getCard();
+            result.add(new Standing(tournament, runner, rank));
+            result.add(new Standing(tournament, corp, rank));
         });
         return result;
     }
