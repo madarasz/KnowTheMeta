@@ -39,8 +39,7 @@ public class Statistics {
             log.error("Meta not found: " + id);
         } else {
             log.info("Deleting meta: " + meta.getTitle());
-            metaRepository.delete(meta);
-            // TODO: destroy related tournaments, matches, etc.
+            metaRepository.deleteMeta(id);
         }
     }
 }

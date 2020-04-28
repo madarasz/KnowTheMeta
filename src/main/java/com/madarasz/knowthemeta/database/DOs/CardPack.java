@@ -22,7 +22,7 @@ public class CardPack {
     @DateString("yyyy-MM-dd") @Nullable Date date_release;
     @Relationship(type = "CYCLE", direction = Relationship.OUTGOING)
     private CardCycle cycle;
-    @Relationship(type = "CARD_IN_PACK")
+    @Relationship(type = "CARD_IN_PACK", direction = Relationship.OUTGOING)
     private Set<CardInPack> cards = new HashSet<CardInPack>();
 
     public CardPack() {

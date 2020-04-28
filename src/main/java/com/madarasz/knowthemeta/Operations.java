@@ -26,6 +26,7 @@ import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
 import com.madarasz.knowthemeta.database.DRs.DeckRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
+import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.StandingRepository;
 import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
 import com.madarasz.knowthemeta.database.DRs.UserRepository;
@@ -48,6 +49,7 @@ public class Operations {
     @Autowired CardRepository cardRepository;
     @Autowired AdminStampRepository adminStampRepository;
     @Autowired MWLRepository mwlRepository;
+    @Autowired MetaRepository metaRepository;
     @Autowired TournamentRepository tournamentRepository;
     @Autowired StandingRepository standingRepository;
     @Autowired UserRepository userRepository;
@@ -235,9 +237,10 @@ public class Operations {
         int standingCreatedCount = 0;
         int userCreatedCount = 0;
         int deckCreatedCount = 0;
+        Long metaId = meta.getId();
 
         List<CardCode> identities = cardRepository.listIdentities();
-        List<Tournament> existingTournaments = tournamentRepository.listForMeta(meta.getId());
+        List<Tournament> existingTournaments = tournamentRepository.listForMeta(metaId);
         log.info("Existing tournaments for meta: "+existingTournaments.size());
         List<User> existingUsers = userRepository.listAll();
         List<Deck> existingDecks = deckRepository.listAll();
@@ -284,6 +287,13 @@ public class Operations {
 
             }
         }
+        // update counts
+        meta.setTournamentCount(metaRepository.countTournaments(metaId));
+        meta.setStandingsCount(metaRepository.countStandings(metaId));
+        meta.setDecksPlayedCount(metaRepository.countDecks(metaId));
+        meta.setLastUpdate(new Date());
+        metaRepository.save(meta);
+
         // logging
         stopwatch.stop();
         String message = String.format("Meta update \"%s\" finished (%.3f sec) - New tournament: %d, new stading: %d, new deck: %d, new player: %d", meta.getTitle(), 

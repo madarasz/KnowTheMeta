@@ -5,6 +5,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
 public class Card {
@@ -26,6 +27,8 @@ public class Card {
     @Index(unique = true) String title;
     private String type_code;
     private Boolean uniqueness;
+    @Relationship(type = "CARD_IN_PACK", direction = Relationship.OUTGOING)
+    private CardPack pack;  // TODO: What if in multiple packs?
 
     public Card() {
     }
@@ -189,5 +192,11 @@ public class Card {
         this.uniqueness = uniqueness;
     }
 
+    public CardPack getPack() {
+        return pack;
+    }
 
+    public void setPack(CardPack pack) {
+        this.pack = pack;
+    }
 }

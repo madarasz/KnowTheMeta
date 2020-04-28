@@ -71,7 +71,8 @@
                         <th>MWL</th>
                         <th class="text-center">new cards</th>
                         <th class="text-center">update</th>
-                        <th class="text-center">tournaments</th>
+                        <th class="text-center">tourn.</th>
+                        <th class="text-center">stand.</th>
                         <th class="text-center">decks</th>
                         <th class="text-center">matches</th>
                         <th></th>
@@ -86,9 +87,10 @@
                             </td>
                             <td>
                                 <em th:if="${meta.lastUpdate == null}">no data</em>
-                                <span th:if="${meta.lastUpdate != null}" th:text="${meta.lastUpdate}"/>
+                                <span th:if="${meta.lastUpdate != null}" th:text="${#dates.format(meta.lastUpdate, 'yyyy-MM-dd HH:mm')}"/>
                             </td>
                             <td th:text="${meta.tournamentCount}" class="text-center"/>
+                            <td th:text="${meta.standingsCount}" class="text-center"/>
                             <td th:text="${meta.decksPlayedCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
                             <td>
