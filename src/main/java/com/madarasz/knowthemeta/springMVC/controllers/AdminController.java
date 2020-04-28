@@ -2,13 +2,18 @@ package com.madarasz.knowthemeta.springMVC.controllers;
 
 import com.madarasz.knowthemeta.Operations;
 import com.madarasz.knowthemeta.Statistics;
+import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
+import com.madarasz.knowthemeta.database.DRs.StandingRepository;
+import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
+import com.madarasz.knowthemeta.database.DRs.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,7 +33,12 @@ public class AdminController {
     @Autowired CardInPackRepository cardInPackRepository;
     @Autowired MWLRepository mwlRepository;
     @Autowired MetaRepository metaRepository;
+    @Autowired TournamentRepository tournamentRepository;
+    @Autowired StandingRepository standingRepository;
+    @Autowired DeckRepository deckRepository;
+    @Autowired UserRepository userRepository;
     @Autowired Statistics statistics;
+    @Autowired NetrunnerDBBroker netrunnerDBBroker;
 
     private static final String STAMP_NETRUNNERDB_UPDATE = "NetrunnerDB update";
 
@@ -52,6 +62,10 @@ public class AdminController {
         model.addAttribute("packs", cardPackRepository.listPacks());
         model.addAttribute("mwls", mwlRepository.listMWLs());
         model.addAttribute("metas", metaRepository.listMetas());
+        model.addAttribute("tournamentCount", tournamentRepository.count());
+        model.addAttribute("standingCount", standingRepository.count());
+        model.addAttribute("deckCount", deckRepository.count());
+        model.addAttribute("playerCount", userRepository.count());
         return "admin";
     }
 
@@ -85,6 +99,14 @@ public class AdminController {
         Meta meta = metaRepository.findById(id).get();
         String message = operations.getMetaData(meta);
         redirectAttributes.addFlashAttribute("message", message);
+        return new RedirectView("/");
+    }
+
+    // Temporary testing solution
+    @GetMapping("/temp")
+    public RedirectView temp(RedirectAttributes redirectAttributes) {
+        //netrunnerDBBroker.loadDeck(59695); // temporary testing task
+        redirectAttributes.addFlashAttribute("message", "temp task run");
         return new RedirectView("/");
     }
 }

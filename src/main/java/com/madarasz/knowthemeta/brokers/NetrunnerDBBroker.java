@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -19,7 +20,10 @@ import com.google.gson.reflect.TypeToken;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.MWL;
+import com.madarasz.knowthemeta.database.DOs.User;
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInDeck;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DOs.relationships.MWLCard;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
@@ -47,12 +51,9 @@ public class NetrunnerDBBroker {
     CardInPackRepository cardInPackRepository;
 
     private final static String NETRUNNERDB_API_URL = "https://netrunnerdb.com/api/2.0/public/";
-    private final static String NETRUNNERDB_PRIVATEDECK_URL = "https://netrunnerdb.com/en/deck/view/";
-    private final static String NETRUNNERDB_DECKLIST_URL = "https://netrunnerdb.com/en/decklist/";
     private final static Logger log = LoggerFactory.getLogger(NetrunnerDBBroker.class);
     private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
-    private final static Gson gson = new GsonBuilder().serializeNulls().create();
+    private final static Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy.MM.dd.").create();
 
     // loads Cycles from NetrunnerDB
     public Set<CardCycle> loadCycles() {
@@ -146,5 +147,34 @@ public class NetrunnerDBBroker {
             result.add(mwl);
         });
         return result;
+    }
+
+    public Deck loadDeck(int deckId, List<Deck> existingDecks) {
+        // check if already in DB
+        Optional<Deck> exists = existingDecks.stream().filter(x -> x.getId() == deckId).findFirst();
+        if (exists.isPresent()) {
+            return exists.get();
+        }
+
+        // load deck
+        log.debug("Loading deck: " + deckId);
+        JsonObject deckData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "decklist/" + deckId).getAsJsonObject().get("data").getAsJsonArray().get(0).getAsJsonObject();
+        Deck deck = gson.fromJson(deckData, Deck.class);
+        deck.setPlayer(new User(deckData.get("user_id").getAsInt(), deckData.get("user_name").getAsString()));
+        // iterate on cards
+        for (Map.Entry<String, JsonElement> card : deckData.get("cards").getAsJsonObject().entrySet()) {
+            String cardCode = card.getKey();
+            int quantity = card.getValue().getAsInt();
+            Card deckCard = cardRepository.findByCode(cardCode); // TODO: do not use DB
+            if (deckCard.getType_code().equals("identity")) {
+                // deck identity
+                deck.setIdentity(deckCard);
+            } else {
+                // deck card
+                deck.addCard(new CardInDeck(deck, deckCard, quantity));
+            }
+        }
+        log.debug("Loaded deck: " + deck.toString());
+        return deck;
     }
 }

@@ -104,6 +104,32 @@
                 </table>
             </div>
         </div>
+        <!-- Stats -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5>Stats</h5>
+                <div>
+                    <strong>Tournaments:</strong> <span th:text="${tournamentCount}"/>
+                </div>
+                <div>
+                    <strong>Standings:</strong> <span th:text="${standingCount}"/>
+                </div>
+                <div>
+                    <strong>Decks:</strong> <span th:text="${deckCount}"/>
+                </div>
+                <div>
+                    <strong>Players:</strong> <span th:text="${playerCount}"/>
+                </div>
+            </div>
+        </div>
+        <!-- TEMP -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <a href="/temp">
+                    <button class="btn btn-primary btn-sm" type="button">Temp</button>
+                </a>
+            </div>
+        </div>
     </div>
     
 </body>

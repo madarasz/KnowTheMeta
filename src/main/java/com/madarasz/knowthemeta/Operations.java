@@ -12,18 +12,23 @@ import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.Tournament;
+import com.madarasz.knowthemeta.database.DOs.User;
 import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
+import com.madarasz.knowthemeta.database.DRs.StandingRepository;
 import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
+import com.madarasz.knowthemeta.database.DRs.UserRepository;
 import com.madarasz.knowthemeta.database.DRs.queryresult.CardCode;
 
 import org.slf4j.Logger;
@@ -44,6 +49,9 @@ public class Operations {
     @Autowired AdminStampRepository adminStampRepository;
     @Autowired MWLRepository mwlRepository;
     @Autowired TournamentRepository tournamentRepository;
+    @Autowired StandingRepository standingRepository;
+    @Autowired UserRepository userRepository;
+    @Autowired DeckRepository deckRepository;
 
     private static final Logger log = LoggerFactory.getLogger(Operations.class);
     private static final StopWatch stopwatch = new StopWatch();
@@ -224,22 +232,62 @@ public class Operations {
     public String getMetaData(Meta meta) {
         stopwatch.start();
         int tournamentCreatedCount = 0;
+        int standingCreatedCount = 0;
+        int userCreatedCount = 0;
+        int deckCreatedCount = 0;
 
         List<CardCode> identities = cardRepository.listIdentities();
+        List<Tournament> existingTournaments = tournamentRepository.listForMeta(meta.getId());
+        log.info("Existing tournaments for meta: "+existingTournaments.size());
+        List<User> existingUsers = userRepository.listAll();
+        List<Deck> existingDecks = deckRepository.listAll();
         List<Tournament> tournaments = abrBroker.getTournamentData(meta);
+
         for (Tournament tournament : tournaments) {
-            Tournament found = tournamentRepository.findById(tournament.getId());
-            List<Standing> standings = abrBroker.getStadingData(tournament, identities);
-            if (found == null) {
+            // tournament
+            int tournamentId = tournament.getId();
+            if (!existingTournaments.stream().filter(x -> x.getId() == tournamentId).findFirst().isPresent()) {
                 // new tournament
                 log.debug("New tournament saved: " + tournament.toString());
+                tournamentRepository.save(tournament);
+                existingTournaments.add(tournament);
                 tournamentCreatedCount++;
+            }
+            // standings
+            List<Standing> standings = abrBroker.getStadingData(tournament, identities, existingDecks);
+            for (Standing standing : standings) {
+                // decks
+                if (standing.getDeck() != null) {
+                    Deck deck = standing.getDeck();
+                    // player
+                    int userId = deck.getPlayer().getUser_id();
+                    if (!existingUsers.stream().filter(x -> x.getUser_id() == userId).findFirst().isPresent()) {
+                        User player = deck.getPlayer();
+                        userRepository.save(player);
+                        existingUsers.add(player);
+                        userCreatedCount++;
+                    }
+                    // deck
+                    int deckId = deck.getId();
+                    if (!existingDecks.stream().filter(x -> x.getId() == deckId).findFirst().isPresent()) {
+                        deckRepository.save(deck);
+                        existingDecks.add(deck);
+                        deckCreatedCount++;
+                    }
+                }
+                Standing existingStanding = standingRepository.findByTournamentSideRank(tournament.getId(), standing.getIsRunner(), standing.getRank());
+                if (existingStanding == null) {
+                    // new standing
+                    standingRepository.save(standing);
+                    standingCreatedCount++;
+                }
+
             }
         }
         // logging
         stopwatch.stop();
-        String message = String.format("Meta update \"%s\" finished (%.3f sec) - New tournament: %d", meta.getTitle(), 
-            stopwatch.getTotalTimeSeconds(), tournamentCreatedCount);
+        String message = String.format("Meta update \"%s\" finished (%.3f sec) - New tournament: %d, new stading: %d, new deck: %d, new player: %d", meta.getTitle(), 
+            stopwatch.getTotalTimeSeconds(), tournamentCreatedCount, standingCreatedCount, deckCreatedCount, userCreatedCount);
         log.info(message);
         return message;
     }

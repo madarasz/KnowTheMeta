@@ -12,7 +12,7 @@ public class Standing {
     private Tournament tournament;
     private Card identity;
     private Boolean isRunner;
-    // TODO deck
+    private Deck deck;
     private int rank;
     private int winCount = 0;
     private int lossCount = 0;
@@ -20,10 +20,20 @@ public class Standing {
     public Standing() {
     }
 
-    public Standing(Tournament tournament, Card identity, int rank) {
+    public Standing(Tournament tournament, Card identity, int rank, Boolean isRunner) {
         this.tournament = tournament;
         this.identity = identity;
         this.rank = rank;
+        this.isRunner = isRunner;
+        this.adjustIsRunner();
+    }
+
+    public Standing(Tournament tournament, Card identity, Deck deck, int rank, Boolean isRunner) {
+        this.tournament = tournament;
+        this.identity = identity;
+        this.deck = deck;
+        this.rank = rank;
+        this.isRunner = isRunner;
         this.adjustIsRunner();
     }
 
@@ -76,11 +86,17 @@ public class Standing {
         this.lossCount = lossCount;
     }
 
+    public Deck getDeck() {
+        return deck;
+    }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
+    }
+
     @Override
     public String toString() {
         return "Standing [identity=" + identity.getTitle() + ", isRunner=" + isRunner + ", rank=" + rank + ", tournament="
                 + tournament.getTitle() + "]";
     }
-
-    
 }

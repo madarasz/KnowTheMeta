@@ -20,6 +20,7 @@ public class Meta {
     private int tournamentCount = 0;
     private int decksPlayedCount = 0;
     private int matchesCount = 0;
+    private int standingsCount = 0;
 
     public Meta(){
     }
@@ -105,6 +106,14 @@ public class Meta {
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public int getStandingsCount() {
+        return standingsCount;
+    }
+
+    public void setStandingsCount(int standingsCount) {
+        this.standingsCount = standingsCount;
     }
 
     @Override
