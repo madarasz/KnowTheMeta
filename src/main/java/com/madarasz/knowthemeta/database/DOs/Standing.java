@@ -16,6 +16,8 @@ public class Standing {
     private int rank;
     private int winCount = 0;
     private int lossCount = 0;
+    private int drawCount = 0;
+    private int playerId; // used only while reading matches
 
     public Standing() {
     }
@@ -24,7 +26,7 @@ public class Standing {
         this.tournament = tournament;
         this.identity = identity;
         this.rank = rank;
-        this.isRunner = isRunner;
+        this.isRunner = isRunner; // TODO: isRunner not needed
         this.adjustIsRunner();
     }
 
@@ -33,13 +35,28 @@ public class Standing {
         this.identity = identity;
         this.deck = deck;
         this.rank = rank;
-        this.isRunner = isRunner;
+        this.isRunner = isRunner; // TODO: isRunner not needed
         this.adjustIsRunner();
+    }
+
+    // for reading match json
+    public Standing(Boolean isRunner, int rank, int playerId) {
+        this.isRunner = isRunner;
+        this.rank = rank;
+        this.playerId = playerId;
     }
 
     public void adjustIsRunner() {
         String[] runnerFactionCodes = {"neutral-runner", "shaper", "criminal", "anarch", "apex", "adam", "sunny-lebeau"};
         isRunner = Arrays.stream(runnerFactionCodes).anyMatch(identity.getFaction_code()::equals);
+    }
+
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
     }
 
     public Tournament getTournament() {
@@ -86,6 +103,26 @@ public class Standing {
         this.lossCount = lossCount;
     }
 
+    public int getDrawCount() {
+        return drawCount;
+    }
+
+    public void setDrawCount(int drawCount) {
+        this.drawCount = drawCount;
+    }
+
+    public void incWinCount() {
+        this.winCount++;
+    }
+
+    public void incLossCount() {
+        this.lossCount++;
+    }
+
+    public void incDrawCount() {
+        this.drawCount++;
+    }
+
     public Deck getDeck() {
         return deck;
     }
@@ -99,4 +136,6 @@ public class Standing {
         return "Standing [identity=" + identity.getTitle() + ", isRunner=" + isRunner + ", rank=" + rank + ", tournament="
                 + tournament.getTitle() + "]";
     }
+
+    
 }

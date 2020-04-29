@@ -2,6 +2,7 @@ package com.madarasz.knowthemeta.springMVC.controllers;
 
 import com.madarasz.knowthemeta.Operations;
 import com.madarasz.knowthemeta.Statistics;
+import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
@@ -39,6 +40,7 @@ public class AdminController {
     @Autowired UserRepository userRepository;
     @Autowired Statistics statistics;
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
+    @Autowired ABRBroker abrBroker;
 
     private static final String STAMP_NETRUNNERDB_UPDATE = "NetrunnerDB update";
 
@@ -105,7 +107,7 @@ public class AdminController {
     // Temporary testing solution
     @GetMapping("/temp")
     public RedirectView temp(RedirectAttributes redirectAttributes) {
-        //netrunnerDBBroker.loadDeck(59695); // temporary testing task
+        abrBroker.loadMatches(2073); // temporary testing task
         redirectAttributes.addFlashAttribute("message", "temp task run");
         return new RedirectView("/");
     }
