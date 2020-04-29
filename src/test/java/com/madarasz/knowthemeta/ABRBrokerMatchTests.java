@@ -175,6 +175,15 @@ public class ABRBrokerMatchTests {
         assertEquals(2, player2Corp.getWinCount(), "ArminFirecracker corp win count is incorrect");
         assertEquals(0, player2Corp.getDrawCount(), "ArminFirecracker corp draw count is incorrect");
         assertEquals(0, player2Corp.getLossCount(), "ArminFirecracker corp loss count is incorrect");
+        // 8th Eric "Hatty" S. #16655, detailed reporing
+        Standing player3Runner = standings.stream().filter(x -> x.getPlayerId() == 16655 && x.getIsRunner()).findFirst().get();
+        Standing player3Corp = standings.stream().filter(x -> x.getPlayerId() == 16655 && !x.getIsRunner()).findFirst().get();
+        assertEquals(1, player3Runner.getWinCount(), "Eric Hatty S. runner win count is incorrect");
+        assertEquals(0, player3Runner.getDrawCount(), "Eric Hatty S. runner draw count is incorrect");
+        assertEquals(3, player3Runner.getLossCount(), "Eric Hatty S. runner loss count is incorrect");
+        assertEquals(3, player3Corp.getWinCount(), "Eric Hatty S. corp win count is incorrect");
+        assertEquals(0, player3Corp.getDrawCount(), "Eric Hatty S. corp draw count is incorrect");
+        assertEquals(1, player3Corp.getLossCount(), "Eric Hatty S. corp loss count is incorrect");
     }
 
     // test new Cobr.ai match output no bye and no top-cut, 5 players, draw, mixed reporting (combined+detailed)

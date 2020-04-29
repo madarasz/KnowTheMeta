@@ -82,67 +82,14 @@ public class ABRBroker {
         List<Standing> stadings = new ArrayList<Standing>();
         JsonObject matchData = httpBroker.readJSONFromURL(ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", new Integer(tournamentId).toString())).getAsJsonObject();
         // read players
-        matchData.get("players").getAsJsonArray().forEach(item -> {
-            JsonObject playerData = item.getAsJsonObject();
-            int playerId = playerData.get("id").getAsInt();
-            int rank = playerData.get("rank").getAsInt();
-            stadings.add(new Standing(true, rank, playerId));
-            stadings.add(new Standing(false, rank, playerId));
-            log.trace("New match player " + playerData.get("name").getAsString() + " no" + rank + " #" + playerId);
-        });
+        matchData.get("players").getAsJsonArray().forEach(playerItem -> readMatchPlayers(stadings, playerItem.getAsJsonObject()));
         // read rounds
         matchData.get("rounds").getAsJsonArray().forEach(roundItem -> {
             // read matches
             log.trace("--- New round ---");
-            roundItem.getAsJsonArray().forEach(item -> {
-                JsonObject matchItem = item.getAsJsonObject();
-                log.trace("Table #" + matchItem.get("table").getAsInt());
-                JsonObject player1 = matchItem.get("player1").getAsJsonObject();
-                JsonObject player2 = matchItem.get("player2").getAsJsonObject();
-                int player1Id = player1.get("id").isJsonNull() ? 0 : player1.get("id").getAsInt();
-                int player2Id = player2.get("id").isJsonNull() ? 0 : player2.get("id").getAsInt();
-                if (matchItem.get("intentionalDraw").getAsBoolean() || player1Id == 0 || player2Id == 0) {
-                    // bye or intentionalDraw
-                    log.trace("bye or intentional draw");
-                } else {
-                    Standing player1Runner = stadings.stream().filter(x -> x.getPlayerId() == player1Id && x.getIsRunner()).findFirst().get();
-                    Standing player1Corp = stadings.stream().filter(x -> x.getPlayerId() == player1Id && !x.getIsRunner()).findFirst().get();
-                    Standing player2Runner = stadings.stream().filter(x -> x.getPlayerId() == player2Id && x.getIsRunner()).findFirst().get();
-                    Standing player2Corp = stadings.stream().filter(x -> x.getPlayerId() == player2Id && !x.getIsRunner()).findFirst().get();                
-                    if (matchItem.get("eliminationGame").getAsBoolean()) {
-                        // top cut
-                        Standing player1Role = player1.get("role").getAsString().equals("corp") ? player1Corp : player1Runner;
-                        Standing player2Role = player2.get("role").getAsString().equals("corp") ? player2Corp : player2Runner;
-                        if (player1.get("winner").getAsBoolean()) {
-                            log.trace("Top-cut, player #" + player1Id + " wins");
-                            player1Role.incWinCount();
-                            player2Role.incLossCount();
-                        } else {
-                            log.trace("Top-cut, player #" + player2Id + " wins");
-                            player1Role.incLossCount();
-                            player2Role.incWinCount();
-                        }
-                    } else {
-                        // swiss
-                        int player1RunnerScore = player1.get("runnerScore").getAsInt();
-                        int player2RunnerScore = player2.get("runnerScore").getAsInt();
-                        int player1CorpScore = player1.get("corpScore").getAsInt();
-                        int player2CorpScore = player2.get("corpScore").getAsInt();
-                        if (player1.has("combinedScore") && player2.has("combinedScore")) {
-                            // cobr.ai
-                            int player1CombinedScore = player1.get("combinedScore").getAsInt();
-                            int player2CombinedScore = player2.get("combinedScore").getAsInt();
-                            applyMatch(player1RunnerScore, player1CorpScore, player1CombinedScore, player1Runner, player1Corp);
-                            applyMatch(player2RunnerScore, player2CorpScore, player2CombinedScore, player2Runner, player2Corp);
-                        } else {
-                            // nrtm
-                            applyMatch(player1RunnerScore, player1CorpScore, player1Runner, player1Corp);
-                            applyMatch(player2RunnerScore, player2CorpScore, player2Runner, player2Corp);
-                        }
-                    }
-                }
-            });
+            roundItem.getAsJsonArray().forEach(matchItem -> readMatchRounds(stadings, matchItem.getAsJsonObject()));
         });
+        // result logging
         for (Standing standing : stadings) {
             log.trace("Player id:" + standing.getPlayerId() + " isRunner:" + standing.getIsRunner() + 
                 " wins:" + standing.getWinCount() + " draws:" + standing.getDrawCount() + " losses:" + standing.getLossCount());
@@ -150,6 +97,80 @@ public class ABRBroker {
         return stadings;
     }
 
+    private void readMatchRounds(List<Standing> stadings, JsonObject matchItem) {
+        // get player Ids
+        log.trace("Table #" + matchItem.get("table").getAsInt());
+        JsonObject player1 = matchItem.get("player1").getAsJsonObject();
+        JsonObject player2 = matchItem.get("player2").getAsJsonObject();
+        int player1Id = player1.get("id").isJsonNull() ? 0 : player1.get("id").getAsInt();
+        int player2Id = player2.get("id").isJsonNull() ? 0 : player2.get("id").getAsInt();
+        // check if it was bye or intentional draw (does not count for stats)
+        if (matchItem.get("intentionalDraw").getAsBoolean() || player1Id == 0 || player2Id == 0) {
+            // bye or intentionalDraw
+            log.trace("bye or intentional draw");
+        } else {
+            // get player standing objects
+            Standing player1Runner = stadings.stream().filter(x -> x.getPlayerId() == player1Id && x.getIsRunner()).findFirst().get();
+            Standing player1Corp = stadings.stream().filter(x -> x.getPlayerId() == player1Id && !x.getIsRunner()).findFirst().get();
+            Standing player2Runner = stadings.stream().filter(x -> x.getPlayerId() == player2Id && x.getIsRunner()).findFirst().get();
+            Standing player2Corp = stadings.stream().filter(x -> x.getPlayerId() == player2Id && !x.getIsRunner()).findFirst().get();                
+            if (matchItem.get("eliminationGame").getAsBoolean()) {
+                // top cut
+                readMatchTopCut(player1, player2, player1Id, player2Id, player1Runner, player1Corp, player2Runner, player2Corp);
+            } else {
+                // swiss
+                readMatchSwiss(player1, player2, player1Runner, player1Corp, player2Runner, player2Corp);
+            }
+        }
+    }
+
+    private void readMatchSwiss(JsonObject player1, JsonObject player2, Standing player1Runner, Standing player1Corp,
+            Standing player2Runner, Standing player2Corp) {
+        // get scores
+        int player1RunnerScore = player1.get("runnerScore").getAsInt();
+        int player2RunnerScore = player2.get("runnerScore").getAsInt();
+        int player1CorpScore = player1.get("corpScore").getAsInt();
+        int player2CorpScore = player2.get("corpScore").getAsInt();
+        // decide if NRTM or Cobr.ai, apply match scores
+        if (player1.has("combinedScore") && player2.has("combinedScore")) {
+            // cobr.ai
+            int player1CombinedScore = player1.get("combinedScore").getAsInt();
+            int player2CombinedScore = player2.get("combinedScore").getAsInt();
+            applyMatch(player1RunnerScore, player1CorpScore, player1CombinedScore, player1Runner, player1Corp);
+            applyMatch(player2RunnerScore, player2CorpScore, player2CombinedScore, player2Runner, player2Corp);
+        } else {
+            // nrtm
+            applyMatch(player1RunnerScore, player1CorpScore, player1Runner, player1Corp);
+            applyMatch(player2RunnerScore, player2CorpScore, player2Runner, player2Corp);
+        }
+    }
+
+    private void readMatchTopCut(JsonObject player1, JsonObject player2, int player1Id, int player2Id, Standing player1Runner,
+            Standing player1Corp, Standing player2Runner, Standing player2Corp) {
+        // check which player played which side
+        Standing player1Role = player1.get("role").getAsString().equals("corp") ? player1Corp : player1Runner;
+        Standing player2Role = player2.get("role").getAsString().equals("corp") ? player2Corp : player2Runner;
+        // apply match scores
+        if (player1.get("winner").getAsBoolean()) {
+            log.trace("Top-cut, player #" + player1Id + " wins");
+            player1Role.incWinCount();
+            player2Role.incLossCount();
+        } else {
+            log.trace("Top-cut, player #" + player2Id + " wins");
+            player1Role.incLossCount();
+            player2Role.incWinCount();
+        }
+    }
+
+    private void readMatchPlayers(List<Standing> stadings, JsonObject playerData) {
+        int playerId = playerData.get("id").getAsInt();
+        int rank = playerData.get("rank").getAsInt();
+        stadings.add(new Standing(true, rank, playerId));
+        stadings.add(new Standing(false, rank, playerId));
+        log.trace("New match player " + playerData.get("name").getAsString() + " no" + rank + " #" + playerId);
+    }
+
+    // apply match outcome if there is a combinedScore field (Cobr.ai)
     private void applyMatch(int runnerScore, int corpScore, int combinedScore, Standing runner, Standing corp) {
         if (combinedScore != runnerScore + corpScore) {
             // old school cobr.ai
@@ -157,23 +178,21 @@ public class ABRBroker {
                 log.trace("Player #" + runner.getPlayerId() + " wins both");
                 runner.incWinCount();
                 corp.incWinCount();
-            } else if (combinedScore == 0) {
-                log.trace("Player #" + runner.getPlayerId() + " loses both");
-                runner.incLossCount();
-                corp.incLossCount();
             } else {
                 log.trace("Could not figure out results");
             }
         } else {
-            applyMatch(runnerScore, corpScore, runner, corp);
+            applyMatch(runnerScore, corpScore, runner, corp);   // gets executed even if combinedScore = 0
         }
     }
 
+    // apply match outcome based on runnerScore and corpScore fields (NRTM, newer Cobr.ai)
     private void applyMatch(int runnerScore, int corpScore, Standing runner, Standing corp) {
         applyMatch(runnerScore, runner);
         applyMatch(corpScore, corp);
     }
 
+    // apply match outcome based on a score field
     private void applyMatch(int score, Standing standing) {
         switch (score) {
             case 0:
@@ -188,6 +207,8 @@ public class ABRBroker {
                 standing.incWinCount();
                 log.trace("Player #" + standing.getPlayerId() + " wins with " + (standing.getIsRunner() ? "runner" : "corp"));
                 break;
+            default:
+                log.error("Player #" + standing.getPlayerId() + " with unexpected score:" + score);
         }
     }
 
