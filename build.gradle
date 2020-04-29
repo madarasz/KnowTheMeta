@@ -9,6 +9,10 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 ext['junit-jupiter.version'] = '5.6.0'
+apply plugin: 'jacoco'
+jacoco {
+  toolVersion = "0.8.2"
+}
 
 repositories {
 	mavenCentral()
@@ -24,6 +28,52 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 }
+
+jacocoTestCoverageVerification {
+  violationRules {
+
+//      rule {
+//          element = 'METHOD'
+//          limit {
+//              counter = 'LINE'
+//              value = 'COVEREDRATIO'
+//              minimum = 1.0
+//          }
+//          excludes = [
+//                  'io.reflectoring.coverage.part.PartlyCovered.partlyCovered(java.lang.String, boolean)',
+//          ]
+//      }
+
+    rule {
+      element = 'CLASS'
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 1.0
+      }
+      excludes = [
+          'io.reflectoring.coverage.part.PartlyCovered',
+          'io.reflectoring.coverage.ignored.*',
+          'io.reflectoring.coverage.part.NotCovered'
+      ]
+    }
+    rule {
+      element = 'CLASS'
+      includes = [
+          'io.reflectoring.coverage.part.PartlyCovered'
+      ]
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.8
+      }
+    }
+  }
+
+}
+
+test.finalizedBy jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
 
 test {
 	useJUnitPlatform()

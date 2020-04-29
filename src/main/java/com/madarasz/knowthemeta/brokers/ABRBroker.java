@@ -78,7 +78,7 @@ public class ABRBroker {
         return result;
     }
 
-    public void loadMatches(int tournamentId) {
+    public List<Standing> loadMatches(int tournamentId) {
         List<Standing> stadings = new ArrayList<Standing>();
         JsonObject matchData = httpBroker.readJSONFromURL(ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", new Integer(tournamentId).toString())).getAsJsonObject();
         // read players
@@ -147,6 +147,7 @@ public class ABRBroker {
             log.trace("Player id:" + standing.getPlayerId() + " isRunner:" + standing.getIsRunner() + 
                 " wins:" + standing.getWinCount() + " draws:" + standing.getDrawCount() + " losses:" + standing.getLossCount());
         }
+        return stadings;
     }
 
     private void applyMatch(int runnerScore, int corpScore, int combinedScore, Standing runner, Standing corp) {
