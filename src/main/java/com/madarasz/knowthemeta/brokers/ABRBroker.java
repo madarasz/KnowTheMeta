@@ -88,12 +88,12 @@ public class ABRBroker {
             int rank = playerData.get("rank").getAsInt();
             stadings.add(new Standing(true, rank, playerId));
             stadings.add(new Standing(false, rank, playerId));
-            log.trace("New match player " + playerData.get("name").getAsString() + " #" + rank + " ID: " + playerId);
+            log.trace("New match player " + playerData.get("name").getAsString() + " no" + rank + " #" + playerId);
         });
         // read rounds
         matchData.get("rounds").getAsJsonArray().forEach(roundItem -> {
             // read matches
-            log.trace("New round");
+            log.trace("--- New round ---");
             roundItem.getAsJsonArray().forEach(item -> {
                 JsonObject matchItem = item.getAsJsonObject();
                 log.trace("Table #" + matchItem.get("table").getAsInt());
@@ -154,11 +154,15 @@ public class ABRBroker {
         if (combinedScore != runnerScore + corpScore) {
             // old school cobr.ai
             if (combinedScore == 6) {
+                log.trace("Player #" + runner.getPlayerId() + " wins both");
                 runner.incWinCount();
                 corp.incWinCount();
             } else if (combinedScore == 0) {
+                log.trace("Player #" + runner.getPlayerId() + " loses both");
                 runner.incLossCount();
                 corp.incLossCount();
+            } else {
+                log.trace("Could not figure out results");
             }
         } else {
             applyMatch(runnerScore, corpScore, runner, corp);
@@ -174,12 +178,15 @@ public class ABRBroker {
         switch (score) {
             case 0:
                 standing.incLossCount();
+                log.trace("Player #" + standing.getPlayerId() + " loses with " + (standing.getIsRunner() ? "runner" : "corp"));
                 break;
             case 1:
                 standing.incDrawCount();
+                log.trace("Player #" + standing.getPlayerId() + " draws with " + (standing.getIsRunner() ? "runner" : "corp"));
                 break;
             case 3:
                 standing.incWinCount();
+                log.trace("Player #" + standing.getPlayerId() + " wins with " + (standing.getIsRunner() ? "runner" : "corp"));
                 break;
         }
     }
