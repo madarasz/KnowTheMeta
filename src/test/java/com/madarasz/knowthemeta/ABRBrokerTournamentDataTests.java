@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.HttpBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;

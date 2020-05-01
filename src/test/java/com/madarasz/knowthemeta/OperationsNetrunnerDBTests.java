@@ -3,23 +3,16 @@ package com.madarasz.knowthemeta;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
-import com.madarasz.knowthemeta.helper.TestHelper;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,30 +21,19 @@ import java.util.Set;
 public class OperationsNetrunnerDBTests {
 
     @Spy NetrunnerDBBroker netrunnerDBBroker;
-    @Spy CardCycleRepository cardCycleRepository;
-    @InjectMocks Operations operations;
-
-    private static final TestHelper testHelper = new TestHelper();
-    private static Driver driver;
-
-    @BeforeAll
-    private static void init() {
-        driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "root"));
-    }
-
-    @AfterAll
-    private static void tearDown() {
-        driver.close();
-    }
+    @Autowired CardCycleRepository cardCycleRepository;
+    @Autowired Operations operations;
 
     @Test
+    @Transactional
     public void testNetrunnerDBUpdate() {
         // setup
         Set<CardCycle> cycleTestSet = new HashSet<CardCycle>();
-        cycleTestSet.add(new CardCycle("test", "First Test Cycle", 9998, true));
+        CardCycle cycleTest = new CardCycle("test", "First Test Cycle", 9998, true);
+        cycleTestSet.add(cycleTest);
+        ReflectionTestUtils.setField(operations, "netrunnerDBBroker", netrunnerDBBroker);
         doReturn(cycleTestSet).when(netrunnerDBBroker).loadCycles();
         operations.updateFromNetrunnerDB();
-        verify(cardCycleRepository, times(1)).save(any(CardCycle.class));
-        assertEquals("First Test Cycle", testHelper.getQueryStringResult(driver, "MATCH (a:CardCycle {code: \"test\"}) RETURN a.name"));    // node does not get persisted :(
+        assertNotNull(cardCycleRepository.findByCode(cycleTest.getCode()));
     }
 }
