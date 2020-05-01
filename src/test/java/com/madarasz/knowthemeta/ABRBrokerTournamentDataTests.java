@@ -38,8 +38,7 @@ public class ABRBrokerTournamentDataTests {
     @Test
     public void testLoadTournamentData() {
         // setup
-        String input = testHelper.getTestResource("MockTournamentData.json");
-        JsonElement testData = JsonParser.parseString(input);
+        JsonElement testData = testHelper.getJsonFromTestResource("MockTournamentData.json");
         Mockito.when(httpBroker.readJSONFromURL(anyString())).thenReturn(testData);
         CardCycle cycle = new CardCycle("test", "test cycle", 1, false);
         CardPack pack = new CardPack("ur", "Uprising", 1, cycle, new Date());

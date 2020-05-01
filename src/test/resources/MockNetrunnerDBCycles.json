@@ -1,0 +1,18 @@
+{
+    "data": [
+        {
+            "code": "test",
+            "name": "First Test Cycle",
+            "position": 9998,
+            "size": 2,
+            "rotated": false
+        },
+        {
+            "code": "test_reprint",
+            "name": "Test Reprint Cycle",
+            "position": 9999,
+            "size": 1,
+            "rotated": false
+        }
+    ]
+}
