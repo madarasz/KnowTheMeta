@@ -15,6 +15,7 @@ public class Card {
     private String faction_code;
     @Nullable private int faction_cost;
     @Nullable private int influence_limit;  // identities only
+    @Nullable private int base_link;  // runner identities only
     @Nullable private int minimum_deck_size;  // identities only
     @Nullable private int memory_cost;  // programs only
     @Nullable private int strength;  // programs, ice only
@@ -36,7 +37,7 @@ public class Card {
     public Card(int cost, int deck_limit, String faction_code, int faction_cost, int influence_limit,
             int minimum_deck_size, int memory_cost, int strength, int advancement_cost, int agenda_points,
             int trash_cost, String keywords, String side_code, String text, String title, String type_code,
-            Boolean uniqueness) {
+            Boolean uniqueness, int base_link) {
         this.cost = cost;
         this.deck_limit = deck_limit;
         this.faction_code = faction_code;
@@ -54,6 +55,7 @@ public class Card {
         this.title = title;
         this.type_code = type_code;
         this.uniqueness = uniqueness;
+        this.base_link = base_link;
     }
 
     public int getCost() {
@@ -199,4 +201,107 @@ public class Card {
     public void setPack(CardPack pack) {
         this.pack = pack;
     }
+
+    public int getBase_link() {
+        return base_link;
+    }
+
+    public void setBase_link(int base_link) {
+        this.base_link = base_link;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + advancement_cost;
+        result = prime * result + agenda_points;
+        result = prime * result + base_link;
+        result = prime * result + cost;
+        result = prime * result + deck_limit;
+        result = prime * result + ((faction_code == null) ? 0 : faction_code.hashCode());
+        result = prime * result + faction_cost;
+        result = prime * result + influence_limit;
+        result = prime * result + ((keywords == null) ? 0 : keywords.hashCode());
+        result = prime * result + memory_cost;
+        result = prime * result + minimum_deck_size;
+        result = prime * result + ((side_code == null) ? 0 : side_code.hashCode());
+        result = prime * result + strength;
+        result = prime * result + ((text == null) ? 0 : text.hashCode());
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        result = prime * result + trash_cost;
+        result = prime * result + ((type_code == null) ? 0 : type_code.hashCode());
+        result = prime * result + ((uniqueness == null) ? 0 : uniqueness.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Card other = (Card) obj;
+        if (advancement_cost != other.advancement_cost)
+            return false;
+        if (agenda_points != other.agenda_points)
+            return false;
+        if (base_link != other.base_link)
+            return false;
+        if (cost != other.cost)
+            return false;
+        if (deck_limit != other.deck_limit)
+            return false;
+        if (faction_code == null) {
+            if (other.faction_code != null)
+                return false;
+        } else if (!faction_code.equals(other.faction_code))
+            return false;
+        if (faction_cost != other.faction_cost)
+            return false;
+        if (influence_limit != other.influence_limit)
+            return false;
+        if (keywords == null) {
+            if (other.keywords != null)
+                return false;
+        } else if (!keywords.equals(other.keywords))
+            return false;
+        if (memory_cost != other.memory_cost)
+            return false;
+        if (minimum_deck_size != other.minimum_deck_size)
+            return false;
+        if (side_code == null) {
+            if (other.side_code != null)
+                return false;
+        } else if (!side_code.equals(other.side_code))
+            return false;
+        if (strength != other.strength)
+            return false;
+        if (text == null) {
+            if (other.text != null)
+                return false;
+        } else if (!text.equals(other.text))
+            return false;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        if (trash_cost != other.trash_cost)
+            return false;
+        if (type_code == null) {
+            if (other.type_code != null)
+                return false;
+        } else if (!type_code.equals(other.type_code))
+            return false;
+        if (uniqueness == null) {
+            if (other.uniqueness != null)
+                return false;
+        } else if (!uniqueness.equals(other.uniqueness))
+            return false;
+        return true;
+    }
+
 }

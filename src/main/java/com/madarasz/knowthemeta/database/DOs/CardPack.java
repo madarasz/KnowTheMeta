@@ -89,4 +89,50 @@ public class CardPack {
         return "CardPack [code=" + code + ", name=" + name + ", position=" + position + "]";
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((cards == null) ? 0 : cards.hashCode());
+        result = prime * result + ((code == null) ? 0 : code.hashCode());
+        result = prime * result + ((date_release == null) ? 0 : date_release.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + position;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CardPack other = (CardPack) obj;
+        if (cards == null) {
+            if (other.cards != null)
+                return false;
+        } else if (!cards.equals(other.cards))
+            return false;
+        if (code == null) {
+            if (other.code != null)
+                return false;
+        } else if (!code.equals(other.code))
+            return false;
+        if (date_release == null) {
+            if (other.date_release != null)
+                return false;
+        } else if (!date_release.equals(other.date_release))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (position != other.position)
+            return false;
+        return true;
+    }
+
 }

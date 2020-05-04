@@ -16,7 +16,7 @@ import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.Tournament;
-import com.madarasz.knowthemeta.database.DRs.queryresult.CardCode;
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class ABRBroker {
         return result;
     }
 
-    public List<Standing> getStadingData(Tournament tournament, List<CardCode> identities, List<Deck> existingDecks) {
+    public List<Standing> getStadingData(Tournament tournament, List<CardInPack> identities, List<Deck> existingDecks) {
         List<Standing> result = new ArrayList<Standing>();
         JsonArray standingData = httpBroker.readJSONFromURL(ABR_STANDING_API_URL+tournament.getId()).getAsJsonArray();
 

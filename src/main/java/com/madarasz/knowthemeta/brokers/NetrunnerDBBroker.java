@@ -64,14 +64,14 @@ public class NetrunnerDBBroker {
     }
 
     // loads Packs from NetrunnerDB
-    public Set<CardPack> loadPacks() {
+    public Set<CardPack> loadPacks(Set<CardCycle> cycles) {
         log.info("Loading packs");
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "packs").getAsJsonObject();
         Set<CardPack> results = new HashSet<CardPack>();
         packData.get("data").getAsJsonArray().forEach(item -> {
             JsonObject packItem = (JsonObject) item;
             String cycleCode = packItem.get("cycle_code").getAsString();
-            CardCycle cycle = cardCycleRepository.findByCode(cycleCode);
+            CardCycle cycle = cycles.stream().filter(x -> x.getCode().equals(cycleCode)).findFirst().get();
             CardPack pack = gson.fromJson(item, CardPack.class);
             if (cycle != null) {
                 pack.setCycle(cycle);
@@ -84,7 +84,7 @@ public class NetrunnerDBBroker {
     }
 
     // loads Cards from NetrunnerDB
-    public List<CardInPack> loadCards() {
+    public List<CardInPack> loadCards(Set<CardPack> packs) {
         log.info("Loading cards");
         
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards").getAsJsonObject();
@@ -94,16 +94,11 @@ public class NetrunnerDBBroker {
         packData.get("data").getAsJsonArray().forEach(item -> {
             // get fields
             JsonObject packItem = (JsonObject) item;
-            String title = packItem.get("title").getAsString();
             String code = packItem.get("code").getAsString();
             String packCode = packItem.get("pack_code").getAsString();
             String imageUrl = packItem.has("image_url") ? packItem.get("image_url").getAsString()
                     : imageUrlTemplate.replaceAll("\\{code\\}", code);
-
-            CardPack pack = cardPackRepository.findByCode(packCode);
-            if (pack == null) {
-                log.error(title + " - No pack found for code: " + packCode);
-            }
+            CardPack pack = packs.stream().filter(x -> x.getCode().equals(packCode)).findFirst().get();
             Card card = gson.fromJson(item, Card.class);
             results.add(new CardInPack(card, pack, code, imageUrl));
         });
@@ -111,7 +106,7 @@ public class NetrunnerDBBroker {
         return results;
     }
 
-    public Set<MWL> loadMWL() {
+    public Set<MWL> loadMWL(List<CardInPack> cards) {
         log.info("Loading MWLs");
         JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "mwl").getAsJsonObject();
         Set<MWL> result = new HashSet<MWL>();
@@ -135,7 +130,7 @@ public class NetrunnerDBBroker {
             for (Map.Entry<String, JsonElement> card : mwlItem.get("cards").getAsJsonObject().entrySet()) {
                 String cardCode = card.getKey();
                 JsonObject penalty = card.getValue().getAsJsonObject();
-                MWLCard mwlCard = new MWLCard(mwl, cardRepository.findByCode(cardCode), false, 0, false, false);
+                MWLCard mwlCard = new MWLCard(mwl, cards.stream().filter(x -> x.getCode().equals(cardCode)).findFirst().get().getCard(), false, 0, false, false);
                 // update with penalty
                 if (penalty.has("global_penalty")) mwlCard.setGlobal_penalty(true);
                 if (penalty.has("universal_faction_cost")) mwlCard.setUniversal_faction_cost(penalty.get("universal_faction_cost").getAsInt());

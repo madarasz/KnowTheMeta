@@ -30,7 +30,6 @@ import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.StandingRepository;
 import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
 import com.madarasz.knowthemeta.database.DRs.UserRepository;
-import com.madarasz.knowthemeta.database.DRs.queryresult.CardCode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +58,11 @@ public class Operations {
     private static final StopWatch stopwatch = new StopWatch();
     private static final DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    // for injecting mock during unit/integration tests
+    public void setNetrunnerDBBroker(NetrunnerDBBroker mock) {
+        this.netrunnerDBBroker = mock;
+    }
+
     @Transactional
     public String getTimeStamp(String entry) {
         AdminStamp adminEntry = adminStampRepository.findByEntry(entry);
@@ -84,10 +88,10 @@ public class Operations {
         StopWatch netrunnerTimer = new StopWatch();
         netrunnerTimer.start();
 
-        this.updateCycles();
-        this.updatePacks();
-        this.updateCards();  
-        this.updateMWLs();
+        Set<CardCycle> cycles = this.updateCycles();
+        Set<CardPack> packs = this.updatePacks(cycles);
+        List<CardInPack> cards = this.updateCards(packs);  
+        this.updateMWLs(cards);
 
         netrunnerTimer.stop();
         log.info(String.format("Finished NetrunnerDB update (%.3f sec)", netrunnerTimer.getTotalTimeSeconds()));
@@ -95,35 +99,37 @@ public class Operations {
     }
 
     @Transactional
-    private void updateCards() {
+    private List<CardInPack> updateCards(Set<CardPack> packs) {
         stopwatch.start();
         int newCount = 0;
         int editCount = 0;
-        List<CardCode> existingCards = cardRepository.listCards();
-        List<CardInPack> cards = netrunnerDBBroker.loadCards();
+        List<CardInPack> existingCards = cardRepository.listCardInPack();
+        List<CardInPack> cards = netrunnerDBBroker.loadCards(packs);
 
         for (CardInPack cardInPack : cards) {
             String title = cardInPack.getCard().getTitle();
             CardPack pack = cardInPack.getCardPack();
             String code = cardInPack.getCode();    
 
-            Optional<CardCode> cardExists = existingCards.stream().filter(x -> x.getCard().getTitle().equals(title)).findFirst();
+            Optional<CardInPack> cardExists = existingCards.stream().filter(x -> x.getCard().getTitle().equals(title)).findFirst();
             if (!cardExists.isPresent()) {
                 // new card
                 Card card = cardInPack.getCard();
                 pack.addCards(cardInPack);
                 cardPackRepository.save(pack);
-                existingCards.add(new CardCode(card, code));
+                existingCards.add(cardInPack);
                 newCount++;
                 log.debug(String.format("New card: %s - %s", card.getTitle(), pack.getName()));
             } else {
                 // card exists
-                Optional<CardCode> printExists = existingCards.stream().filter(x -> x.getCode().equals(code)).findFirst();
+                Optional<CardInPack> printExists = existingCards.stream().filter(x -> x.getCode().equals(code)).findFirst();
                 if (!printExists.isPresent()) {
                     // new reprint
                     Card card = cardExists.get().getCard();
-                    pack.addCards(new CardInPack(card, pack, code, cardInPack.getImage_url()));
+                    CardInPack reprint = new CardInPack(card, pack, code, cardInPack.getImage_url());
+                    pack.addCards(reprint);
                     cardPackRepository.save(pack);
+                    existingCards.add(reprint);
                     editCount++;
                     log.debug(String.format("New reprint: %s - %s", card.getTitle(), pack.getName()));
                 }
@@ -138,12 +144,13 @@ public class Operations {
             log.info(String.format("Cards: %d new cards, %d reprints (%.3f sec)", newCount, editCount,
                     stopwatch.getTotalTimeSeconds()));
         }
+        return existingCards;
     }
 
     @Transactional
-    private void updatePacks() {
+    private Set<CardPack> updatePacks(Set<CardCycle> cycles) {
         stopwatch.start();
-        Set<CardPack> packs = netrunnerDBBroker.loadPacks();
+        Set<CardPack> packs = netrunnerDBBroker.loadPacks(cycles);
         int createCount = 0;
 
         for (CardPack cardPack : packs) {
@@ -165,10 +172,11 @@ public class Operations {
         } else {
             log.info(String.format("Cardpacks: %d added (%.3f sec)", createCount, stopwatch.getTotalTimeSeconds()));
         }
+        return packs;
     }
 
     @Transactional
-    private void updateCycles() {
+    private Set<CardCycle> updateCycles() {
         stopwatch.start();
         Set<CardCycle> cycles = netrunnerDBBroker.loadCycles();
         int updateCount = 0;
@@ -196,12 +204,13 @@ public class Operations {
         } else {
             log.info(String.format("Cardcycles: %d added, %d updated (%.3f sec)", createCount, updateCount, stopwatch.getTotalTimeSeconds()));
         }
+        return cycles;
     }
 
     @Transactional
-    private void updateMWLs() {
+    private void updateMWLs(List<CardInPack> cards) {
         stopwatch.start();
-        Set<MWL> mwls = netrunnerDBBroker.loadMWL();
+        Set<MWL> mwls = netrunnerDBBroker.loadMWL(cards);
         int createCount = 0;
         int updateCount = 0;
 
@@ -239,7 +248,7 @@ public class Operations {
         int deckCreatedCount = 0;
         Long metaId = meta.getId();
 
-        List<CardCode> identities = cardRepository.listIdentities();
+        List<CardInPack> identities = cardRepository.listIdentities();
         List<Tournament> existingTournaments = tournamentRepository.listForMeta(metaId);
         log.info("Existing tournaments for meta: "+existingTournaments.size());
         List<User> existingUsers = userRepository.listAll();

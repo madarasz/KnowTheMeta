@@ -86,4 +86,50 @@ public class MWL {
     public String toString() {
         return "MWL [active=" + active + ", code=" + code + ", date_start=" + date_start + ", name=" + name + ", size =" + cards.size() + "]";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((active == null) ? 0 : active.hashCode());
+        result = prime * result + ((code == null) ? 0 : code.hashCode());
+        result = prime * result + ((date_start == null) ? 0 : date_start.hashCode());
+        result = prime * result + id;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MWL other = (MWL) obj;
+        if (active == null) {
+            if (other.active != null)
+                return false;
+        } else if (!active.equals(other.active))
+            return false;
+        if (code == null) {
+            if (other.code != null)
+                return false;
+        } else if (!code.equals(other.code))
+            return false;
+        if (date_start == null) {
+            if (other.date_start != null)
+                return false;
+        } else if (!date_start.equals(other.date_start))
+            return false;
+        if (id != other.id)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
 }

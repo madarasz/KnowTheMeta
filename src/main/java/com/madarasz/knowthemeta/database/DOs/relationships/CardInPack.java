@@ -60,4 +60,35 @@ public class CardInPack {
     public void setCardPack(CardPack cardPack) {
         this.cardPack = cardPack;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((code == null) ? 0 : code.hashCode());
+        result = prime * result + ((image_url == null) ? 0 : image_url.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CardInPack other = (CardInPack) obj;
+        if (code == null) {
+            if (other.code != null)
+                return false;
+        } else if (!code.equals(other.code))
+            return false;
+        if (image_url == null) {
+            if (other.image_url != null)
+                return false;
+        } else if (!image_url.equals(other.image_url))
+            return false;
+        return true;
+    }
 }
