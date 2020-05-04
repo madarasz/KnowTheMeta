@@ -24,6 +24,6 @@ public interface CardRepository extends CrudRepository<Card, Long> {
     @Query("MATCH (n:Card {type_code:\"identity\"})-[p:CARD_IN_PACK]-(:CardPack) RETURN p")
     List<CardInPack> listIdentities();
 
-    @Query("MATCH (n:Card)-[p:CARD_IN_PACK]-(:CardPack) RETURN p")
+    @Query("MATCH (n:Card)-[r:CARD_IN_PACK]-(p:CardPack) RETURN p, n, r")
     List<CardInPack> listCardInPack();
 }
