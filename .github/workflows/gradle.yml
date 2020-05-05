@@ -20,3 +20,11 @@ jobs:
       run: chmod +x gradlew
     - name: Test with Gradle, exclude DB related tests
       run: ./gradlew test -PexcludeTests=**/OperationsNetrunnerDBTests.class
+    - name: Send coverage xml artifact to codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: 93781e3a-e11d-44c3-8f2d-44fb163025bf
+        file: ./build/reports/jacoco/test/jacocoTestReport.xml
+        flags: unittests # optional
+        name: codecov-umbrella # optional
+        fail_ci_if_error: false
