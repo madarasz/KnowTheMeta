@@ -19,7 +19,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Test with Gradle, exclude DB related tests
-      run: ./gradlew test -PexcludeTests=**/OperationsNetrunnerDBTests.class
+      run: ./gradlew test
     - name: Send coverage xml artifact to codecov
       uses: codecov/codecov-action@v1
       with:
