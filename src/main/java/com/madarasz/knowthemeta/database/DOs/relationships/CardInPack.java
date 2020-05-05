@@ -62,9 +62,17 @@ public class CardInPack {
     }
 
     @Override
+    public String toString() {
+        return "CardInPack [card=" + card.getTitle() + ", cardPack=" + cardPack.getName() + ", code=" + code + ", image_url=" + image_url
+                + "]";
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((card == null) ? 0 : card.getTitle().hashCode());
+        result = prime * result + ((cardPack == null) ? 0 : cardPack.getName().hashCode());
         result = prime * result + ((code == null) ? 0 : code.hashCode());
         result = prime * result + ((image_url == null) ? 0 : image_url.hashCode());
         return result;
@@ -79,6 +87,16 @@ public class CardInPack {
         if (getClass() != obj.getClass())
             return false;
         CardInPack other = (CardInPack) obj;
+        if (card == null) {
+            if (other.card != null)
+                return false;
+        } else if (!card.getTitle().equals(other.card.getTitle()))
+            return false;
+        if (cardPack == null) {
+            if (other.cardPack != null)
+                return false;
+        } else if (!cardPack.getName().equals(other.cardPack.getName()))
+            return false;
         if (code == null) {
             if (other.code != null)
                 return false;

@@ -73,11 +73,7 @@ public class NetrunnerDBBroker {
             String cycleCode = packItem.get("cycle_code").getAsString();
             CardCycle cycle = cycles.stream().filter(x -> x.getCode().equals(cycleCode)).findFirst().get();
             CardPack pack = gson.fromJson(item, CardPack.class);
-            if (cycle != null) {
-                pack.setCycle(cycle);
-            } else {
-                log.error("No cycle found for code: " + cycleCode);
-            }
+            pack.setCycle(cycle);
             results.add(pack);
         });
         return results;

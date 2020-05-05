@@ -1,0 +1,18 @@
+{
+    "data": [
+        {
+            "id": 999,
+            "date_creation": "2018-05-01T15:24:02+00:00",
+            "date_update": "2019-06-03T11:49:00+00:00",
+            "code": "test_MWL",
+            "name": "First MWL",
+            "active": true,
+            "date_start": "2020-06-06",
+            "cards": {
+                "99991": {
+                    "is_restricted": 1
+                }
+            }
+        }
+    ]
+}

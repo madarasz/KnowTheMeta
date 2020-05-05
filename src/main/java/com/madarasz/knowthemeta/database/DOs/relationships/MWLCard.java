@@ -81,6 +81,58 @@ public class MWLCard {
         this.deck_limit = deck_limit;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((card == null) ? 0 : card.getTitle().hashCode());
+        result = prime * result + ((deck_limit == null) ? 0 : deck_limit.hashCode());
+        result = prime * result + ((global_penalty == null) ? 0 : global_penalty.hashCode());
+        result = prime * result + ((is_restricted == null) ? 0 : is_restricted.hashCode());
+        result = prime * result + ((mwl == null) ? 0 : mwl.getCode().hashCode());
+        result = prime * result + universal_faction_cost;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MWLCard other = (MWLCard) obj;
+        if (card == null) {
+            if (other.card != null)
+                return false;
+        } else if (!card.getTitle().equals(other.card.getTitle()))
+            return false;
+        if (deck_limit == null) {
+            if (other.deck_limit != null)
+                return false;
+        } else if (!deck_limit.equals(other.deck_limit))
+            return false;
+        if (global_penalty == null) {
+            if (other.global_penalty != null)
+                return false;
+        } else if (!global_penalty.equals(other.global_penalty))
+            return false;
+        if (is_restricted == null) {
+            if (other.is_restricted != null)
+                return false;
+        } else if (!is_restricted.equals(other.is_restricted))
+            return false;
+        if (mwl == null) {
+            if (other.mwl != null)
+                return false;
+        } else if (!mwl.getCode().equals(other.mwl.getCode()))
+            return false;
+        if (universal_faction_cost != other.universal_faction_cost)
+            return false;
+        return true;
+    }
+
     
     
 }

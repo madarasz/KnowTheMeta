@@ -1,0 +1,31 @@
+{
+    "data": [
+        {
+            "code": "first",
+            "cycle_code": "test",
+            "date_release": "2020-01-01",
+            "name": "The beginning",
+            "position": 1,
+            "size": 113,
+            "ffg_id": null
+        },
+        {
+            "code": "second",
+            "cycle_code": "test",
+            "date_release": "2020-03-15",
+            "name": "Meh",
+            "position": 2,
+            "size": 113,
+            "ffg_id": null
+        },
+        {
+            "code": "third",
+            "cycle_code": "test_reprint",
+            "date_release": "2020-05-03",
+            "name": "Reprinto",
+            "position": 1,
+            "size": 113,
+            "ffg_id": null
+        }
+    ]
+}

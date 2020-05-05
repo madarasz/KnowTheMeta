@@ -304,4 +304,14 @@ public class Card {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "Card [advancement_cost=" + advancement_cost + ", agenda_points=" + agenda_points + ", base_link="
+                + base_link + ", cost=" + cost + ", deck_limit=" + deck_limit + ", faction_code=" + faction_code
+                + ", faction_cost=" + faction_cost + ", influence_limit=" + influence_limit + ", keywords=" + keywords
+                + ", memory_cost=" + memory_cost + ", minimum_deck_size=" + minimum_deck_size + ", side_code="
+                + side_code + ", strength=" + strength + ", text=" + text + ", title=" + title + ", trash_cost="
+                + trash_cost + ", type_code=" + type_code + ", uniqueness=" + uniqueness + "]";
+    }
+
 }

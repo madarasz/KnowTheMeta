@@ -154,7 +154,7 @@ public class Operations {
         int createCount = 0;
 
         for (CardPack cardPack : packs) {
-            CardPack found = cardPackRepository.findByCode(cardPack.getCode());
+            CardPack found = cardPackRepository.findByCode(cardPack.getCode()); // TODO: without DB
             if (found == null) {
                 cardPackRepository.save(cardPack);
                 CardCycle cardCycle = cardPack.getCycle();
@@ -183,7 +183,7 @@ public class Operations {
         int createCount = 0;
 
         for (CardCycle cardCycle : cycles) {
-            CardCycle found = cardCycleRepository.findByCode(cardCycle.getCode());
+            CardCycle found = cardCycleRepository.findByCode(cardCycle.getCode()); // TODO without DB
             if (found == null) {
                 cardCycleRepository.save(cardCycle);
                 log.debug("New cycle: " + cardCycle.getName());
