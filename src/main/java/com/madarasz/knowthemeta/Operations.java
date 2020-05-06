@@ -57,6 +57,7 @@ public class Operations {
     private static final Logger log = LoggerFactory.getLogger(Operations.class);
     private static final StopWatch stopwatch = new StopWatch();
     private static final DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public final String MESSAGE_NOT_HAPPENED_YET = "not happened yet";
 
     // for injecting mock during unit/integration tests
     public void setNetrunnerDBBroker(NetrunnerDBBroker mock) {
@@ -67,7 +68,7 @@ public class Operations {
     public String getTimeStamp(String entry) {
         AdminStamp adminEntry = adminStampRepository.findByEntry(entry);
         if (adminEntry == null) {
-            return "not happened yet";
+            return MESSAGE_NOT_HAPPENED_YET;
         }
         return dateTimeFormatter.format(adminEntry.getTimestamp());
     }
