@@ -101,5 +101,17 @@ public class OperationsNetrunnerDBTests {
         assertTrue(cardInPackRepository.verifyCardInPackRelationship(testData.testCard1.getTitle(), testData.testCardInPack3.getCode()));
         // assert card-mwl relationship
         assertTrue(mwlRepository.verifyCardInMWLRelationship(testData.testCard1.getTitle(), testData.testMwl.getCode()));
+        // assert that no new items are created on a second run
+        Long cycleCount = cardCycleRepository.count();
+        Long packCount = cardPackRepository.count();
+        Long cardCount = cardRepository.count();
+        Long printCount = cardInPackRepository.count();
+        Long mwlCount = mwlRepository.count();
+        operations.updateFromNetrunnerDB();
+        assertEquals(cycleCount, cardCycleRepository.count(), "Additional cycle created on second run");
+        assertEquals(packCount, cardPackRepository.count(), "Additional cycle created on second run");
+        assertEquals(cardCount, cardRepository.count(), "Additional cycle created on second run");
+        assertEquals(printCount, cardInPackRepository.count(), "Additional cycle created on second run");
+        assertEquals(mwlCount, mwlRepository.count(), "Additional cycle created on second run");
     }
 }
