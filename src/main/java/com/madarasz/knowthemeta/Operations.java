@@ -180,20 +180,24 @@ public class Operations {
     private Set<CardCycle> updateCycles() {
         stopwatch.start();
         Set<CardCycle> cycles = netrunnerDBBroker.loadCycles();
+        Set<CardCycle> existingCycles = cardCycleRepository.findall();
         int updateCount = 0;
         int createCount = 0;
 
         for (CardCycle cardCycle : cycles) {
-            CardCycle found = cardCycleRepository.findByCode(cardCycle.getCode()); // TODO without DB
-            if (found == null) {
+            Optional<CardCycle> found = existingCycles.stream().filter(x -> x.getCode().equals(cardCycle.getCode())).findFirst();
+            if (!found.isPresent()) {
                 cardCycleRepository.save(cardCycle);
+                existingCycles.add(cardCycle);
                 log.debug("New cycle: " + cardCycle.getName());
                 createCount++;
             } else {
-                if (!found.equals(cardCycle)) {
-                    // TODO: update
+                CardCycle foundCycle = found.get();
+                if (!foundCycle.equals(cardCycle)) {
+                    foundCycle.copyFrom(cardCycle);
+                    cardCycleRepository.save(foundCycle);
+                    log.debug("Updated cycle: " + foundCycle.getName());
                     updateCount++;
-                    log.error("UPDATE NOT IMPLEMENTED");
                 }
             }
         }

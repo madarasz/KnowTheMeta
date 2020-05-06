@@ -38,12 +38,11 @@ public class OperationsNetrunnerDBTests {
     @Autowired MWLRepository mwlRepository;
     @Autowired Operations operations;
 
-    public static final TestData testData = new TestData();
-
     @Test
     @Transactional
     public void testNetrunnerDBUpdate() throws ParseException {
         // setup
+        TestData testData = new TestData();
         doReturn(testData.cycleTestSet).when(netrunnerDBBroker).loadCycles();
         doReturn(testData.packTestSet).when(netrunnerDBBroker).loadPacks(any());
         doReturn(testData.cardInPackTestSet).when(netrunnerDBBroker).loadCards(any());
@@ -108,6 +107,51 @@ public class OperationsNetrunnerDBTests {
         Long printCount = cardInPackRepository.count();
         Long mwlCount = mwlRepository.count();
         operations.updateFromNetrunnerDB();
+        assertEquals(cycleCount, cardCycleRepository.count(), "Additional cycle created on second run");
+        assertEquals(packCount, cardPackRepository.count(), "Additional cycle created on second run");
+        assertEquals(cardCount, cardRepository.count(), "Additional cycle created on second run");
+        assertEquals(printCount, cardInPackRepository.count(), "Additional cycle created on second run");
+        assertEquals(mwlCount, mwlRepository.count(), "Additional cycle created on second run");
+    }
+
+    @Test
+    @Transactional
+    public void testNetrunnerDBUpdateWithUpdate() throws ParseException {
+        // setup
+        TestData testData = new TestData();
+        System.out.println("test data: " + testData.testCycle1.toString());
+        doReturn(testData.cycleTestSet).when(netrunnerDBBroker).loadCycles();
+        doReturn(testData.packTestSet).when(netrunnerDBBroker).loadPacks(any());
+        doReturn(testData.cardInPackTestSet).when(netrunnerDBBroker).loadCards(any());
+        doReturn(testData.mwlTestSet).when(netrunnerDBBroker).loadMWL(any());
+        operations.setNetrunnerDBBroker(netrunnerDBBroker);
+
+        // run
+        operations.updateFromNetrunnerDB();
+
+        // count items
+        Long cycleCount = cardCycleRepository.count();
+        Long packCount = cardPackRepository.count();
+        Long cardCount = cardRepository.count();
+        Long printCount = cardInPackRepository.count();
+        Long mwlCount = mwlRepository.count();
+
+        // setup updated entries
+        TestData testDataUpdated = new TestData();
+        testDataUpdated.testCycle1.setRotated(true);
+        testDataUpdated.testMwl.setActive(false);
+        doReturn(testDataUpdated.cycleTestSet).when(netrunnerDBBroker).loadCycles();
+        doReturn(testDataUpdated.mwlTestSet).when(netrunnerDBBroker).loadMWL(any());
+
+        // rerun
+        operations.updateFromNetrunnerDB();
+
+        // assert updated fields
+        CardCycle foundCycle1 = cardCycleRepository.findByCode(testData.testCycle1.getCode());
+        assertEquals(testDataUpdated.testCycle1, foundCycle1, "Test cycle data is incorrect");
+        MWL foundMwl = mwlRepository.findByCode(testData.testMwl.getCode());
+        assertEquals(testDataUpdated.testMwl, foundMwl, "Test MWL data is incorrect");
+        // assert that no new items are created on a second run
         assertEquals(cycleCount, cardCycleRepository.count(), "Additional cycle created on second run");
         assertEquals(packCount, cardPackRepository.count(), "Additional cycle created on second run");
         assertEquals(cardCount, cardRepository.count(), "Additional cycle created on second run");

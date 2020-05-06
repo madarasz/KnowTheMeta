@@ -74,6 +74,13 @@ public class CardCycle {
         this.packs.add(pack);
     }
 
+    public void copyFrom(CardCycle cardCycle) {
+        this.code = cardCycle.getCode();
+        this.name = cardCycle.getName();
+        this.position = cardCycle.getPosition();
+        this.rotated = cardCycle.getRotated();
+    }
+
     @Override
     public String toString() {
         return "CardCycle [code=" + code + ", name=" + name + ", position=" + position + ", rotated=" + rotated + ", size=" + packs.size() + "]";

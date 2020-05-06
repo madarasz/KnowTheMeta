@@ -24,13 +24,21 @@ public class AdminStampTests {
     @Test
     @Transactional
     public void testAdminStamp() throws ParseException {
+        // get timestamp, it has not happened yet
         String entryName = "Test entry";
         assertEquals(operations.MESSAGE_NOT_HAPPENED_YET, operations.getTimeStamp(entryName), "Wrong message");
+        // set timestamp, get timestamp, now minus timestamp is less than a second
         operations.setTimeStamp(entryName);
         String returnedTimeStamp = operations.getTimeStamp(entryName);
         assertNotEquals(operations.MESSAGE_NOT_HAPPENED_YET, returnedTimeStamp, "Wrong message");
         Date returnedDate = dateTimeFormatter.parse(returnedTimeStamp);
         Date currentDate = new Date();
         assertTrue(currentDate.getTime() - returnedDate.getTime() < 1000, "Wrong timestamp");
+        // set timestamp again, get timestamp, elapsed time is less than a second
+        operations.setTimeStamp(entryName);
+        String returnedTimeStamp2 = operations.getTimeStamp(entryName);
+        assertNotEquals(operations.MESSAGE_NOT_HAPPENED_YET, returnedTimeStamp2, "Wrong message");
+        Date returnedDate2 = dateTimeFormatter.parse(returnedTimeStamp2);
+        assertTrue(returnedDate2.getTime() - returnedDate.getTime() < 1000, "Wrong timestamp");
     }
 }

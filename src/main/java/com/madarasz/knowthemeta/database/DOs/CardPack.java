@@ -86,14 +86,13 @@ public class CardPack {
 
     @Override
     public String toString() {
-        return "CardPack [code=" + code + ", name=" + name + ", position=" + position + "]";
+        return "CardPack [code=" + code + ", name=" + name + ", position=" + position + ", date_release=" + date_release + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((cards == null) ? 0 : cards.hashCode());
         result = prime * result + ((code == null) ? 0 : code.hashCode());
         result = prime * result + ((date_release == null) ? 0 : date_release.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -110,11 +109,6 @@ public class CardPack {
         if (getClass() != obj.getClass())
             return false;
         CardPack other = (CardPack) obj;
-        if (cards == null) {
-            if (other.cards != null)
-                return false;
-        } else if (!cards.equals(other.cards))
-            return false;
         if (code == null) {
             if (other.code != null)
                 return false;
