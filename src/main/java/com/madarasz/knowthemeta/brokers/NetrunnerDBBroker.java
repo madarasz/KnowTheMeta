@@ -94,7 +94,13 @@ public class NetrunnerDBBroker {
             String packCode = packItem.get("pack_code").getAsString();
             String imageUrl = packItem.has("image_url") ? packItem.get("image_url").getAsString()
                     : imageUrlTemplate.replaceAll("\\{code\\}", code);
-            CardPack pack = packs.stream().filter(x -> x.getCode().equals(packCode)).findFirst().get();
+            Optional<CardPack> foundPack = packs.stream().filter(x -> x.getCode().equals(packCode)).findFirst();
+            CardPack pack = new CardPack();
+            if (foundPack.isPresent()) {
+                pack = foundPack.get();
+            } else {
+                log.error("No cardpack found for: " + packCode);
+            }
             Card card = gson.fromJson(item, Card.class);
             results.add(new CardInPack(card, pack, code, imageUrl));
         });
