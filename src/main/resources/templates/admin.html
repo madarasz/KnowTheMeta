@@ -94,7 +94,7 @@
                             <td th:text="${meta.decksPlayedCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
                             <td>
-                                <a th:href="${'/get-meta?id=' + meta.title}">
+                                <a th:href="${'/get-meta?title=' + meta.title}">
                                     <button class="btn btn-primary btn-sm" type="button">&#8634;</button>    
                                 </a>
                                 <a th:href="${'/delete-meta?title=' + meta.title}">

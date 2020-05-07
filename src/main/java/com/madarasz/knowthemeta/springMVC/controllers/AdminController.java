@@ -97,18 +97,18 @@ public class AdminController {
     }
 
     @GetMapping("/get-meta")
-    public RedirectView getMeta(@RequestParam(name = "id") Long id, RedirectAttributes redirectAttributes) {
-        Meta meta = metaRepository.findById(id).get();
+    public RedirectView getMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
+        Meta meta = metaRepository.findByTitle(title);
         String message = operations.getMetaData(meta);
         redirectAttributes.addFlashAttribute("message", message);
         return new RedirectView("/");
     }
 
     // Temporary testing solution
-    @GetMapping("/temp")
-    public RedirectView temp(RedirectAttributes redirectAttributes) {
-        abrBroker.loadMatches(2073); // temporary testing task
-        redirectAttributes.addFlashAttribute("message", "temp task run");
-        return new RedirectView("/");
-    }
+    // @GetMapping("/temp")
+    // public RedirectView temp(RedirectAttributes redirectAttributes) {
+    //     abrBroker.loadMatches(2073); // temporary testing task
+    //     redirectAttributes.addFlashAttribute("message", "temp task run");
+    //     return new RedirectView("/");
+    // }
 }
