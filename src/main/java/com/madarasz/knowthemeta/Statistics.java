@@ -23,6 +23,7 @@ public class Statistics {
 
     @Transactional
     public void addMeta(String mwlCode, String packCode, Boolean newCards, String title) {
+        // TODO: stop if meta exists with same name
         MWL mwl = mwlRepository.findByCode(mwlCode);
         CardPack cardPack = cardPackRepository.findByCode(packCode);
         if (mwl == null) log.error("No MWL found by code: " + mwlCode);
@@ -33,13 +34,13 @@ public class Statistics {
     }
 
     @Transactional
-    public void deleteMeta(Long id) {
-        Meta meta = metaRepository.findById(id).get();
+    public void deleteMeta(String title) {
+        Meta meta = metaRepository.findByTitle(title);
         if (meta == null) {
-            log.error("Meta not found: " + id);
+            log.error("Meta not found: " + title);
         } else {
             log.info("Deleting meta: " + meta.getTitle());
-            metaRepository.deleteMeta(id);
+            metaRepository.deleteMeta(title);
         }
     }
 }

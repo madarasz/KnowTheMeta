@@ -25,6 +25,6 @@ public interface MetaRepository extends CrudRepository<Meta, Long> {
     @Query("MATCH (d:Deck)-[:DECK]-(:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta) WHERE ID(m)=$metaId RETURN COUNT(d)")
     int countDecks(Long metaId);
 
-    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(t:Tournament)-[:META]-(m:Meta) WHERE ID(m)=$metaId DETACH DELETE s,t,m")
-    void deleteMeta(Long metaId);
+    @Query("MATCH (m:Meta {title:$0}) OPTIONAL MATCH (s:Standing)-[:TOURNAMENT]-(t:Tournament)-[:META]-(m) DETACH DELETE s,t,m")
+    void deleteMeta(String title);
 }

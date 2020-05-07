@@ -90,8 +90,8 @@ public class AdminController {
     }
 
     @GetMapping("/delete-meta")
-    public RedirectView deleteMeta(@RequestParam(name = "id") Long id, RedirectAttributes redirectAttributes) {
-        statistics.deleteMeta(id);
+    public RedirectView deleteMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
+        statistics.deleteMeta(title);
         redirectAttributes.addFlashAttribute("message", "Meta deleted");
         return new RedirectView("/");
     }

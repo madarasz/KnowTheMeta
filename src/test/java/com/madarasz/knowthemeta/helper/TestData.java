@@ -11,6 +11,7 @@ import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.MWL;
+import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DOs.relationships.MWLCard;
 
@@ -32,6 +33,7 @@ public class TestData {
     public MWL testMwl;
     public MWLCard testMWLCard;
     public Set<MWL> mwlTestSet = new HashSet<MWL>();
+    public Meta testMeta;
 
     public TestData() {
         testCycle1 = new CardCycle("test", "First Test Cycle", 9998, false);
@@ -50,6 +52,7 @@ public class TestData {
         testCardInPack2 = new CardInPack(testCard2, testPack2, "66662", "http://www.cardgamedb.com/forums/uploads/an/med_ADN17_21.png");
         testCardInPack3 = new CardInPack(testCard1, testPack3, "99991", "https://netrunnerdb.com/card_image/99991.png");
         testMWLCard = new MWLCard(testMwl, testCard1, false, 0, true, false);
+        testMeta = new Meta(testPack3, testMwl, true, "Test meta");
         testMwl.addCard(testMWLCard);
         cycleTestSet.add(testCycle1);
         cycleTestSet.add(testCycle2);

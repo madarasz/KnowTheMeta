@@ -118,7 +118,56 @@ public class Meta {
 
     @Override
     public String toString() {
-        return "Meta [cardpool=" + cardpool +  ", mwl=" + mwl + ", title=" + title + "]";
+        return "Meta [cardpool=" + cardpool.getName() +  ", mwl=" + mwl.getName() + ", title=" + title + ", new cards=" + newCards + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((cardpool == null) ? 0 : cardpool.getName().hashCode());
+        result = prime * result + ((lastUpdate == null) ? 0 : lastUpdate.hashCode());
+        result = prime * result + ((mwl == null) ? 0 : mwl.getName().hashCode());
+        result = prime * result + ((newCards == null) ? 0 : newCards.hashCode());
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Meta other = (Meta) obj;
+        if (cardpool == null) {
+            if (other.cardpool != null)
+                return false;
+        } else if (!cardpool.getName().equals(other.cardpool.getName()))
+            return false;
+        if (lastUpdate == null) {
+            if (other.lastUpdate != null)
+                return false;
+        } else if (!lastUpdate.equals(other.lastUpdate))
+            return false;
+        if (mwl == null) {
+            if (other.mwl != null)
+                return false;
+        } else if (!mwl.getName().equals(other.mwl.getName()))
+            return false;
+        if (newCards == null) {
+            if (other.newCards != null)
+                return false;
+        } else if (!newCards.equals(other.newCards))
+            return false;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        return true;
     }
 
 }
