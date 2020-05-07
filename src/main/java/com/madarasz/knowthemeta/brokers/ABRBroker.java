@@ -2,6 +2,7 @@ package com.madarasz.knowthemeta.brokers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.reflect.Type;
@@ -48,7 +49,7 @@ public class ABRBroker {
         return result;
     }
 
-    public List<Standing> getStadingData(Tournament tournament, List<CardInPack> identities, List<Deck> existingDecks) {
+    public List<Standing> getStadingData(Tournament tournament, Set<CardInPack> identities, Set<CardInPack> cards, Set<Deck> existingDecks) {
         List<Standing> result = new ArrayList<Standing>();
         JsonArray standingData = httpBroker.readJSONFromURL(ABR_STANDING_API_URL+tournament.getId()).getAsJsonArray();
 
@@ -63,13 +64,13 @@ public class ABRBroker {
             String runnerDeckUrl = stadingItem.get("runner_deck_url").getAsString();
             String corpDeckUrl = stadingItem.get("corp_deck_url").getAsString();
             if (runnerDeckUrl.length() > 0) {
-                Deck runnerDeck = netrunnerDBBroker.loadDeck(this.deckIdFromUrl(runnerDeckUrl), existingDecks);
+                Deck runnerDeck = netrunnerDBBroker.loadDeck(this.deckIdFromUrl(runnerDeckUrl), existingDecks, cards);
                 result.add(new Standing(tournament, runner, runnerDeck, rank, true));
             } else {
                 result.add(new Standing(tournament, runner, rank, true));
             } 
             if (corpDeckUrl.length() > 0) {
-                Deck corpDeck = netrunnerDBBroker.loadDeck(this.deckIdFromUrl(corpDeckUrl), existingDecks);
+                Deck corpDeck = netrunnerDBBroker.loadDeck(this.deckIdFromUrl(corpDeckUrl), existingDecks, cards);
                 result.add(new Standing(tournament, corp, corpDeck, rank, false));
             } else {
                 result.add(new Standing(tournament, corp, rank, false));

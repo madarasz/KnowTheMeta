@@ -140,7 +140,7 @@ public class NetrunnerDBBroker {
         return result;
     }
 
-    public Deck loadDeck(int deckId, List<Deck> existingDecks) {
+    public Deck loadDeck(int deckId, Set<Deck> existingDecks, Set<CardInPack> cards) {
         // check if already in DB
         Optional<Deck> exists = existingDecks.stream().filter(x -> x.getId() == deckId).findFirst();
         if (exists.isPresent()) {
@@ -155,7 +155,7 @@ public class NetrunnerDBBroker {
         for (Map.Entry<String, JsonElement> card : deckData.get("cards").getAsJsonObject().entrySet()) {
             String cardCode = card.getKey();
             int quantity = card.getValue().getAsInt();
-            Card deckCard = cardRepository.findByCode(cardCode); // TODO: do not use DB
+            Card deckCard = cards.stream().filter(x -> x.getCode().equals(cardCode)).findFirst().get().getCard();
             if (deckCard.getType_code().equals("identity")) {
                 // deck identity
                 deck.setIdentity(deckCard);

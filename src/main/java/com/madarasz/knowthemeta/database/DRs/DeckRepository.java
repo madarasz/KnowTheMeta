@@ -1,6 +1,6 @@
 package com.madarasz.knowthemeta.database.DRs;
 
-import java.util.List;
+import java.util.Set;
 
 import com.madarasz.knowthemeta.database.DOs.Deck;
 
@@ -11,5 +11,5 @@ public interface DeckRepository extends CrudRepository<Deck, Long> {
     Deck findById(int id);
 
     @Query("MATCH (d:Deck)-[p:PLAYER]-(:User) RETURN d, p")
-    List<Deck> listAll();
+    Set<Deck> listAll();
 }

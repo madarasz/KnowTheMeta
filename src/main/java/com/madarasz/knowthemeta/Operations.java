@@ -2,6 +2,7 @@ package com.madarasz.knowthemeta;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.madarasz.knowthemeta.database.DOs.admin.AdminStamp;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
+import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
 import com.madarasz.knowthemeta.database.DRs.DeckRepository;
@@ -45,6 +47,7 @@ public class Operations {
     @Autowired ABRBroker abrBroker;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
+    @Autowired CardInPackRepository cardInPackRepository;
     @Autowired CardRepository cardRepository;
     @Autowired AdminStampRepository adminStampRepository;
     @Autowired MWLRepository mwlRepository;
@@ -104,7 +107,7 @@ public class Operations {
         stopwatch.start();
         int newCount = 0;
         int editCount = 0;
-        List<CardInPack> existingCards = cardRepository.listCardInPack();
+        List<CardInPack> existingCards = new ArrayList<CardInPack>(cardInPackRepository.listAll());
         List<CardInPack> cards = netrunnerDBBroker.loadCards(packs);
 
         for (CardInPack cardInPack : cards) {
@@ -253,11 +256,12 @@ public class Operations {
         int deckCreatedCount = 0;
         Long metaId = meta.getId();
 
-        List<CardInPack> identities = cardRepository.listIdentities();
+        Set<CardInPack> identities = cardInPackRepository.listIdentities();
+        Set<CardInPack> cards = cardInPackRepository.listAll();
         List<Tournament> existingTournaments = tournamentRepository.listForMeta(metaId);
         log.info("Existing tournaments for meta: "+existingTournaments.size());
         List<User> existingUsers = userRepository.listAll();
-        List<Deck> existingDecks = deckRepository.listAll();
+        Set<Deck> existingDecks = deckRepository.listAll();
         List<Tournament> tournaments = abrBroker.getTournamentData(meta);
 
         for (Tournament tournament : tournaments) {
@@ -271,7 +275,7 @@ public class Operations {
                 tournamentCreatedCount++;
             }
             // standings
-            List<Standing> standings = abrBroker.getStadingData(tournament, identities, existingDecks);
+            List<Standing> standings = abrBroker.getStadingData(tournament, identities, cards, existingDecks);
             for (Standing standing : standings) {
                 // decks
                 if (standing.getDeck() != null) {

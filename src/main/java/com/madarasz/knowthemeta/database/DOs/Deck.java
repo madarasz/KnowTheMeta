@@ -91,7 +91,7 @@ public class Deck {
         }   
     }
 
-    public int size() {
+    public int cardCount() {
         int result = 0;
         for (CardInDeck card : this.deckCards) {
             result += card.getQuantity();
@@ -101,7 +101,7 @@ public class Deck {
 
     @Override
     public String toString() {
-        return "Deck [date_update=" + date_update + ", id=" + id + ", identity=" + identity.getTitle() + ", name=" + name + ", size=" + size() + ", player=" + player.getUser_name() + "]";
+        return "Deck [date_update=" + date_update + ", id=" + id + ", identity=" + identity.getTitle() + ", name=" + name + ", size=" + cardCount() + ", player=" + player.getUser_name() + "]";
     }
 
     
