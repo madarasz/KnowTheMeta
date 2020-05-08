@@ -60,7 +60,7 @@ public class ABRBrokerTournamentDataTests {
         assertEquals(correctDate, tournaments.get(0).getDate(), "Tournament date is incorrect");
         assertEquals(10, tournaments.get(0).getPlayers_count(), "Tournament ID is incorrect");
         assertEquals(4, tournaments.get(0).getTop_count(), "Tournament ID is incorrect");
-        assertEquals(true, tournaments.get(0).getMatchdata(), "Tournament matchdata is incorrect");
+        assertEquals(true, tournaments.get(0).isMatchDataAvailable(), "Tournament matchdata is incorrect");
         assertEquals(meta, tournaments.get(0).getMeta(), "Tournament meta is incorrect");
     }
 

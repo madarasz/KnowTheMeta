@@ -1,6 +1,7 @@
 package com.madarasz.knowthemeta.brokers;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -18,6 +19,7 @@ import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
+import com.madarasz.knowthemeta.helper.Searcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class ABRBroker {
 
     @Autowired HttpBroker httpBroker;
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
+    @Autowired Searcher searcher;
     private final static String ABR_TOURNAMENT_API_URL = 
         "https://alwaysberunning.net/api/tournaments?concluded=1&approved=1&format=standard&cardpool={CARDPOOL_CODE}&mwl_id={MWL_ID}";
     private final static String ABR_STANDING_API_URL = "https://alwaysberunning.net/api/entries?id=";
@@ -59,8 +62,8 @@ public class ABRBroker {
             int rank = (stadingItem.get("rank_top").isJsonNull()) ? stadingItem.get("rank_swiss").getAsInt() : stadingItem.get("rank_top").getAsInt();
             String runnerId = stadingItem.get("runner_deck_identity_id").getAsString();
             String corpId = stadingItem.get("corp_deck_identity_id").getAsString();
-            Card runner = identities.stream().filter(id -> id.getCode().equals(runnerId)).findFirst().get().getCard();
-            Card corp = identities.stream().filter(id -> id.getCode().equals(corpId)).findFirst().get().getCard();
+            Card runner = searcher.getCardByCode(identities, runnerId);
+            Card corp = searcher.getCardByCode(identities, corpId);
             String runnerDeckUrl = stadingItem.get("runner_deck_url").getAsString();
             String corpDeckUrl = stadingItem.get("corp_deck_url").getAsString();
             if (runnerDeckUrl.length() > 0) {
@@ -79,8 +82,8 @@ public class ABRBroker {
         return result;
     }
 
-    public List<Standing> loadMatches(int tournamentId) {
-        List<Standing> stadings = new ArrayList<Standing>();
+    public Set<Standing> loadMatches(int tournamentId) {
+        Set<Standing> stadings = new HashSet<Standing>();
         JsonObject matchData = httpBroker.readJSONFromURL(ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", new Integer(tournamentId).toString())).getAsJsonObject();
         // read players
         matchData.get("players").getAsJsonArray().forEach(playerItem -> readMatchPlayers(stadings, playerItem.getAsJsonObject()));
@@ -98,9 +101,9 @@ public class ABRBroker {
         return stadings;
     }
 
-    private void readMatchRounds(List<Standing> stadings, JsonObject matchItem) {
+    private void readMatchRounds(Set<Standing> stadings, JsonObject matchItem) {
         // get player Ids
-        log.trace("Table #" + matchItem.get("table").getAsInt());
+        log.trace("Table #" + (matchItem.get("table").isJsonNull() ? "null" : matchItem.get("table").getAsString()));
         JsonObject player1 = matchItem.get("player1").getAsJsonObject();
         JsonObject player2 = matchItem.get("player2").getAsJsonObject();
         int player1Id = player1.get("id").isJsonNull() ? 0 : player1.get("id").getAsInt();
@@ -128,10 +131,10 @@ public class ABRBroker {
     private void readMatchSwiss(JsonObject player1, JsonObject player2, Standing player1Runner, Standing player1Corp,
             Standing player2Runner, Standing player2Corp) {
         // get scores
-        int player1RunnerScore = player1.get("runnerScore").getAsInt();
-        int player2RunnerScore = player2.get("runnerScore").getAsInt();
-        int player1CorpScore = player1.get("corpScore").getAsInt();
-        int player2CorpScore = player2.get("corpScore").getAsInt();
+        int player1RunnerScore = player1.get("runnerScore").isJsonNull() ? 0 :  player1.get("runnerScore").getAsInt();
+        int player2RunnerScore = player2.get("runnerScore").isJsonNull() ? 0 :  player2.get("runnerScore").getAsInt();
+        int player1CorpScore = player1.get("corpScore").isJsonNull() ? 0 :  player1.get("corpScore").getAsInt();
+        int player2CorpScore = player2.get("corpScore").isJsonNull() ? 0 :  player2.get("corpScore").getAsInt();
         // decide if NRTM or Cobr.ai, apply match scores
         if (player1.has("combinedScore") && player2.has("combinedScore")) {
             // cobr.ai
@@ -163,7 +166,7 @@ public class ABRBroker {
         }
     }
 
-    private void readMatchPlayers(List<Standing> stadings, JsonObject playerData) {
+    private void readMatchPlayers(Set<Standing> stadings, JsonObject playerData) {
         int playerId = playerData.get("id").getAsInt();
         int rank = playerData.get("rank").getAsInt();
         stadings.add(new Standing(true, rank, playerId));

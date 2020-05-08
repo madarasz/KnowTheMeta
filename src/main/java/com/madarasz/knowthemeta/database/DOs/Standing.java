@@ -131,10 +131,22 @@ public class Standing {
         this.deck = deck;
     }
 
+    // copies match data from other Standing object
+    public void copyFrom(Standing other) {
+        this.winCount = other.winCount;
+        this.drawCount = other.drawCount;
+        this.lossCount = other.lossCount;
+        this.playerId = other.playerId;
+    }
+
+    public Boolean areMatchDataIdentical(Standing other) {
+        return winCount == other.winCount && lossCount == other.lossCount && drawCount == other.drawCount;
+    }
+
     @Override
     public String toString() {
-        return "Standing [identity=" + identity.getTitle() + ", isRunner=" + isRunner + ", rank=" + rank + ", tournament="
-                + tournament.getTitle() + "]";
+        return "Standing [identity=" + (identity == null ? "null" : identity.getTitle()) + ", isRunner=" + isRunner + ", rank=" + rank + ", tournament="
+                + (tournament == null ? "null" : tournament.getTitle()) + ", winCount=" + winCount + ", drawCount=" + drawCount + ", lossCount=" + lossCount + "]";
     }
 
     

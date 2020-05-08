@@ -252,6 +252,7 @@ public class Operations {
         stopwatch.start();
         int tournamentCreatedCount = 0;
         int standingCreatedCount = 0;
+        int matchUpdatedCount = 0;
         int userCreatedCount = 0;
         int deckCreatedCount = 0;
         Long metaId = meta.getId();
@@ -266,6 +267,7 @@ public class Operations {
 
         for (Tournament tournament : tournaments) {
             // tournament
+            log.trace(String.format("Looking at tournament %s (#%d)", tournament.getTitle(), tournament.getId()));
             int tournamentId = tournament.getId();
             if (!existingTournaments.stream().filter(x -> x.getId() == tournamentId).findFirst().isPresent()) {
                 // new tournament
@@ -309,20 +311,33 @@ public class Operations {
                     standingRepository.save(standing);
                     standingCreatedCount++;
                 }
-
+            }
+            // matches
+            if (tournament.isMatchDataAvailable()) {
+                Set<Standing> matches = abrBroker.loadMatches(tournamentId);
+                for (Standing match : matches) {
+                    // TODO: without DB
+                    Standing existingStanding = standingRepository.findByTournamentSideRank(tournament.getId(), match.getIsRunner(), match.getRank());
+                    if (existingStanding != null && !existingStanding.areMatchDataIdentical(match)) {
+                            existingStanding.copyFrom(match);
+                            standingRepository.save(existingStanding);
+                            matchUpdatedCount++;
+                    }
+                }
             }
         }
         // update counts
         meta.setTournamentCount(metaRepository.countTournaments(metaId));
         meta.setStandingsCount(metaRepository.countStandings(metaId));
         meta.setDecksPlayedCount(metaRepository.countDecks(metaId));
+        meta.setMatchesCount(metaRepository.countMatches(metaId));
         meta.setLastUpdate(new Date());
         metaRepository.save(meta);
 
         // logging
         stopwatch.stop();
-        String message = String.format("Meta update \"%s\" finished (%.3f sec) - New tournament: %d, new stading: %d, new deck: %d, new player: %d", meta.getTitle(), 
-            stopwatch.getTotalTimeSeconds(), tournamentCreatedCount, standingCreatedCount, deckCreatedCount, userCreatedCount);
+        String message = String.format("Meta update \"%s\" finished (%.3f sec) - New tournament: %d, new stading: %d, new deck: %d, new player: %d, match updates: %d", 
+            meta.getTitle(), stopwatch.getTotalTimeSeconds(), tournamentCreatedCount, standingCreatedCount, deckCreatedCount, userCreatedCount, matchUpdatedCount);
         log.info(message);
         return message;
     }

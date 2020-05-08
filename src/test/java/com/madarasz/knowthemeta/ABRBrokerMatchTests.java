@@ -2,7 +2,7 @@ package com.madarasz.knowthemeta;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
+import java.util.Set;
 
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.database.DOs.Standing;
@@ -20,7 +20,7 @@ public class ABRBrokerMatchTests {
     // https://alwaysberunning.net/tjsons/2387.json
     @Test
     void testLoadMatchesNRTM153WithByeNoTopcut() {
-        List<Standing> standings = abrBroker.loadMatches(2387);
+        Set<Standing> standings = abrBroker.loadMatches(2387);
         assertEquals(10, standings.size());
         // Claudiu/hobbes #1 has 1 draw
         Standing player1Runner = standings.stream().filter(x -> x.getPlayerId() == 1 && x.getIsRunner()).findFirst().get();
@@ -56,7 +56,7 @@ public class ABRBrokerMatchTests {
     // https://alwaysberunning.net/tjsons/2245.json
     @Test
     void testLoadMatchesNRTM154WithByeTopcutIntentionalDraw() {
-        List<Standing> standings = abrBroker.loadMatches(2245);
+        Set<Standing> standings = abrBroker.loadMatches(2245);
         assertEquals(30, standings.size());
         // winner Bailey/CowboyTintin #5 has intentional draw in round 4
         Standing player1Runner = standings.stream().filter(x -> x.getPlayerId() == 5 && x.getIsRunner()).findFirst().get();
@@ -92,7 +92,7 @@ public class ABRBrokerMatchTests {
     // https://alwaysberunning.net/tjsons/2073.json
     @Test
     void testLoadMatchesOldCobraiWithByeTopcut() {
-        List<Standing> standings = abrBroker.loadMatches(2073);
+        Set<Standing> standings = abrBroker.loadMatches(2073);
         assertEquals(32, standings.size());
         // winner Cauhita #10165, last 2 rounds unknown 
         Standing player1Runner = standings.stream().filter(x -> x.getPlayerId() == 10165 && x.getIsRunner()).findFirst().get();
@@ -128,7 +128,7 @@ public class ABRBrokerMatchTests {
     // https://alwaysberunning.net/tjsons/2735.json
     @Test
     void testLoadMatchesNewCobraiTopcut() {
-        List<Standing> standings = abrBroker.loadMatches(2735);
+        Set<Standing> standings = abrBroker.loadMatches(2735);
         assertEquals(64, standings.size());
         // winner internet #17616 
         Standing player1Runner = standings.stream().filter(x -> x.getPlayerId() == 17616 && x.getIsRunner()).findFirst().get();
@@ -155,7 +155,7 @@ public class ABRBrokerMatchTests {
     // https://alwaysberunning.net/tjsons/2601.json
     @Test
     void testLoadMatchesNewCobraiNoTopcutDrawMixed() {
-        List<Standing> standings = abrBroker.loadMatches(2601);
+        Set<Standing> standings = abrBroker.loadMatches(2601);
         assertEquals(24, standings.size());
         // winner Tradon #16032, combined reporting, draw 
         Standing player1Runner = standings.stream().filter(x -> x.getPlayerId() == 16032 && x.getIsRunner()).findFirst().get();
@@ -191,7 +191,7 @@ public class ABRBrokerMatchTests {
     // https://alwaysberunning.net/tjsons/2564.json
     @Test
     void testLoadMatchesNewCobraiNoTopcutBye() {
-        List<Standing> standings = abrBroker.loadMatches(2564);
+        Set<Standing> standings = abrBroker.loadMatches(2564);
         assertEquals(10, standings.size());
         // 2nd Tre #16643, detailed reporing
         Standing player2Runner = standings.stream().filter(x -> x.getPlayerId() == 16643 && x.getIsRunner()).findFirst().get();

@@ -70,7 +70,7 @@ public class Tournament {
         this.top_count = top_count;
     }
 
-    public Boolean getMatchdata() {
+    public Boolean isMatchDataAvailable() {
         return matchdata;
     }
 
