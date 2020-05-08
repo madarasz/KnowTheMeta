@@ -32,10 +32,10 @@ public class ABRBroker {
     @Autowired HttpBroker httpBroker;
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
     @Autowired Searcher searcher;
-    private final static String ABR_TOURNAMENT_API_URL = 
+    public final static String ABR_TOURNAMENT_API_URL = 
         "https://alwaysberunning.net/api/tournaments?concluded=1&approved=1&format=standard&cardpool={CARDPOOL_CODE}&mwl_id={MWL_ID}";
-    private final static String ABR_STANDING_API_URL = "https://alwaysberunning.net/api/entries?id=";
-    private final static String ABR_MATCHES_URL = "https://alwaysberunning.net/tjsons/{TOURNAMENT_ID}.json";
+    public final static String ABR_STANDING_API_URL = "https://alwaysberunning.net/api/entries?id=";
+    public final static String ABR_MATCHES_URL = "https://alwaysberunning.net/tjsons/{TOURNAMENT_ID}.json";
     private final static Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy.MM.dd.").create();
     private final static Logger log = LoggerFactory.getLogger(ABRBroker.class);
     private final static Pattern deckUrlPattern = Pattern.compile("https://netrunnerdb.com/en/decklist/(\\d+)");

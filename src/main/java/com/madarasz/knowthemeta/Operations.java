@@ -269,70 +269,34 @@ public class Operations {
             // tournament
             log.trace(String.format("Looking at tournament %s (#%d)", tournament.getTitle(), tournament.getId()));
             int tournamentId = tournament.getId();
-            if (!existingTournaments.stream().filter(x -> x.getId() == tournamentId).findFirst().isPresent()) {
-                // new tournament
-                log.debug("New tournament saved: " + tournament.toString());
-                tournamentRepository.save(tournament);
-                existingTournaments.add(tournament);
-                tournamentCreatedCount++;
-            }
+            tournamentCreatedCount += updateTournaments(existingTournaments, tournament);
             // standings
             List<Standing> standings = abrBroker.getStadingData(tournament, identities, cards, existingDecks);
+            Set<Standing> existingStandings = standingRepository.findByTournament(tournamentId);
             for (Standing standing : standings) {
                 // decks
                 if (standing.getDeck() != null) {
                     Deck deck = standing.getDeck();     
                     // player
-                    int userId = deck.getPlayer().getUser_id();
-                    Optional<User> existingPlayer = existingUsers.stream().filter(x -> x.getUser_id() == userId).findFirst();
-                    if (!existingPlayer.isPresent()) {
-                        User player = deck.getPlayer();
-                        userRepository.save(player);
-                        existingUsers.add(player);
-                        userCreatedCount++;
-                    } else {
-                        deck.setPlayer(existingPlayer.get());
-                    }
+                    userCreatedCount += updateWithPlayer(existingUsers, deck);
                     // deck
-                    int deckId = deck.getId();
-                    Optional<Deck> existingDeck = existingDecks.stream().filter(x -> x.getId() == deckId).findFirst();
-                    if (!existingDeck.isPresent()) {
-                        deckRepository.save(deck);
-                        existingDecks.add(deck);
-                        deckCreatedCount++;
-                    } else {
-                        standing.setDeck(existingDeck.get());
-                    }
+                    deckCreatedCount += updateWithDeck(existingDecks, standing, deck);
                 }
-                // TODO: without DB
-                Standing existingStanding = standingRepository.findByTournamentSideRank(tournament.getId(), standing.getIsRunner(), standing.getRank());
-                if (existingStanding == null) {
+                Optional<Standing> existingStanding = existingStandings.stream().filter(x -> x.getRank() == standing.getRank() && x.getIsRunner() == standing.getIsRunner()).findFirst();
+                if (!existingStanding.isPresent()) {
                     // new standing
                     standingRepository.save(standing);
+                    existingStandings.add(standing);
                     standingCreatedCount++;
                 }
             }
             // matches
             if (tournament.isMatchDataAvailable()) {
-                Set<Standing> matches = abrBroker.loadMatches(tournamentId);
-                for (Standing match : matches) {
-                    // TODO: without DB
-                    Standing existingStanding = standingRepository.findByTournamentSideRank(tournament.getId(), match.getIsRunner(), match.getRank());
-                    if (existingStanding != null && !existingStanding.areMatchDataIdentical(match)) {
-                            existingStanding.copyFrom(match);
-                            standingRepository.save(existingStanding);
-                            matchUpdatedCount++;
-                    }
-                }
+                matchUpdatedCount += updateStandingsWithMatchData(tournamentId, existingStandings);
             }
         }
-        // update counts
-        meta.setTournamentCount(metaRepository.countTournaments(metaId));
-        meta.setStandingsCount(metaRepository.countStandings(metaId));
-        meta.setDecksPlayedCount(metaRepository.countDecks(metaId));
-        meta.setMatchesCount(metaRepository.countMatches(metaId));
-        meta.setLastUpdate(new Date());
-        metaRepository.save(meta);
+        // update counters
+        updateMetaCounts(meta);
 
         // logging
         stopwatch.stop();
@@ -340,6 +304,69 @@ public class Operations {
             meta.getTitle(), stopwatch.getTotalTimeSeconds(), tournamentCreatedCount, standingCreatedCount, deckCreatedCount, userCreatedCount, matchUpdatedCount);
         log.info(message);
         return message;
+    }
+
+    private int updateTournaments(List<Tournament> existingTournaments, Tournament tournament) {
+        int tournamentId = tournament.getId();
+        if (!existingTournaments.stream().filter(x -> x.getId() == tournamentId).findFirst().isPresent()) {
+            // new tournament
+            log.debug("New tournament saved: " + tournament.toString());
+            tournamentRepository.save(tournament);
+            existingTournaments.add(tournament);
+            return 1;
+        }
+        return 0;
+    }
+
+    private int updateWithPlayer(List<User> existingUsers, Deck deck) {
+        int userId = deck.getPlayer().getUser_id();
+        Optional<User> existingPlayer = existingUsers.stream().filter(x -> x.getUser_id() == userId).findFirst();
+        if (!existingPlayer.isPresent() && userId > 0) {
+            User player = deck.getPlayer();
+            userRepository.save(player);
+            existingUsers.add(player);
+            return 1;
+        } 
+        deck.setPlayer(existingPlayer.get());
+        return 0;
+    }
+
+    private int updateWithDeck(Set<Deck> existingDecks, Standing standing, Deck deck) {
+        int deckId = deck.getId();
+        Optional<Deck> existingDeck = existingDecks.stream().filter(x -> x.getId() == deckId).findFirst();
+        if (!existingDeck.isPresent()) {
+            deckRepository.save(deck);
+            existingDecks.add(deck);
+            return 1;
+        } 
+        standing.setDeck(existingDeck.get());
+        return 0;
+    }
+
+    private void updateMetaCounts(Meta meta) {
+        Long metaId = meta.getId();
+        meta.setTournamentCount(metaRepository.countTournaments(metaId));
+        meta.setStandingsCount(metaRepository.countStandings(metaId));
+        meta.setDecksPlayedCount(metaRepository.countDecks(metaId));
+        meta.setMatchesCount(metaRepository.countMatches(metaId));
+        meta.setLastUpdate(new Date());
+        metaRepository.save(meta);
+    }
+
+    private int updateStandingsWithMatchData(int tournamentId, Set<Standing> existingStandings) {
+        int matchUpdatedCount = 0;
+        Set<Standing> matches = abrBroker.loadMatches(tournamentId);
+        for (Standing match : matches) {
+            // TODO: team tournaments with multiple players on same rank
+            Optional<Standing> existingStanding = existingStandings.stream().filter(x -> x.getRank() == match.getRank() && x.getIsRunner() == match.getIsRunner()).findFirst();
+            if (existingStanding.isPresent() && !existingStanding.get().areMatchDataIdentical(match)) {
+                    Standing standing = existingStanding.get();
+                    standing.copyFrom(match);
+                    standingRepository.save(standing);
+                    matchUpdatedCount++;
+            }
+        }
+        return matchUpdatedCount;
     }
 
     @Transactional
