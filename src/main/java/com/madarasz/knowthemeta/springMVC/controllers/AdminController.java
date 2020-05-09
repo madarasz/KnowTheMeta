@@ -1,7 +1,8 @@
 package com.madarasz.knowthemeta.springMVC.controllers;
 
-import com.madarasz.knowthemeta.Operations;
-import com.madarasz.knowthemeta.Statistics;
+import com.madarasz.knowthemeta.NetrunnerDBUpdater;
+import com.madarasz.knowthemeta.MetaOperations;
+import com.madarasz.knowthemeta.TimeStamper;
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Meta;
@@ -27,7 +28,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @Controller
 public class AdminController {
 
-    @Autowired Operations operations;
+    @Autowired MetaOperations metaOperations;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired CardPackRepository cardPackRepository;
     @Autowired CardRepository cardRepository;
@@ -38,9 +39,10 @@ public class AdminController {
     @Autowired StandingRepository standingRepository;
     @Autowired DeckRepository deckRepository;
     @Autowired UserRepository userRepository;
-    @Autowired Statistics statistics;
+    @Autowired NetrunnerDBUpdater netrunnerDBUpdater;
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
     @Autowired ABRBroker abrBroker;
+    @Autowired TimeStamper timeStamper;
 
     private static final String STAMP_NETRUNNERDB_UPDATE = "NetrunnerDB update";
 
@@ -60,7 +62,7 @@ public class AdminController {
         model.addAttribute("lastPack", packCount > 0 ? cardPackRepository.findLast().getName() : "none");
         model.addAttribute("lastPrint", cardCount > 0 ? cardRepository.findLast().getTitle() : "none");
         model.addAttribute("lastMWL", mwlCount > 0 ? mwlRepository.findLast().getName() : "none");
-        model.addAttribute("stampNetrunnerDB", operations.getTimeStamp(STAMP_NETRUNNERDB_UPDATE));
+        model.addAttribute("stampNetrunnerDB", timeStamper.getTimeStamp(STAMP_NETRUNNERDB_UPDATE));
         model.addAttribute("packs", cardPackRepository.listPacks());
         model.addAttribute("mwls", mwlRepository.listMWLs());
         model.addAttribute("metas", metaRepository.listMetas());
@@ -73,9 +75,9 @@ public class AdminController {
 
     @GetMapping("/load-netrunnerdb")
     public RedirectView loadNetrunnerDB(RedirectAttributes redirectAttributes) {
-        double timer = operations.updateFromNetrunnerDB();
+        double timer = netrunnerDBUpdater.updateFromNetrunnerDB();
         redirectAttributes.addFlashAttribute("message", String.format("Updated from NetrunnerDB (%.3f sec)", timer));
-        operations.setTimeStamp(STAMP_NETRUNNERDB_UPDATE);
+        timeStamper.setTimeStamp(STAMP_NETRUNNERDB_UPDATE);
         return new RedirectView("/");
     }
 
@@ -84,14 +86,14 @@ public class AdminController {
                                 @RequestParam(name = "metaPack") String packCode, @RequestParam(name = "metaNewCards", required = false) Boolean newCards, 
                                 RedirectAttributes redirectAttributes) {
         if (newCards == null) newCards = false; // if checkbox was not checked
-        statistics.addMeta(mwlCode, packCode, newCards, title);
+        metaOperations.addMeta(mwlCode, packCode, newCards, title);
         redirectAttributes.addFlashAttribute("message", "Meta added");
         return new RedirectView("/");
     }
 
     @GetMapping("/delete-meta")
     public RedirectView deleteMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
-        statistics.deleteMeta(title);
+        metaOperations.deleteMeta(title);
         redirectAttributes.addFlashAttribute("message", "Meta deleted");
         return new RedirectView("/");
     }
@@ -99,7 +101,7 @@ public class AdminController {
     @GetMapping("/get-meta")
     public RedirectView getMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
         Meta meta = metaRepository.findByTitle(title);
-        String message = operations.getMetaData(meta);
+        String message = metaOperations.getMetaData(meta);
         redirectAttributes.addFlashAttribute("message", message);
         return new RedirectView("/");
     }

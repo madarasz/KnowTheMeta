@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 public class MetaCreateDeleteTests {
-    @Autowired Statistics statistics;
+    @Autowired MetaOperations metaOperations;
     @Autowired MetaRepository metaRepository;
     @Autowired CardPackRepository cardPackRepository;
     @Autowired MWLRepository mwlRepository;
@@ -30,13 +30,13 @@ public class MetaCreateDeleteTests {
         cardPackRepository.save(testData.testMeta.getCardpool());
         mwlRepository.save(testData.testMeta.getMwl());
         // add meta
-        statistics.addMeta(testData.testMeta.getMwl().getCode(), testData.testMeta.getCardpool().getCode(), testData.testMeta.getNewCards(), testData.testMeta.getTitle());
+        metaOperations.addMeta(testData.testMeta.getMwl().getCode(), testData.testMeta.getCardpool().getCode(), testData.testMeta.getNewCards(), testData.testMeta.getTitle());
         // verify data
         Meta foundMeta = metaRepository.findByTitle(testData.testMeta.getTitle());
         assertNotNull(foundMeta, "Meta not found");
         assertEquals(testData.testMeta, foundMeta, "Meta data not correct");
         // delete meta
-        statistics.deleteMeta(foundMeta.getTitle());
+        metaOperations.deleteMeta(foundMeta.getTitle());
         // verify meta delated
         assertNull(metaRepository.findByTitle(testData.testMeta.getTitle()), "Meta not deleted");
     }

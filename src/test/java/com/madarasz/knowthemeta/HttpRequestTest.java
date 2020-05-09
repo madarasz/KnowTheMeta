@@ -19,9 +19,11 @@ import org.springframework.boot.web.server.LocalServerPort;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class HttpRequestTest {
     @MockBean
-    private Operations operations;
+    private MetaOperations operations;
     @MockBean
-    private Statistics statistics;
+    private TimeStamper timeStamper;
+    @MockBean
+    private NetrunnerDBUpdater netrunnerDBUpdater;
 
     @LocalServerPort
     private int port;
@@ -37,25 +39,25 @@ public class HttpRequestTest {
     @Test
     public void testNetrunnerDBUpdate() throws Exception {
         // setup
-        doReturn((double)3).when(operations).updateFromNetrunnerDB();
+        doReturn((double)3).when(netrunnerDBUpdater).updateFromNetrunnerDB();
         // run and verify
         assertTrue(this.restTemplate.getForObject("http://localhost:" + port + "/load-netrunnerdb", String.class).contains("Updated from NetrunnerDB"));
-        verify(operations, times(1)).updateFromNetrunnerDB();
-        verify(operations, times(1)).setTimeStamp(anyString());
+        verify(netrunnerDBUpdater, times(1)).updateFromNetrunnerDB();
+        verify(timeStamper, times(1)).setTimeStamp(anyString());
     }
 
     @Test
     public void testAddMeta() {
         // run and verify
         assertTrue(this.restTemplate.getForObject("http://localhost:" + port + "/add-meta?metaTitle=a&metaMWL=b&metaPack=c", String.class).contains("Meta added"));
-        verify(statistics, times(1)).addMeta(anyString(), anyString(), anyBoolean(), anyString());
+        verify(operations, times(1)).addMeta(anyString(), anyString(), anyBoolean(), anyString());
     }
 
     @Test
     public void testDeleteMeta() {
         // run and verify
         assertTrue(this.restTemplate.getForObject("http://localhost:" + port + "/delete-meta?title=a", String.class).contains("Meta deleted"));
-        verify(statistics, times(1)).deleteMeta(anyString());
+        verify(operations, times(1)).deleteMeta(anyString());
     }
 
     @Test
