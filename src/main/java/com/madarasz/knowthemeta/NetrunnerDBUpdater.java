@@ -2,7 +2,6 @@ package com.madarasz.knowthemeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
@@ -15,6 +14,7 @@ import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
+import com.madarasz.knowthemeta.helper.Searcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +31,7 @@ public class NetrunnerDBUpdater {
     @Autowired CardPackRepository cardPackRepository;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired MWLRepository mwlRepository;
+    @Autowired Searcher searcher;
     private static final Logger log = LoggerFactory.getLogger(NetrunnerDBUpdater.class);
 
     // for injecting mock during unit/integration tests
@@ -39,7 +40,7 @@ public class NetrunnerDBUpdater {
     }
 
     public double updateFromNetrunnerDB() {
-        log.info("Starting NetrunnerDB update");
+        log.info("*** Starting NetrunnerDB update");
         StopWatch netrunnerTimer = new StopWatch();
         netrunnerTimer.start();
 
@@ -49,7 +50,7 @@ public class NetrunnerDBUpdater {
         this.updateMWLs(cards);
 
         netrunnerTimer.stop();
-        log.info(String.format("Finished NetrunnerDB update (%.3f sec)", netrunnerTimer.getTotalTimeSeconds()));
+        log.info(String.format("*** Finished NetrunnerDB update (%.3f sec)", netrunnerTimer.getTotalTimeSeconds()));
         return netrunnerTimer.getTotalTimeSeconds();
     }
 
@@ -67,8 +68,8 @@ public class NetrunnerDBUpdater {
             CardPack pack = cardInPack.getCardPack();
             String code = cardInPack.getCode();    
 
-            Optional<CardInPack> cardExists = existingCards.stream().filter(x -> x.getCard().getTitle().equals(title)).findFirst();
-            if (!cardExists.isPresent()) {
+            CardInPack cardExists = searcher.getCardInPackByTitle(existingCards, title);
+            if (cardExists == null) {
                 // new card
                 Card card = cardInPack.getCard();
                 pack.addCards(cardInPack);
@@ -78,10 +79,10 @@ public class NetrunnerDBUpdater {
                 log.debug(String.format("New card: %s - %s", card.getTitle(), pack.getName()));
             } else {
                 // card exists
-                Optional<CardInPack> printExists = existingCards.stream().filter(x -> x.getCode().equals(code)).findFirst();
-                if (!printExists.isPresent()) {
+                Card printExists = searcher.getCardByCode(existingCards, code);
+                if (printExists == null) {
                     // new reprint
-                    Card card = cardExists.get().getCard();
+                    Card card = cardExists.getCard();
                     CardInPack reprint = new CardInPack(card, pack, code, cardInPack.getImage_url());
                     pack.addCards(reprint);
                     cardPackRepository.save(pack);
@@ -108,11 +109,13 @@ public class NetrunnerDBUpdater {
         StopWatch stopwatch = new StopWatch();
         stopwatch.start();
         Set<CardPack> packs = netrunnerDBBroker.loadPacks(cycles);
+        Set<CardPack> existingPacks = cardPackRepository.findAll();
         int createCount = 0;
 
         for (CardPack cardPack : packs) {
-            CardPack found = cardPackRepository.findByCode(cardPack.getCode()); // TODO: without DB
+            CardPack found = searcher.getPackByCode(existingPacks, cardPack.getCode());
             if (found == null) {
+                // add pack
                 cardPackRepository.save(cardPack);
                 CardCycle cardCycle = cardPack.getCycle();
                 cardCycle.addPack(cardPack);
@@ -142,20 +145,19 @@ public class NetrunnerDBUpdater {
         int createCount = 0;
 
         for (CardCycle cardCycle : cycles) {
-            Optional<CardCycle> found = existingCycles.stream().filter(x -> x.getCode().equals(cardCycle.getCode())).findFirst();
-            if (!found.isPresent()) {
+            CardCycle foundCycle = searcher.getCycleByCode(existingCycles, cardCycle.getCode());
+            if (foundCycle == null) {
+                // add cycle
                 cardCycleRepository.save(cardCycle);
                 existingCycles.add(cardCycle);
                 log.debug("New cycle: " + cardCycle.getName());
                 createCount++;
-            } else {
-                CardCycle foundCycle = found.get();
-                if (!foundCycle.equals(cardCycle)) {
-                    foundCycle.copyFrom(cardCycle);
-                    cardCycleRepository.save(foundCycle);
-                    log.debug("Updated cycle: " + foundCycle.getName());
-                    updateCount++;
-                }
+            } else if (!foundCycle.equals(cardCycle)) {
+                // update existing cycle if different
+                foundCycle.copyFrom(cardCycle);
+                cardCycleRepository.save(foundCycle);
+                log.debug("Updated cycle: " + foundCycle.getName());
+                updateCount++;
             }
         }
 
@@ -174,11 +176,12 @@ public class NetrunnerDBUpdater {
         StopWatch stopwatch = new StopWatch();
         stopwatch.start();
         Set<MWL> mwls = netrunnerDBBroker.loadMWL(cards);
+        Set<MWL> existingMwls = mwlRepository.findAll();
         int createCount = 0;
         int updateCount = 0;
 
         for (MWL mwl : mwls) {
-            MWL existing = mwlRepository.findByCode(mwl.getCode());
+            MWL existing = searcher.getMWLByCode(existingMwls, mwl.getCode());
             if (existing == null) {
                 // add MWL
                 mwlRepository.save(mwl);

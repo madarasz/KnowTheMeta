@@ -1,6 +1,7 @@
 package com.madarasz.knowthemeta.database.DRs;
 
 import java.util.List;
+import java.util.Set;
 
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 
@@ -9,6 +10,8 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface CardPackRepository extends CrudRepository<CardPack, Long>{
     CardPack findByCode(String code);
+
+    Set<CardPack> findAll();
 
     @Query("MATCH (c:CardCycle)-[:CYCLE]-(p:CardPack) RETURN p ORDER BY c.position DESC, p.position DESC LIMIT 1")
     CardPack findLast();
