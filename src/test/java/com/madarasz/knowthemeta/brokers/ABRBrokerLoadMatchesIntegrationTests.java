@@ -1,18 +1,20 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.brokers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
 
-import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+/**
+ * Integration test - ABRBRoker.loadMatches tests via HttpBroker to real ABR endpoint
+ */
 @SpringBootTest
-public class ABRBrokerMatchTests {
+public class ABRBrokerLoadMatchesIntegrationTests {
     @Autowired ABRBroker abrBroker;
 
     // test NRTM v1.53 match output with bye and no top-cut

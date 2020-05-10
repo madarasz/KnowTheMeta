@@ -15,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Integration tests for addMeta and deteMeta methods of MetaOperations with DB verification
+ */
 @SpringBootTest
-public class MetaCreateDeleteTests {
+public class MetaOperationsCreateDeleteIntegrationTests {
     @Autowired MetaOperations metaOperations;
     @Autowired MetaRepository metaRepository;
     @Autowired CardPackRepository cardPackRepository;

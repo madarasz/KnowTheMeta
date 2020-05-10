@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.brokers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
@@ -18,8 +17,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+/**
+ * Integration test for loadDeck method of NetrunnerDBBroker with verifying results in DB
+ * + NetrunnerDB data load at the beginning
+ */
 @SpringBootTest
-public class NetrunnerDBLoadDeckTests {
+public class NetrunnerDBLoadDeckIntegrationTests {
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
 
     // Loading deck: https://netrunnerdb.com/en/decklist/51436

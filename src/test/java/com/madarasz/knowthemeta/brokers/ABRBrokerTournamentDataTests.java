@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.brokers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.JsonElement;
-import com.madarasz.knowthemeta.brokers.ABRBroker;
-import com.madarasz.knowthemeta.brokers.HttpBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.MWL;
@@ -19,12 +17,16 @@ import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.helper.TestHelper;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
+/**
+ * Unit test for ABRBroker.getTournamentData
+ */
+@ExtendWith(MockitoExtension.class)
 public class ABRBrokerTournamentDataTests {
 
     @Mock

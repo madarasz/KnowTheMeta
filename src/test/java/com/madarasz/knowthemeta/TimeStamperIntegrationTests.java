@@ -14,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Integration test - Reading and writing TimeStamps to DB
+ */
 @SpringBootTest
-public class AdminStampTests {
+public class TimeStamperIntegrationTests {
     @Autowired
     TimeStamper timeStamper;
 

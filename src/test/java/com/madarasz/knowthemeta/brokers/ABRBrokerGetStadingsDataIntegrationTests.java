@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.brokers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.madarasz.knowthemeta.brokers.ABRBroker;
-import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
@@ -25,8 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
+/**
+ * Integration test - ABRBroker.getStandingsData via HttpBroker to real ABR endpoints 
+ * + NetrunnerDB data gathering in the beginning
+ */
 @SpringBootTest
-public class ABRBrokerStadingTests {
+public class ABRBrokerGetStadingsDataIntegrationTests {
     @Autowired ABRBroker abrBroker;
     @SpyBean NetrunnerDBBroker netrunnerDBBroker; 
 

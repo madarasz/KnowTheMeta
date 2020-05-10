@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.brokers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.List;
 
 import com.google.gson.JsonElement;
-import com.madarasz.knowthemeta.brokers.HttpBroker;
-import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.MWL;
@@ -20,12 +18,16 @@ import com.madarasz.knowthemeta.helper.TestData;
 import com.madarasz.knowthemeta.helper.TestHelper;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
+/**
+ * Unit tests for loadCycles, loadPacks, loadCards, loadMWL methods of ABRBroker
+ */
+@ExtendWith(MockitoExtension.class)
 public class NetrunnerDBBrokerTests {
 
     @Mock HttpBroker httpBroker;

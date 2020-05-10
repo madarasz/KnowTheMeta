@@ -71,6 +71,7 @@ public class ABRBroker {
             Card corp = searcher.getCardByCode(identities, corpId);
             String runnerDeckUrl = stadingItem.get("runner_deck_url").getAsString();
             String corpDeckUrl = stadingItem.get("corp_deck_url").getAsString();
+            // TODO leave deckloading for MetaOperations
             if (runnerDeckUrl.length() > 0) {
                 Deck runnerDeck = netrunnerDBBroker.loadDeck(this.deckIdFromUrl(runnerDeckUrl), existingDecks, cards);
                 result.add(new Standing(tournament, runner, runnerDeck, rank, true));

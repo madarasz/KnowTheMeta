@@ -27,8 +27,11 @@ import static org.mockito.Mockito.doReturn;
 
 import java.text.ParseException;
 
+/**
+ * NetrunnerDBUpdater integration tests with DB verification.
+ */
 @SpringBootTest
-public class NetrunnerDBUpdaterTests {
+public class NetrunnerDBUpdaterIntegrationTests {
 
     @Spy NetrunnerDBBroker netrunnerDBBroker;
     @Autowired CardCycleRepository cardCycleRepository;

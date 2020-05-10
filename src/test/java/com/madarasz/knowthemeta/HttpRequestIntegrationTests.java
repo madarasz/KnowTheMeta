@@ -16,8 +16,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 
+/**
+ * Spring MVC Controller integration test
+ */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class HttpRequestTest {
+public class HttpRequestIntegrationTests {
     @MockBean
     private MetaOperations operations;
     @MockBean
