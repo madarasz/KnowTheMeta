@@ -23,15 +23,14 @@ import com.madarasz.knowthemeta.helper.Searcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class ABRBroker {
 
-    @Autowired HttpBroker httpBroker;
-    @Autowired NetrunnerDBBroker netrunnerDBBroker;
-    @Autowired Searcher searcher;
+    private final HttpBroker httpBroker;
+    private final NetrunnerDBBroker netrunnerDBBroker;
+    private final Searcher searcher;
     public final static String ABR_TOURNAMENT_API_URL = 
         "https://alwaysberunning.net/api/tournaments?concluded=1&approved=1&format=standard&cardpool={CARDPOOL_CODE}&mwl_id={MWL_ID}";
     public final static String ABR_STANDING_API_URL = "https://alwaysberunning.net/api/entries?id=";
@@ -39,6 +38,12 @@ public class ABRBroker {
     private final static Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy.MM.dd.").create();
     private final static Logger log = LoggerFactory.getLogger(ABRBroker.class);
     private final static Pattern deckUrlPattern = Pattern.compile("https://netrunnerdb.com/en/decklist/(\\d+)");
+
+    public ABRBroker(HttpBroker httpBroker, NetrunnerDBBroker netrunnerDBBroker, Searcher searcher) {
+        this.httpBroker = httpBroker;
+        this.netrunnerDBBroker = netrunnerDBBroker;
+        this.searcher = searcher;
+    }
 
     public List<Tournament> getTournamentData(Meta meta) {
         log.info("Getting ABR tournament data for meta: " + meta.getTitle());
