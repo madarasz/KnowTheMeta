@@ -118,7 +118,7 @@ public class MetaOperations {
         // load data
         Set<CardInPack> identities = cardInPackRepository.listIdentities();
         Set<CardInPack> cards = cardInPackRepository.listAll();
-        List<Tournament> existingTournaments = tournamentRepository.listForMeta(meta.getId());
+        List<Tournament> existingTournaments = tournamentRepository.listForMeta(meta.getTitle());
         List<User> existingUsers = userRepository.listAll();
         Set<Deck> existingDecks = deckRepository.listAll();
         List<Tournament> tournaments = abrBroker.getTournamentData(meta);
@@ -265,11 +265,11 @@ public class MetaOperations {
      * @param meta meta in question
      */
     private void updateMetaCounts(Meta meta) {
-        Long metaId = meta.getId();
-        meta.setTournamentCount(metaRepository.countTournaments(metaId));
-        meta.setStandingsCount(metaRepository.countStandings(metaId));
-        meta.setDecksPlayedCount(metaRepository.countDecks(metaId));
-        meta.setMatchesCount(metaRepository.countMatches(metaId));
+        String metaTitle = meta.getTitle();
+        meta.setTournamentCount(metaRepository.countTournaments(metaTitle));
+        meta.setStandingsCount(metaRepository.countStandings(metaTitle));
+        meta.setDecksPlayedCount(metaRepository.countDecks(metaTitle));
+        meta.setMatchesCount(metaRepository.countMatches(metaTitle));
         meta.setLastUpdate(new Date());
         metaRepository.save(meta);
     }

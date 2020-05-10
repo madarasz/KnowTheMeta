@@ -16,17 +16,17 @@ public interface MetaRepository extends CrudRepository<Meta, Long> {
     @Query("MATCH (a:MWL)-[w:MWL]-(m:Meta)-[p:CARDPOOL]-(b:CardPack) RETURN m, p, w ORDER BY b.date_release DESC, a.date_start DESC")
     List<Meta> listMetas();
 
-    @Query("MATCH (t:Tournament)-[:META]-(m:Meta) WHERE ID(m)=$metaId RETURN COUNT(t)")
-    int countTournaments(Long metaId);
+    @Query("MATCH (t:Tournament)-[:META]-(m:Meta {title:$title}) RETURN COUNT(t)")
+    int countTournaments(String title);
 
-    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta) WHERE ID(m)=$metaId RETURN COUNT(s)")
-    int countStandings(Long metaId);
+    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$title}) RETURN COUNT(s)")
+    int countStandings(String title);
 
-    @Query("MATCH (d:Deck)-[:DECK]-(:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta) WHERE ID(m)=$metaId RETURN COUNT(d)")
-    int countDecks(Long metaId);
+    @Query("MATCH (d:Deck)-[:DECK]-(:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$title}) RETURN COUNT(d)")
+    int countDecks(String title);
 
-    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta) WHERE ID(m)=$metaId RETURN SUM(s.winCount+s.lossCount+s.drawCount)")
-    int countMatches(Long metaId);
+    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$title}) RETURN SUM(s.winCount+s.lossCount+s.drawCount)")
+    int countMatches(String title);
 
     @Query("MATCH (m:Meta {title:$0}) OPTIONAL MATCH (s:Standing)-[:TOURNAMENT]-(t:Tournament)-[:META]-(m) DETACH DELETE s,t,m")
     void deleteMeta(String title);

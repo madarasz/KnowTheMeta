@@ -10,6 +10,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface TournamentRepository extends CrudRepository<Tournament, Long> {
     Tournament findById(int id);
 
-    @Query("MATCH (m)-[:META]-(t:Tournament) WHERE ID(m)=$metaId RETURN t")
-    List<Tournament> listForMeta(Long metaId);
+    @Query("MATCH (m:Meta {title:$metaTitle})-[:META]-(t:Tournament) RETURN t")
+    List<Tournament> listForMeta(String metaTitle);
 }
