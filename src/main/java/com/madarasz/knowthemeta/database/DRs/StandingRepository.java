@@ -9,9 +9,9 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface StandingRepository extends CrudRepository<Standing, Long> {
 
-    @Query("MATCH (s:Standing {isRunner: $isRunner, rank: $rank})-[:TOURNAMENT]-(:Tournament {id: $tournamentId}) RETURN s LIMIT 1")
+    @Query("MATCH (s:Standing {isRunner: $isRunner, rank: $rank})-[:TOURNAMENT]-(:Tournament {id:$0}) RETURN s LIMIT 1")
     Standing findByTournamentSideRank(int tournamentId, boolean isRunner, int rank);
 
-    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament {id: $tournamentId}) RETURN s")
+    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament {id: $0}) RETURN s")
     Set<Standing> findByTournament(int tournamentId);
 }

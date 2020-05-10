@@ -10,8 +10,13 @@ import java.util.Set;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.DOs.Standing;
+import com.madarasz.knowthemeta.database.DOs.Tournament;
+import com.madarasz.knowthemeta.database.DOs.User;
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInDeck;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DOs.relationships.MWLCard;
 
@@ -34,6 +39,15 @@ public class TestData {
     public MWLCard testMWLCard;
     public Set<MWL> mwlTestSet = new HashSet<MWL>();
     public Meta testMeta;
+    public Tournament testTournament;
+    public List<Tournament> testTournamentList = new ArrayList<Tournament>();
+    public List<Standing> testStandingsFromABR = new ArrayList<Standing>();
+    public User testPlayer;
+    public Deck testDeck;
+    public Standing testStanding1;
+    public Standing testStanding2;
+    public Standing testStanding3;
+    public List<Standing> testStandingSet = new ArrayList<Standing>();
 
     public TestData() {
         testCycle1 = new CardCycle("test", "First Test Cycle", 9998, false);
@@ -43,6 +57,8 @@ public class TestData {
             testPack2 = new CardPack("second", "Meh", 2, testCycle1, dateFormat.parse("2020-03-15"));
             testPack3 = new CardPack("third", "Reprinto", 1, testCycle2, dateFormat.parse("2020-05-03"));
             testMwl = new MWL("test_MWL", "First MWL", true, dateFormat.parse("2020-06-06"), 999);
+            testTournament = new Tournament(666999, "Test Tournament", dateFormat.parse("2019-12-12"), 6, 0, true);
+            testDeck = new Deck(9999991, "Test deck", dateFormat.parse("2019-12-25"));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -53,6 +69,16 @@ public class TestData {
         testCardInPack3 = new CardInPack(testCard1, testPack3, "99991", "https://netrunnerdb.com/card_image/99991.png");
         testMWLCard = new MWLCard(testMwl, testCard1, false, 0, true, false);
         testMeta = new Meta(testPack3, testMwl, true, "Test meta");
+        testPlayer = new User(111222, "Test player");
+        testDeck.setPlayer(testPlayer);
+        testDeck.setIdentity(testCard2);
+        testDeck.addCard(new CardInDeck(testDeck, testCard1, 2));
+        testStanding1 = new Standing(testTournament, testCard2, testDeck, 1, true);
+        testStanding2 = new Standing(testTournament, testCard2, 1, false); // TODO: corp test identity
+        testStanding3 = new Standing(testTournament, testCard2, testDeck, 2, true);
+        testStandingSet.add(testStanding1);
+        testStandingSet.add(testStanding2);
+        testStandingSet.add(testStanding3);
         testMwl.addCard(testMWLCard);
         cycleTestSet.add(testCycle1);
         cycleTestSet.add(testCycle2);
@@ -63,6 +89,7 @@ public class TestData {
         cardInPackTestSet.add(testCardInPack2);
         cardInPackTestSet.add(testCardInPack3);
         mwlTestSet.add(testMwl);
+        testTournamentList.add(testTournament);
     }
 
     

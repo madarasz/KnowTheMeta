@@ -51,7 +51,7 @@ public class ABRBrokerTournamentDataTests {
 
         // asserts
         assertEquals(2, tournaments.size(), "Tournament list size is not correct");
-        assertEquals(2763, tournaments.get(0).getId(), "Tournament ID is incorrect");
+        assertEquals(999666, tournaments.get(0).getId(), "Tournament ID is incorrect");
         assertEquals("Hacktivist Tournament 4/28/2020", tournaments.get(0).getTitle(), "Tournament title is incorrect");
         Date correctDate = new Date();
         try {
