@@ -10,9 +10,9 @@ import com.google.gson.JsonParser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class HttpBroker {
     private final static Logger log = LoggerFactory.getLogger(HttpBroker.class);
     
