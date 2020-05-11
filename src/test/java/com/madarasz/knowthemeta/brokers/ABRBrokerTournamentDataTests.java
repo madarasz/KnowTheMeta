@@ -37,7 +37,7 @@ public class ABRBrokerTournamentDataTests {
     private static final TestHelper testHelper = new TestHelper();
 
     @Test
-    public void testLoadTournamentData() {
+    public void testLoadTournamentData() throws Exception {
         // setup
         JsonElement testData = testHelper.getJsonFromTestResource("MockTournamentData.json");
         Mockito.when(httpBroker.readJSONFromURL(anyString())).thenReturn(testData);

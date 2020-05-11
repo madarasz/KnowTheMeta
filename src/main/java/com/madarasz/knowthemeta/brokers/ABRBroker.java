@@ -31,8 +31,7 @@ public class ABRBroker {
     private final HttpBroker httpBroker;
     private final NetrunnerDBBroker netrunnerDBBroker;
     private final Searcher searcher;
-    public final static String ABR_TOURNAMENT_API_URL = 
-        "https://alwaysberunning.net/api/tournaments?concluded=1&approved=1&format=standard&cardpool={CARDPOOL_CODE}&mwl_id={MWL_ID}";
+    public final static String ABR_TOURNAMENT_API_URL = "https://alwaysberunning.net/api/tournaments?concluded=1&approved=1&format=standard&cardpool={CARDPOOL_CODE}&mwl_id={MWL_ID}";
     public final static String ABR_STANDING_API_URL = "https://alwaysberunning.net/api/entries?id=";
     public final static String ABR_MATCHES_URL = "https://alwaysberunning.net/tjsons/{TOURNAMENT_ID}.json";
     private final static Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy.MM.dd.").create();
@@ -47,9 +46,23 @@ public class ABRBroker {
 
     public List<Tournament> getTournamentData(Meta meta) {
         log.info("Getting ABR tournament data for meta: " + meta.getTitle());
-        JsonArray tournamentData = httpBroker.readJSONFromURL(ABR_TOURNAMENT_API_URL
-            .replaceAll("\\{CARDPOOL_CODE\\}", meta.getCardpool().getCode()).replaceAll("\\{MWL_ID\\}", Integer.toString(meta.getMwl().getId()))).getAsJsonArray();
-        Type collectionType = new TypeToken<List<Tournament>>(){}.getType();
+        JsonArray tournamentData = new JsonArray();
+
+        // read JSON
+        try {
+            tournamentData = httpBroker
+                    .readJSONFromURL(
+                            ABR_TOURNAMENT_API_URL.replaceAll("\\{CARDPOOL_CODE\\}", meta.getCardpool().getCode())
+                                    .replaceAll("\\{MWL_ID\\}", Integer.toString(meta.getMwl().getId())))
+                    .getAsJsonArray();
+        } catch (Exception e) {
+            log.error("Cannot read tournaments JSON from ABR");
+            return new ArrayList<Tournament>();
+        }
+
+        // parse
+        Type collectionType = new TypeToken<List<Tournament>>() {
+        }.getType();
         List<Tournament> result = gson.fromJson(tournamentData.toString(), collectionType);
         for (Tournament tournament : result) {
             tournament.setMeta(meta);
@@ -57,14 +70,24 @@ public class ABRBroker {
         return result;
     }
 
-    public List<Standing> getStadingData(Tournament tournament, Set<CardInPack> identities, Set<CardInPack> cards, Set<Deck> existingDecks) {
+    public List<Standing> getStadingData(Tournament tournament, Set<CardInPack> identities, Set<CardInPack> cards,
+            Set<Deck> existingDecks) {
         List<Standing> result = new ArrayList<Standing>();
-        JsonArray standingData = httpBroker.readJSONFromURL(ABR_STANDING_API_URL+tournament.getId()).getAsJsonArray();
+        JsonArray standingData = new JsonArray();
+
+        // read JSON
+        try {
+            standingData = httpBroker.readJSONFromURL(ABR_STANDING_API_URL + tournament.getId()).getAsJsonArray();
+        } catch (Exception e) {
+            log.error("Cannot read standings JSON for tournament #" + tournament.getId() + " from ABR");
+            return result;
+        }
 
         // iterate on items
         standingData.forEach(item -> {
             JsonObject stadingItem = (JsonObject) item;
-            int rank = (stadingItem.get("rank_top").isJsonNull()) ? stadingItem.get("rank_swiss").getAsInt() : stadingItem.get("rank_top").getAsInt();
+            int rank = (stadingItem.get("rank_top").isJsonNull()) ? stadingItem.get("rank_swiss").getAsInt()
+                    : stadingItem.get("rank_top").getAsInt();
             String runnerId = stadingItem.get("runner_deck_identity_id").getAsString();
             String corpId = stadingItem.get("corp_deck_identity_id").getAsString();
             Card runner = searcher.getCardByCode(identities, runnerId);
@@ -77,25 +100,37 @@ public class ABRBroker {
                 result.add(new Standing(tournament, runner, runnerDeck, rank, true));
             } else {
                 result.add(new Standing(tournament, runner, rank, true));
-            } 
+            }
             if (corpDeckUrl.length() > 0) {
                 Deck corpDeck = netrunnerDBBroker.loadDeck(this.deckIdFromUrl(corpDeckUrl), existingDecks, cards);
                 result.add(new Standing(tournament, corp, corpDeck, rank, false));
             } else {
                 result.add(new Standing(tournament, corp, rank, false));
-            }     
+            }
         });
         return result;
     }
 
     public Set<Standing> loadMatches(int tournamentId) {
         Set<Standing> stadings = new HashSet<Standing>();
-        JsonObject matchData = httpBroker.readJSONFromURL(ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", new Integer(tournamentId).toString())).getAsJsonObject();
-        // read players
+        JsonObject matchData = new JsonObject();
+
+        // read JSON
+        try {
+            matchData = httpBroker
+                    .readJSONFromURL(
+                            ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", new Integer(tournamentId).toString()))
+                    .getAsJsonObject();
+        } catch (Exception e) {
+            log.error("Cannot read matches JSON for tournament #" + tournamentId + " from ABR");
+            return stadings;
+        }
+
+        // parse players
         matchData.get("players").getAsJsonArray().forEach(playerItem -> readMatchPlayers(stadings, playerItem.getAsJsonObject()));
-        // read rounds
+        // pase rounds
         matchData.get("rounds").getAsJsonArray().forEach(roundItem -> {
-            // read matches
+            // pase matches
             log.trace("--- New round ---");
             roundItem.getAsJsonArray().forEach(matchItem -> readMatchRounds(stadings, matchItem.getAsJsonObject()));
         });

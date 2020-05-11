@@ -59,7 +59,17 @@ public class NetrunnerDBBroker {
     // loads Cycles from NetrunnerDB
     public Set<CardCycle> loadCycles() {
         log.info("Loading cycles");
-        JsonObject cycleData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cycles").getAsJsonObject();
+        JsonObject cycleData = new JsonObject();
+
+        // load JSON
+        try {
+            cycleData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cycles").getAsJsonObject();
+        } catch (Exception e) {
+            log.error("Cannot read cycles from NetrunnerDB");
+            return new HashSet<CardCycle>();
+        }
+
+        // parse
         Type collectionType = new TypeToken<Set<CardCycle>>() {}.getType();
         return gson.fromJson(cycleData.get("data").toString(), collectionType);
     }
@@ -67,8 +77,18 @@ public class NetrunnerDBBroker {
     // loads Packs from NetrunnerDB
     public Set<CardPack> loadPacks(Set<CardCycle> cycles) {
         log.info("Loading packs");
-        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "packs").getAsJsonObject();
         Set<CardPack> results = new HashSet<CardPack>();
+        JsonObject packData = new JsonObject();
+
+        // read JSON
+        try {
+            packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "packs").getAsJsonObject();
+        } catch (Exception e) {
+            log.error("Cannot read packs from NetrunnerDB");
+            return results;
+        }
+
+        // parse
         packData.get("data").getAsJsonArray().forEach(item -> {
             JsonObject packItem = (JsonObject) item;
             String cycleCode = packItem.get("cycle_code").getAsString();
@@ -83,11 +103,19 @@ public class NetrunnerDBBroker {
     // loads Cards from NetrunnerDB
     public List<CardInPack> loadCards(Set<CardPack> packs) {
         log.info("Loading cards");
-        
-        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards").getAsJsonObject();
-        String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
         List<CardInPack> results = new ArrayList<CardInPack>();
 
+        // load JSON
+        JsonObject packData = new JsonObject();
+        try {
+            packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "cards").getAsJsonObject();
+        } catch (Exception e) {
+            log.error("Cannot read cards from NetrunnerDB");
+            return results;
+        }
+        String imageUrlTemplate = packData.get("imageUrlTemplate").getAsString();
+
+        // parse
         packData.get("data").getAsJsonArray().forEach(item -> {
             // get fields
             JsonObject packItem = (JsonObject) item;
@@ -103,7 +131,8 @@ public class NetrunnerDBBroker {
                 log.error("No cardpack found for: " + packCode);
             }
             Card card = gson.fromJson(item, Card.class);
-            card.setFaction(new Faction(packItem.get("faction_code").getAsString(), "temp")); // adding temporary faction
+            card.setFaction(new Faction(packItem.get("faction_code").getAsString(), "temp")); // adding temporary
+                                                                                              // faction
             results.add(new CardInPack(card, pack, code, imageUrl));
         });
 
@@ -112,8 +141,16 @@ public class NetrunnerDBBroker {
 
     public Set<MWL> loadMWL(List<CardInPack> cards) {
         log.info("Loading MWLs");
-        JsonObject packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "mwl").getAsJsonObject();
         Set<MWL> result = new HashSet<MWL>();
+
+        // read JSON
+        JsonObject packData = new JsonObject();
+        try {
+            packData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "mwl").getAsJsonObject();
+        } catch (Exception e1) {
+            log.error("Could not read MWL data from NetrunnerDB");
+            return result;
+        }
 
         // iterate on MWL entries
         packData.get("data").getAsJsonArray().forEach(item -> {
@@ -155,8 +192,16 @@ public class NetrunnerDBBroker {
             return exists.get();
         }
 
-        // load deck
-        JsonObject deckData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "decklist/" + deckId).getAsJsonObject().get("data").getAsJsonArray().get(0).getAsJsonObject();
+        // load deck JSON
+        JsonObject deckData = new JsonObject();
+        try {
+            deckData = httpBroker.readJSONFromURL(NETRUNNERDB_API_URL + "decklist/" + deckId).getAsJsonObject().get("data").getAsJsonArray().get(0).getAsJsonObject();
+        } catch (Exception ex) {
+            log.error("Cannot read deck #" + deckId + " from NetrunnerDB");
+            return null;
+        }
+
+        // parse
         Deck deck = gson.fromJson(deckData, Deck.class);
         deck.setPlayer(new User(deckData.get("user_id").getAsInt(), deckData.get("user_name").getAsString()));
         // iterate on cards

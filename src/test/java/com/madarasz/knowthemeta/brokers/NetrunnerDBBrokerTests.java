@@ -36,7 +36,7 @@ public class NetrunnerDBBrokerTests {
     private static final TestHelper testHelper = new TestHelper();
 
     @Test
-    public void testCycleLoad() {
+    public void testCycleLoad() throws Exception {
         // setup
         JsonElement jsonMock = testHelper.getJsonFromTestResource("MockNetrunnerDBCycles.json");
         Mockito.when(httpBroker.readJSONFromURL(anyString())).thenReturn(jsonMock);
@@ -53,7 +53,7 @@ public class NetrunnerDBBrokerTests {
     }
 
     @Test
-    public void testPackLoad() {
+    public void testPackLoad() throws Exception {
         // setup
         JsonElement jsonMock = testHelper.getJsonFromTestResource("MockNetrunnerDBPacks.json");
         Mockito.when(httpBroker.readJSONFromURL(anyString())).thenReturn(jsonMock);
@@ -73,7 +73,7 @@ public class NetrunnerDBBrokerTests {
     }
 
     @Test
-    public void testCardLoad() {
+    public void testCardLoad() throws Exception {
         // setup
         JsonElement jsonMock = testHelper.getJsonFromTestResource("MockNetrunnerDBCards.json");
         Mockito.when(httpBroker.readJSONFromURL(anyString())).thenReturn(jsonMock);
@@ -96,7 +96,7 @@ public class NetrunnerDBBrokerTests {
     }
 
     @Test
-    public void testMWLLoad() {
+    public void testMWLLoad() throws Exception {
         // setup
         JsonElement jsonMock = testHelper.getJsonFromTestResource("MockNetrunnerDBMWLs.json");
         Mockito.when(httpBroker.readJSONFromURL(anyString())).thenReturn(jsonMock);

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class HttpBroker {
     private final static Logger log = LoggerFactory.getLogger(HttpBroker.class);
     
-    public JsonElement readJSONFromURL(String urlString) {
+    public JsonElement readJSONFromURL(String urlString) throws Exception {
         try {
             URL url = new URL(urlString);
             URLConnection request = url.openConnection();
@@ -26,8 +26,8 @@ public class HttpBroker {
             json.close();
             return root;
         } catch (Exception ex) {
-            log.error("logged exception", ex);
-            return null;
+            log.error("Cannot read from URL: " + urlString);
+            throw ex;
         } 
     }
 }
