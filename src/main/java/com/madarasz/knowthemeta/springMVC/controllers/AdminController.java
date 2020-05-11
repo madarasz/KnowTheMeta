@@ -2,6 +2,7 @@ package com.madarasz.knowthemeta.springMVC.controllers;
 
 import com.madarasz.knowthemeta.NetrunnerDBUpdater;
 import com.madarasz.knowthemeta.MetaOperations;
+import com.madarasz.knowthemeta.MetaStatistics;
 import com.madarasz.knowthemeta.TimeStamper;
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
@@ -17,6 +18,7 @@ import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.StandingRepository;
 import com.madarasz.knowthemeta.database.DRs.TournamentRepository;
 import com.madarasz.knowthemeta.database.DRs.UserRepository;
+import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,6 +47,8 @@ public class AdminController {
     @Autowired NetrunnerDBBroker netrunnerDBBroker;
     @Autowired ABRBroker abrBroker;
     @Autowired TimeStamper timeStamper;
+    @Autowired MetaStatistics metaStatistics;
+    @Autowired WinRateUsedCounterRepository winRateUsedCounterRepository;
 
     private static final String STAMP_NETRUNNERDB_UPDATE = "NetrunnerDB update";
 
@@ -62,6 +66,8 @@ public class AdminController {
         model.addAttribute("printCount", printCount);
         model.addAttribute("mwlCount", mwlCount);
         model.addAttribute("factionCount", factionCount);
+        model.addAttribute("idStatCount", winRateUsedCounterRepository.countIDStats());
+        model.addAttribute("factionStatCount", winRateUsedCounterRepository.countFactionStats());
         model.addAttribute("lastCycle", cycleCount > 0 ? cardCycleRepository.findLast().getName() : "none");
         model.addAttribute("lastPack", packCount > 0 ? cardPackRepository.findLast().getName() : "none");
         model.addAttribute("lastPrint", cardCount > 0 ? cardRepository.findLast().getTitle() : "none");

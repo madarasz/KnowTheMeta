@@ -1,0 +1,34 @@
+package com.madarasz.knowthemeta.database.serializer;
+
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.madarasz.knowthemeta.database.DOs.Card;
+import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
+
+public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCounter> {
+
+    public WinRateUsedCounterSerializer() {
+        this(null);
+    }
+
+    public WinRateUsedCounterSerializer(Class<WinRateUsedCounter> t) {
+        super(t);
+    }
+    
+    private static final long serialVersionUID = -2550415871512245385L;
+
+    @Override
+    public void serialize(WinRateUsedCounter value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        gen.writeStartObject();
+        gen.writeStringField("title", ((Card)value.getStatAbout()).getTitle());
+        gen.writeNumberField("used", value.getUsedCounter());
+        gen.writeNumberField("wins", value.getWinCounter());
+        gen.writeNumberField("draws", value.getDrawCounter());
+        gen.writeNumberField("losses", value.getLossCounter());
+        gen.writeEndObject();
+    }
+    
+}

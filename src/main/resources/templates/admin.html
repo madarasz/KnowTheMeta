@@ -83,7 +83,9 @@
                     </thead>
                     <tbody>
                         <tr th:each="meta : ${metas}">
-                            <td th:text="${meta.title}"/>
+                            <td>
+                                <a th:href="${'/stats/' + meta.title}" th:text="${meta.title}"/>
+                            </td>
                             <td th:text="${meta.cardpool?.name}"/>
                             <td th:text="${meta.mwl?.name}"/>
                             <td class="text-center">

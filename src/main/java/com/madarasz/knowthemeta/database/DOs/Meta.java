@@ -2,13 +2,16 @@ package com.madarasz.knowthemeta.database.DOs;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.madarasz.knowthemeta.database.Entity;
+import com.madarasz.knowthemeta.database.serializer.MetaSerializer;
 
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
+@JsonSerialize(using = MetaSerializer.class)
 public class Meta extends Entity {
     private CardPack cardpool;
     private MWL mwl;

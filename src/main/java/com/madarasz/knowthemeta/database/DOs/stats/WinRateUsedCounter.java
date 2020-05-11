@@ -1,13 +1,16 @@
 package com.madarasz.knowthemeta.database.DOs.stats;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.serializer.WinRateUsedCounterSerializer;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
+@JsonSerialize(using = WinRateUsedCounterSerializer.class)
 public class WinRateUsedCounter extends Entity {
     private int winCounter;
     private int drawCounter;
