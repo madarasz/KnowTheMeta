@@ -26,8 +26,7 @@ public class Standing {
         this.tournament = tournament;
         this.identity = identity;
         this.rank = rank;
-        this.isRunner = isRunner; // TODO: isRunner not needed
-        this.adjustIsRunner();
+        this.isRunner = isRunner;
     }
 
     public Standing(Tournament tournament, Card identity, Deck deck, int rank, Boolean isRunner) {
@@ -35,8 +34,7 @@ public class Standing {
         this.identity = identity;
         this.deck = deck;
         this.rank = rank;
-        this.isRunner = isRunner; // TODO: isRunner not needed
-        this.adjustIsRunner();
+        this.isRunner = isRunner;
     }
 
     // for reading match json
@@ -47,8 +45,10 @@ public class Standing {
     }
 
     public void adjustIsRunner() {
-        String[] runnerFactionCodes = {"neutral-runner", "shaper", "criminal", "anarch", "apex", "adam", "sunny-lebeau"};
-        isRunner = Arrays.stream(runnerFactionCodes).anyMatch(identity.getFaction_code()::equals);
+        if (this.identity != null) {
+            String[] runnerFactionCodes = {"neutral-runner", "shaper", "criminal", "anarch", "apex", "adam", "sunny-lebeau"};
+            isRunner = Arrays.stream(runnerFactionCodes).anyMatch(identity.getFaction_code()::equals);
+        }
     }
 
     public int getPlayerId() {

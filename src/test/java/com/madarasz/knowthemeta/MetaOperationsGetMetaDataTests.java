@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,16 +52,31 @@ public class MetaOperationsGetMetaDataTests {
     @Mock DeckRepository deckRepository;
     @Mock MetaRepository metaRepository;
     @Spy Searcher searcher; // TODO: this integration is still in
-    @Spy Meta meta; // TODO: this integration is still in
     @InjectMocks MetaOperations operations;
     private static final TestData testData = new TestData();
 
     @Test
     public void testGetMetaData() {
         // setup
+        Random r = new Random();
+        Set<Standing> matchStandings = new HashSet<Standing>();
+        for(int i = 0; i < 10; i++) {
+            Standing runnerStanding = new Standing(true, i, 1000+i);
+            Standing corpStanding = new Standing(false, i, 1000+i);
+            int[] randoms = r.ints(6, 1 , 5).toArray();
+            runnerStanding.setLossCount(randoms[0]);
+            runnerStanding.setWinCount(randoms[1]);
+            runnerStanding.setDrawCount(randoms[2]);
+            corpStanding.setLossCount(randoms[3]);
+            corpStanding.setWinCount(randoms[4]);
+            corpStanding.setDrawCount(randoms[5]);
+            matchStandings.add(runnerStanding);
+            matchStandings.add(corpStanding);
+        }
         Set<CardInPack> cards = testData.cardInPackTestSet.stream().collect(Collectors.toSet());
         Mockito.when(abrBroker.getTournamentData(any(Meta.class))).thenReturn(testData.testTournamentList);
         Mockito.when(abrBroker.getStadingData(any(Tournament.class), any(), any(), any())).thenReturn(testData.testStandingSet);
+        Mockito.when(abrBroker.loadMatches(testData.testTournament.getId())).thenReturn(matchStandings);
         Mockito.when(cardInPackRepository.listAll()).thenReturn(cards);
         Mockito.when(cardInPackRepository.listIdentities()).thenReturn(cards);
         Mockito.when(tournamentRepository.listForMeta(any())).thenReturn(new ArrayList<Tournament>());
@@ -70,7 +86,7 @@ public class MetaOperationsGetMetaDataTests {
         operations.getMetaData(testData.testMeta);
         // verify
         verify(tournamentRepository, times(1)).save(any(Tournament.class));
-        verify(standingRepository, times(2)).save(any(Standing.class));
+        verify(standingRepository, times(6)).save(any(Standing.class));
         verify(deckRepository, times(1)).save(any(Deck.class));
     }
 
