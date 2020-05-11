@@ -126,9 +126,10 @@ public class MetaOperations {
         log.info(String.format("Existing tournaments for meta: %d", existingTournaments.size()));
 
         // iterate on ABR data
+        int counter = 0;
         for (Tournament tournament : tournaments) {
             // tournament
-            log.trace(String.format("Looking at tournament %s (#%d)", tournament.getTitle(), tournament.getId()));
+            log.debug(String.format("%d / %d Looking at tournament %s (#%d)", ++counter, tournaments.size(), tournament.getTitle(), tournament.getId()));
             updateTournaments(existingTournaments, tournament);
             // standings
             updateStandings(tournament, identities, cards, existingDecks, existingUsers);
