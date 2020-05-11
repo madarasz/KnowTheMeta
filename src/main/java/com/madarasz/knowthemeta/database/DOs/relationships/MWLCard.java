@@ -1,18 +1,16 @@
 package com.madarasz.knowthemeta.database.DOs.relationships;
 
+import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 
 import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 @RelationshipEntity(type="MWL_CARD")
-public class MWLCard {
-    @Id @GeneratedValue private Long id;
+public class MWLCard extends Entity {
     @StartNode private MWL mwl;
     @EndNode private Card card;
     @Property private Boolean global_penalty; // 1 or no value

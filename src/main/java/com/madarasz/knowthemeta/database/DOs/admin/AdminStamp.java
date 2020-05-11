@@ -2,15 +2,14 @@ package com.madarasz.knowthemeta.database.DOs.admin;
 
 import java.util.Date;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
-public class AdminStamp {
-    @Id @GeneratedValue private Long id;
+public class AdminStamp extends Entity {
     @Index(unique = true) private String entry;
     @DateString("yyyy-MM-dd HH:mm:ss") private Date timestamp;
 

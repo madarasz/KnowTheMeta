@@ -1,18 +1,16 @@
 package com.madarasz.knowthemeta.database.DOs.relationships;
 
+import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.Deck;
 
 import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 @RelationshipEntity(type="CARD_IN_DECK")
-public class CardInDeck {
-    @Id @GeneratedValue private Long id;
+public class CardInDeck extends Entity {
     @StartNode private Deck deck;
     @EndNode private Card card;
     @Property int quantity;

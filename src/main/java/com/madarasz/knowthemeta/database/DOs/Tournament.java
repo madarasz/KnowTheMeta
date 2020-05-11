@@ -2,14 +2,13 @@ package com.madarasz.knowthemeta.database.DOs;
 
 import java.util.Date;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
-public class Tournament {
-    @Id @GeneratedValue private Long graphId;
+public class Tournament extends Entity {
     private int id; // ABR id
     private String title;
     @DateString("yyyy.MM.dd.") private Date date;

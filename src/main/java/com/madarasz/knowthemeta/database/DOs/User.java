@@ -1,12 +1,11 @@
 package com.madarasz.knowthemeta.database.DOs;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
-public class User {
-    @Id @GeneratedValue private Long graphId;
+public class User extends Entity {
     private int user_id;
     private String user_name;
 

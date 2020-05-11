@@ -2,13 +2,12 @@ package com.madarasz.knowthemeta.database.DOs;
 
 import java.util.Arrays;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
-public class Standing {
-    @Id @GeneratedValue private Long graphId;
+public class Standing extends Entity {
     private Tournament tournament;
     private Card identity;
     private Boolean isRunner;

@@ -1,19 +1,17 @@
 package com.madarasz.knowthemeta.database.DOs.relationships;
 
+import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
 import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 @RelationshipEntity(type="CARD_IN_PACK")
-public class CardInPack {
-    @Id @GeneratedValue private Long id;
+public class CardInPack extends Entity {
     @StartNode private CardPack cardPack;
     @EndNode private Card card;
     @Property String code;

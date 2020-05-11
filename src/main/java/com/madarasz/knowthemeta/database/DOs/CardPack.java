@@ -4,18 +4,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
-public class CardPack {
-    @Id @GeneratedValue private Long id;
+public class CardPack extends Entity {
     private String code;
     private String name;
     private int position;

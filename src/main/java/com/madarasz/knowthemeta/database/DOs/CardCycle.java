@@ -3,14 +3,13 @@ package com.madarasz.knowthemeta.database.DOs;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
-public class CardCycle {
-    @Id @GeneratedValue private Long id;
+public class CardCycle extends Entity {
     private String code;
     private String name;
     private int position;

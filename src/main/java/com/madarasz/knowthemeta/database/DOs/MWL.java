@@ -4,17 +4,15 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.relationships.MWLCard;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
-public class MWL {
-    @Id @GeneratedValue private Long graphId;
+public class MWL extends Entity {
     private int id; // coming from NetrunnerDB, needed for ABR query
     private String code;
     private String name;

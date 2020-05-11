@@ -1,15 +1,14 @@
 package com.madarasz.knowthemeta.database.DOs;
 
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity
-public class Card {
-    @Id @GeneratedValue private Long id;
+public class Card extends Entity {
     @Nullable private int cost;
     private int deck_limit;
     private Faction faction;

@@ -1,12 +1,11 @@
 package com.madarasz.knowthemeta.database.DOs;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
-public class Faction {
-    @Id @GeneratedValue private Long id;
+public class Faction extends Entity {
     private String factionCode;
     private String name;
 

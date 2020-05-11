@@ -2,15 +2,14 @@ package com.madarasz.knowthemeta.database.DOs;
 
 import java.util.Date;
 
+import com.madarasz.knowthemeta.database.Entity;
+
 import org.neo4j.driver.internal.shaded.reactor.util.annotation.Nullable;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
-public class Meta {
-    @Id @GeneratedValue private Long id;
+public class Meta extends Entity {
     private CardPack cardpool;
     private MWL mwl;
     private Boolean newCards;
