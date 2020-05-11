@@ -78,6 +78,7 @@
                         <th class="text-center">stand.</th>
                         <th class="text-center">decks</th>
                         <th class="text-center">matches</th>
+                        <th class="text-center">stats</th>
                         <th></th>
                     </thead>
                     <tbody>
@@ -96,6 +97,10 @@
                             <td th:text="${meta.standingsCount}" class="text-center"/>
                             <td th:text="${meta.decksPlayedCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
+                            <td class="text-center">
+                                <span th:if="${meta.statsCalculated}">&#9728;</span>
+                                <span th:if="${!meta.statsCalculated}">&#9729;</span>
+                            </td>
                             <td>
                                 <a th:href="${'/get-meta?title=' + meta.title}">
                                     <button class="btn btn-primary btn-sm" type="button">&#8634;</button>    
