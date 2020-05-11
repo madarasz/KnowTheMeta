@@ -142,7 +142,8 @@ public class ABRBroker {
         int player1CorpScore = player1.get("corpScore").isJsonNull() ? 0 :  player1.get("corpScore").getAsInt();
         int player2CorpScore = player2.get("corpScore").isJsonNull() ? 0 :  player2.get("corpScore").getAsInt();
         // decide if NRTM or Cobr.ai, apply match scores
-        if (player1.has("combinedScore") && player2.has("combinedScore")) {
+        if (player1.has("combinedScore") && player2.has("combinedScore") 
+                && !player1.get("combinedScore").isJsonNull() && !player2.get("combinedScore").isJsonNull()) {
             // cobr.ai
             int player1CombinedScore = player1.get("combinedScore").getAsInt();
             int player2CombinedScore = player2.get("combinedScore").getAsInt();
