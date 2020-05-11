@@ -11,6 +11,7 @@ import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
@@ -48,6 +49,7 @@ public class TestData {
     public Standing testStanding2;
     public Standing testStanding3;
     public List<Standing> testStandingSet = new ArrayList<Standing>();
+    public Faction testFaction;
 
     public TestData() {
         testCycle1 = new CardCycle("test", "First Test Cycle", 9998, false);
@@ -62,8 +64,9 @@ public class TestData {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        testCard1 = new Card(2, 3, "anarch", 2, 0, 0, 1, 2, 0, 0, 0, "Icebreaker - Fracter", "runner", "1[credit]: Break <strong>barrier</strong> subroutine.", "Test Fracter", "program", false, 0);
-        testCard2 = new Card(0, 1, "anarch", 0, 15, 45, 0, 0, 0, 0, 0, "G-mod", "runner", "Whenever you install a <strong>virus</strong> program, the Corp trashes the top card of R&D.", "Test Anarch", "identity", false, 0);
+        testFaction = new Faction("test-anarch", "Test Anarch");
+        testCard1 = new Card(2, 3, testFaction, 2, 0, 0, 1, 2, 0, 0, 0, "Icebreaker - Fracter", "runner", "1[credit]: Break <strong>barrier</strong> subroutine.", "Test Fracter", "program", false, 0);
+        testCard2 = new Card(0, 1, testFaction, 0, 15, 45, 0, 0, 0, 0, 0, "G-mod", "runner", "Whenever you install a <strong>virus</strong> program, the Corp trashes the top card of R&D.", "Test Anarch", "identity", false, 0);
         testCardInPack1 = new CardInPack(testCard1, testPack1, "66661", "https://netrunnerdb.com/card_image/66661.png");
         testCardInPack2 = new CardInPack(testCard2, testPack2, "66662", "http://www.cardgamedb.com/forums/uploads/an/med_ADN17_21.png");
         testCardInPack3 = new CardInPack(testCard1, testPack3, "99991", "https://netrunnerdb.com/card_image/99991.png");

@@ -1,18 +1,22 @@
 package com.madarasz.knowthemeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
+import com.madarasz.knowthemeta.database.DRs.FactionRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 import com.madarasz.knowthemeta.helper.Searcher;
 
@@ -31,6 +35,7 @@ public class NetrunnerDBUpdater {
     @Autowired CardPackRepository cardPackRepository;
     @Autowired CardCycleRepository cardCycleRepository;
     @Autowired MWLRepository mwlRepository;
+    @Autowired FactionRepository factionRepository;
     @Autowired Searcher searcher;
     private static final Logger log = LoggerFactory.getLogger(NetrunnerDBUpdater.class);
 
@@ -61,6 +66,7 @@ public class NetrunnerDBUpdater {
         int newCount = 0;
         int editCount = 0;
         List<CardInPack> existingCards = new ArrayList<CardInPack>(cardInPackRepository.listAll());
+        Set<Faction> existingFactions = factionRepository.findAll();
         List<CardInPack> cards = netrunnerDBBroker.loadCards(packs);
 
         for (CardInPack cardInPack : cards) {
@@ -72,6 +78,14 @@ public class NetrunnerDBUpdater {
             if (cardExists == null) {
                 // new card
                 Card card = cardInPack.getCard();
+                // adjust faction
+                Faction faction = searcher.getFactionByCode(existingFactions, card.getFaction().getFactionCode());
+                if (faction == null) {
+                    faction = new Faction(card.getFaction().getFactionCode(), generateNameForFaction(card.getFaction()));
+                    existingFactions.add(faction);
+                } 
+                card.setFaction(faction);
+                // save
                 pack.addCards(cardInPack);
                 cardPackRepository.save(pack);
                 existingCards.add(cardInPack);
@@ -202,6 +216,17 @@ public class NetrunnerDBUpdater {
             log.info(String.format("MWL: no updates (%.3f sec)", stopwatch.getTotalTimeSeconds()));
         } else {
             log.info(String.format("MWL: %d added, %d updated (%.3f sec)", createCount, updateCount, stopwatch.getTotalTimeSeconds()));
+        }
+    }
+
+    private String generateNameForFaction(Faction faction) {
+        String name = faction.getFactionCode();
+        if (name.equals("haas-bioroid")) {
+            return "Haas-Bioroid";
+        } else {
+            name = name.replace("-", " ");
+            // capitalize first letters
+            return Arrays.stream(name.split("\\s+")).map(t -> t.substring(0, 1).toUpperCase() + t.substring(1)).collect(Collectors.joining(" "));
         }
     }
 }

@@ -12,7 +12,7 @@ public class Card {
     @Id @GeneratedValue private Long id;
     @Nullable private int cost;
     private int deck_limit;
-    private String faction_code;
+    private Faction faction;
     @Nullable private int faction_cost;
     @Nullable private int influence_limit;  // identities only
     @Nullable private int base_link;  // runner identities only
@@ -34,13 +34,13 @@ public class Card {
     public Card() {
     }
 
-    public Card(int cost, int deck_limit, String faction_code, int faction_cost, int influence_limit,
+    public Card(int cost, int deck_limit, Faction faction, int faction_cost, int influence_limit,
             int minimum_deck_size, int memory_cost, int strength, int advancement_cost, int agenda_points,
             int trash_cost, String keywords, String side_code, String text, String title, String type_code,
             Boolean uniqueness, int base_link) {
         this.cost = cost;
         this.deck_limit = deck_limit;
-        this.faction_code = faction_code;
+        this.faction = faction;
         this.faction_cost = faction_cost;
         this.influence_limit = influence_limit;
         this.minimum_deck_size = minimum_deck_size;
@@ -74,12 +74,12 @@ public class Card {
         this.deck_limit = deck_limit;
     }
 
-    public String getFaction_code() {
-        return faction_code;
+    public Faction getFaction() {
+        return faction;
     }
 
-    public void setFaction_code(String faction_code) {
-        this.faction_code = faction_code;
+    public void setFaction(Faction faction) {
+        this.faction = faction;
     }
 
     public int getFaction_cost() {
@@ -219,7 +219,7 @@ public class Card {
         result = prime * result + base_link;
         result = prime * result + cost;
         result = prime * result + deck_limit;
-        result = prime * result + ((faction_code == null) ? 0 : faction_code.hashCode());
+        result = prime * result + ((faction == null) ? 0 : faction.getFactionCode().hashCode());
         result = prime * result + faction_cost;
         result = prime * result + influence_limit;
         result = prime * result + ((keywords == null) ? 0 : keywords.hashCode());
@@ -254,10 +254,10 @@ public class Card {
             return false;
         if (deck_limit != other.deck_limit)
             return false;
-        if (faction_code == null) {
-            if (other.faction_code != null)
+        if (faction == null) {
+            if (other.faction != null)
                 return false;
-        } else if (!faction_code.equals(other.faction_code))
+        } else if (!faction.getFactionCode().equals(other.faction.getFactionCode()))
             return false;
         if (faction_cost != other.faction_cost)
             return false;
@@ -307,7 +307,7 @@ public class Card {
     @Override
     public String toString() {
         return "Card [advancement_cost=" + advancement_cost + ", agenda_points=" + agenda_points + ", base_link="
-                + base_link + ", cost=" + cost + ", deck_limit=" + deck_limit + ", faction_code=" + faction_code
+                + base_link + ", cost=" + cost + ", deck_limit=" + deck_limit + ", faction=" + faction.getFactionCode()
                 + ", faction_cost=" + faction_cost + ", influence_limit=" + influence_limit + ", keywords=" + keywords
                 + ", memory_cost=" + memory_cost + ", minimum_deck_size=" + minimum_deck_size + ", side_code="
                 + side_code + ", strength=" + strength + ", text=" + text + ", title=" + title + ", trash_cost="

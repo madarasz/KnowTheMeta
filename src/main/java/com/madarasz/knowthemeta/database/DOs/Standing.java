@@ -47,7 +47,7 @@ public class Standing {
     public void adjustIsRunner() {
         if (this.identity != null) {
             String[] runnerFactionCodes = {"neutral-runner", "shaper", "criminal", "anarch", "apex", "adam", "sunny-lebeau"};
-            isRunner = Arrays.stream(runnerFactionCodes).anyMatch(identity.getFaction_code()::equals);
+            isRunner = Arrays.stream(runnerFactionCodes).anyMatch(identity.getFaction().getFactionCode()::equals);
         }
     }
 

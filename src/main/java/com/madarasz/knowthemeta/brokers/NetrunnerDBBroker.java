@@ -21,6 +21,7 @@ import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.User;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInDeck;
@@ -102,6 +103,7 @@ public class NetrunnerDBBroker {
                 log.error("No cardpack found for: " + packCode);
             }
             Card card = gson.fromJson(item, Card.class);
+            card.setFaction(new Faction(packItem.get("faction_code").getAsString(), "temp")); // adding temporary faction
             results.add(new CardInPack(card, pack, code, imageUrl));
         });
 

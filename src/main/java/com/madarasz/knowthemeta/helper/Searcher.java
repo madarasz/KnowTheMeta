@@ -7,6 +7,7 @@ import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.User;
@@ -65,6 +66,11 @@ public class Searcher {
 
     public CardPack getPackByCode(Collection<CardPack> searchFrom, String packCode) {
         Optional<CardPack> result = searchFrom.stream().filter(x -> x.getCode().equals(packCode)).findFirst();
+        return safeGet(result);
+    }
+
+    public Faction getFactionByCode(Collection<Faction> searchFrom, String factionCode) {
+        Optional<Faction> result = searchFrom.stream().filter(x -> x.getFactionCode().equals(factionCode)).findFirst();
         return safeGet(result);
     }
 

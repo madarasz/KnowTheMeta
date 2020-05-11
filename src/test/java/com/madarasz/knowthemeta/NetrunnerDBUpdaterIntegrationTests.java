@@ -10,6 +10,7 @@ import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.FactionRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 import com.madarasz.knowthemeta.helper.TestData;
 
@@ -39,6 +40,7 @@ public class NetrunnerDBUpdaterIntegrationTests {
     @Autowired CardRepository cardRepository;
     @Autowired CardInPackRepository cardInPackRepository;
     @Autowired MWLRepository mwlRepository;
+    @Autowired FactionRepository factionRepository;
     @Autowired NetrunnerDBUpdater netrunnerDBUpdater;
 
     @Test
@@ -109,12 +111,14 @@ public class NetrunnerDBUpdaterIntegrationTests {
         Long cardCount = cardRepository.count();
         Long printCount = cardInPackRepository.count();
         Long mwlCount = mwlRepository.count();
+        Long factionCount = factionRepository.count();
         netrunnerDBUpdater.updateFromNetrunnerDB();
         assertEquals(cycleCount, cardCycleRepository.count(), "Additional cycle created on second run");
         assertEquals(packCount, cardPackRepository.count(), "Additional cycle created on second run");
         assertEquals(cardCount, cardRepository.count(), "Additional cycle created on second run");
         assertEquals(printCount, cardInPackRepository.count(), "Additional cycle created on second run");
         assertEquals(mwlCount, mwlRepository.count(), "Additional cycle created on second run");
+        assertEquals(factionCount, factionRepository.count(), "Additional faction created on second run");
     }
 
     @Test
