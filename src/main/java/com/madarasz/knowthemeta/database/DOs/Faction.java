@@ -40,7 +40,7 @@ public class Faction extends Entity {
         this.name = name;
     }
 
-    public Boolean getRunner() {
+    public Boolean isRunner() {
         return runner;
     }
 
