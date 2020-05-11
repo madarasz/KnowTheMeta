@@ -81,7 +81,7 @@ public class NetrunnerDBUpdater {
                 // adjust faction
                 Faction faction = searcher.getFactionByCode(existingFactions, card.getFaction().getFactionCode());
                 if (faction == null) {
-                    faction = new Faction(card.getFaction().getFactionCode(), generateNameForFaction(card.getFaction()));
+                    faction = new Faction(card.getFaction().getFactionCode(), generateNameForFaction(card.getFaction()), card.getSide_code().equals("runner"));
                     existingFactions.add(faction);
                 } 
                 card.setFaction(faction);

@@ -64,7 +64,7 @@ public class TestData {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        testFaction = new Faction("test-anarch", "Test Anarch");
+        testFaction = new Faction("test-anarch", "Test Anarch", true);
         testCard1 = new Card(2, 3, testFaction, 2, 0, 0, 1, 2, 0, 0, 0, "Icebreaker - Fracter", "runner", "1[credit]: Break <strong>barrier</strong> subroutine.", "Test Fracter", "program", false, 0);
         testCard2 = new Card(0, 1, testFaction, 0, 15, 45, 0, 0, 0, 0, 0, "G-mod", "runner", "Whenever you install a <strong>virus</strong> program, the Corp trashes the top card of R&D.", "Test Anarch", "identity", false, 0);
         testCardInPack1 = new CardInPack(testCard1, testPack1, "66661", "https://netrunnerdb.com/card_image/66661.png");

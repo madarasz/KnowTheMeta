@@ -4,6 +4,7 @@ import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardCycle;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
@@ -95,6 +96,10 @@ public class NetrunnerDBUpdaterIntegrationTests {
         MWL foundMwl = mwlRepository.findByCode(testData.testMwl.getCode());
         assertNotNull(foundMwl, "Test MWL missing");
         assertEquals(testData.testMwl, foundMwl, "Test MWL data is incorrect");
+        // assert factions
+        Faction foundFaction = factionRepository.findByFactionCode("test-anarch");
+        assertNotNull(foundFaction, "Test faction missing");
+        assertEquals(testData.testFaction, foundFaction);
         // assert cycle-pack relationship
         assertTrue(cardPackRepository.verifyPackInCycleRelationship(testData.testCycle1.getCode(), testData.testPack1.getCode()));
         assertTrue(cardPackRepository.verifyPackInCycleRelationship(testData.testCycle1.getCode(), testData.testPack2.getCode()));

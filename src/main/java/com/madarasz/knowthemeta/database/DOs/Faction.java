@@ -8,6 +8,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 public class Faction extends Entity {
     private String factionCode;
     private String name;
+    private Boolean runner;
 
     public Faction() {
     }
@@ -15,6 +16,12 @@ public class Faction extends Entity {
     public Faction(String factionCode, String name) {
         this.factionCode = factionCode;
         this.name = name;
+    }
+
+    public Faction(String factionCode, String name, Boolean runner) {
+        this.factionCode = factionCode;
+        this.name = name;
+        this.runner = runner;
     }
 
     public String getFactionCode() {
@@ -31,6 +38,14 @@ public class Faction extends Entity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getRunner() {
+        return runner;
+    }
+
+    public void setRunner(Boolean runner) {
+        this.runner = runner;
     }
 
     @Override
@@ -62,5 +77,4 @@ public class Faction extends Entity {
     public String toString() {
         return "Faction [factionCode=" + factionCode + ", name=" + name + "]";
     }
-    
 }
