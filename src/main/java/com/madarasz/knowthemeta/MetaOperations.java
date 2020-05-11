@@ -272,6 +272,7 @@ public class MetaOperations {
         meta.setDecksPlayedCount(metaRepository.countDecks(metaTitle));
         meta.setMatchesCount(metaRepository.countMatches(metaTitle));
         meta.setLastUpdate(new Date());
+        if (tournamentCreatedCount + standingCreatedCount + deckCreatedCount + matchUpdatedCount > 0) meta.setStatsCalculated(false);
         metaRepository.save(meta);
     }
 }

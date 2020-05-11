@@ -12,6 +12,7 @@ import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.User;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
+import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
 
 import org.springframework.stereotype.Service;
 
@@ -71,6 +72,16 @@ public class Searcher {
 
     public Faction getFactionByCode(Collection<Faction> searchFrom, String factionCode) {
         Optional<Faction> result = searchFrom.stream().filter(x -> x.getFactionCode().equals(factionCode)).findFirst();
+        return safeGet(result);
+    }
+
+    public WinRateUsedCounter getStatsByCardTitle(Collection<WinRateUsedCounter> searchFrom, String cardTitle) {
+        Optional<WinRateUsedCounter> result = searchFrom.stream().filter(x -> ((Card)x.getStatAbout()).getTitle().equals(cardTitle)).findFirst();
+        return safeGet(result);
+    }
+
+    public WinRateUsedCounter getStatsByFactionName(Collection<WinRateUsedCounter> searchFrom, String factionName) {
+        Optional<WinRateUsedCounter> result = searchFrom.stream().filter(x -> ((Faction)x.getStatAbout()).getName().equals(factionName)).findFirst();
         return safeGet(result);
     }
 

@@ -14,4 +14,7 @@ public interface StandingRepository extends CrudRepository<Standing, Long> {
 
     @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament {id: $0}) RETURN s")
     Set<Standing> findByTournament(int tournamentId);
+
+    @Query("MATCH (f:Faction)-[r1:FACTION]-(i:Card)-[r2:IDENTITY]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) RETURN f,i,s,t,m,r1,r2,r3,r4")
+    Set<Standing> findByMeta(String metaTitle);
 }
