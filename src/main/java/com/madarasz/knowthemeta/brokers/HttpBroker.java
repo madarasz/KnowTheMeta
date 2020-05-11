@@ -21,7 +21,7 @@ public class HttpBroker {
             URL url = new URL(urlString);
             URLConnection request = url.openConnection();
             request.connect();
-            BufferedReader json = new BufferedReader(new InputStreamReader(request.getInputStream()));
+            BufferedReader json = new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8"));
             JsonElement root = JsonParser.parseReader(json);
             json.close();
             return root;
