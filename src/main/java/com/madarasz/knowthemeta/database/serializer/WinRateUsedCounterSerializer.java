@@ -7,8 +7,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
+import com.madarasz.knowthemeta.database.DRs.CardRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCounter> {
+
+    @Autowired CardRepository cardRepository;
 
     public WinRateUsedCounterSerializer() {
         this(null);
@@ -22,8 +27,10 @@ public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCount
 
     @Override
     public void serialize(WinRateUsedCounter value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        String title = ((Card)value.getStatAbout()).getTitle();
         gen.writeStartObject();
-        gen.writeStringField("title", ((Card)value.getStatAbout()).getTitle());
+        gen.writeStringField("title", title);
+        gen.writeStringField("code", cardRepository.getLastCode(title));
         gen.writeNumberField("used", value.getUsedCounter());
         gen.writeNumberField("wins", value.getWinCounter());
         gen.writeNumberField("draws", value.getDrawCounter());
