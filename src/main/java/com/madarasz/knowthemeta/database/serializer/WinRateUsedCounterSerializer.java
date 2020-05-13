@@ -27,10 +27,12 @@ public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCount
 
     @Override
     public void serialize(WinRateUsedCounter value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        String title = ((Card)value.getStatAbout()).getTitle();
+        Card card = (Card)value.getStatAbout();
+        String title = card.getTitle();
         gen.writeStartObject();
         gen.writeStringField("title", title);
         gen.writeStringField("code", cardRepository.getLastCode(title));
+        gen.writeStringField("faction", card.getFaction() == null ? "fuck" : card.getFaction().getFactionCode());
         gen.writeNumberField("used", value.getUsedCounter());
         gen.writeNumberField("wins", value.getWinCounter());
         gen.writeNumberField("draws", value.getDrawCounter());
