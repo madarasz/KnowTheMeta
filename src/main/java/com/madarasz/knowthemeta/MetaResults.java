@@ -32,6 +32,8 @@ public class MetaResults {
         // List<WinRateUsedCounter> factionStats = winRateUsedCounterRepository.listFactionStatsForMetaOrdered(metaTitle);
         // List<WinRateUsedCounter> runnerFactionStats = factionStats.stream().filter(x -> ((Faction)x.getStatAbout())
         List<WinRateUsedCounter> idStats = winRateUsedCounterRepository.listIDStatsForMetaOrdered(metaTitle);
+        // filter out neutral IDs - TODO: don't save in the first place
+        idStats = idStats.stream().filter(x -> !((Card)x.getStatAbout()).getFaction().getFactionCode().contains("neutral")).collect(Collectors.toList());
         List<WinRateUsedCounter> runnerIdStats = idStats.stream().filter(x -> ((Card)x.getStatAbout()).getSide_code().equals("runner"))
             .collect(Collectors.toList());
         List<WinRateUsedCounter> corpIdStats = idStats.stream().filter(x -> ((Card)x.getStatAbout()).getSide_code().equals("corp"))
