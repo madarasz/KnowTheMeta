@@ -193,18 +193,20 @@ public class ABRBroker {
 
     private void readMatchTopCut(JsonObject player1, JsonObject player2, int player1Id, int player2Id, Standing player1Runner,
             Standing player1Corp, Standing player2Runner, Standing player2Corp) {
-        // check which player played which side
-        Standing player1Role = player1.get("role").getAsString().equals("corp") ? player1Corp : player1Runner;
-        Standing player2Role = player2.get("role").getAsString().equals("corp") ? player2Corp : player2Runner;
-        // apply match scores
-        if (player1.get("winner").getAsBoolean()) {
-            log.trace("Top-cut, player #" + player1Id + " wins");
-            player1Role.incWinCount();
-            player2Role.incLossCount();
-        } else {
-            log.trace("Top-cut, player #" + player2Id + " wins");
-            player1Role.incLossCount();
-            player2Role.incWinCount();
+        if ((!player1.get("winner").isJsonNull()) && (!player2.get("winner").isJsonNull()) && (!player1.get("role").isJsonNull()) && (!player2.get("role").isJsonNull())) {
+            // check which player played which side
+            Standing player1Role = player1.get("role").getAsString().equals("corp") ? player1Corp : player1Runner;
+            Standing player2Role = player2.get("role").getAsString().equals("corp") ? player2Corp : player2Runner;
+            // apply match scores
+            if (player1.get("winner").getAsBoolean()) {
+                log.trace("Top-cut, player #" + player1Id + " wins");
+                player1Role.incWinCount();
+                player2Role.incLossCount();
+            } else {
+                log.trace("Top-cut, player #" + player2Id + " wins");
+                player1Role.incLossCount();
+                player2Role.incWinCount();
+            }
         }
     }
 
