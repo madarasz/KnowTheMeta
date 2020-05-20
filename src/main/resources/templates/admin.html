@@ -1,50 +1,80 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Getting Started: Serving Web Content</title>
+    <title>Know the Meta Admin</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <h3 class="m-2 mb-4">Admin page</h2>
         <div class="alert alert-success" role="alert" th:text="${message}" th:if="${message != null}"/>
-        <!-- NetrunnerDB -->
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-                <div class="float-right">
-                    <a href="/load-netrunnerdb" class="btn btn-primary">Update</a>
+        <div class="row">
+            <div class="col">
+                <!-- NetrunnerDB -->
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="float-right">
+                            <a href="/load-netrunnerdb" class="btn btn-primary">Update</a>
+                        </div>
+                        <h5 class="card-title">
+                            NetrunnerDB<br/>
+                            <small>
+                                last update: <em th:text="${stampNetrunnerDB}"/>
+                            </small>
+                        </h5>
+                        <hr/>
+                        <div>
+                            <strong>CardCycles:</strong> <span th:text="${cycleCount}"/>
+                            - last: <em th:text="${lastCycle}"/>
+                        </div>
+                        <div>
+                            <strong>CardPacks:</strong> <span th:text="${packCount}"/>
+                            - last: <em th:text="${lastPack}"/>
+                        </div>
+                        <div>
+                            <strong>Factions:</strong> <span th:text="${factionCount}"/>
+                        </div>
+                        <div>
+                            <strong>Cards:</strong> <span th:text="${cardCount}"/>
+                            <strong>Prints:</strong> <span th:text="${printCount}"/>
+                            - last: <em th:text="${lastPrint}"/>
+                        </div>
+                        <div>
+                            <strong>MWLS:</strong> <span th:text="${mwlCount}"/>
+                            - last: <em th:text="${lastMWL}"/>
+                        </div>
+                    </div>
                 </div>
-                <h5 class="card-title">
-                    NetrunnerDB<br/>
-                    <small>
-                        last update: <em th:text="${stampNetrunnerDB}"/>
-                    </small>
-                </h5>
-                <hr/>
-                <div>
-                    <strong>CardCycles:</strong> <span th:text="${cycleCount}"/>
-                    - last: <em th:text="${lastCycle}"/>
-                </div>
-                <div>
-                    <strong>CardPacks:</strong> <span th:text="${packCount}"/>
-                    - last: <em th:text="${lastPack}"/>
-                </div>
-                <div>
-                    <strong>Factions:</strong> <span th:text="${factionCount}"/>
-                </div>
-                <div>
-                    <strong>Cards:</strong> <span th:text="${cardCount}"/>
-                    <strong>Prints:</strong> <span th:text="${printCount}"/>
-                    - last: <em th:text="${lastPrint}"/>
-                </div>
-                <div>
-                    <strong>MWLS:</strong> <span th:text="${mwlCount}"/>
-                    - last: <em th:text="${lastMWL}"/>
+            </div>
+            <div class="col">
+                <!-- Stats -->
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <h5>Stats</h5>
+                        <div>
+                            <strong>Tournaments:</strong> <span th:text="${tournamentCount}"/>
+                        </div>
+                        <div>
+                            <strong>Standings:</strong> <span th:text="${standingCount}"/>
+                        </div>
+                        <div>
+                            <strong>Decks:</strong> <span th:text="${deckCount}"/>
+                        </div>
+                        <div>
+                            <strong>Players:</strong> <span th:text="${playerCount}"/>
+                        </div>
+                        <hr/>
+                        <div>
+                            <strong>WinRateUsed</strong> stat for <strong>factions</strong>: <span th:text="${factionStatCount}"/><br/>
+                            <strong>WinRateUsed</strong> stat for <strong>IDs</strong>: <span th:text="${idStatCount}"/><br/>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        
         <!-- Meta -->
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
@@ -66,6 +96,7 @@
                 </form>
                 <em th:if="${packCount == 0}">Update NetrunnerDB first!</em>
                 <hr/>
+                Meta list: <a href="/stats">metas.json</a>
                 <!-- Existing Metas -->
                 <table class="table">
                     <thead class="thead-dark">
@@ -84,7 +115,7 @@
                     <tbody>
                         <tr th:each="meta : ${metas}">
                             <td>
-                                <a th:href="${'/stats/' + meta.title}" th:text="${meta.title}"/>
+                                <a th:href="${'/stats/' + #strings.replace(meta.title,'+','%2B')}" th:text="${meta.title}"/>
                             </td>
                             <td th:text="${meta.cardpool?.name}"/>
                             <td th:text="${meta.mwl?.name}"/>
@@ -104,39 +135,16 @@
                                 <span th:if="${!meta.statsCalculated}">&#9729;</span>
                             </td>
                             <td>
-                                <a th:href="${'/get-meta?title=' + meta.title}">
+                                <a th:href="${'/get-meta?title=' + #strings.replace(meta.title,'+','%2B')}">
                                     <button class="btn btn-primary btn-sm" type="button">&#8634;</button>    
                                 </a>
-                                <a th:href="${'/delete-meta?title=' + meta.title}">
+                                <a th:href="${'/delete-meta?title=' + #strings.replace(meta.title,'+','%2B')}">
                                     <button class="btn btn-outline-danger btn-sm" type="button">&#10060;</button>    
                                 </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-        <!-- Stats -->
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-                <h5>Stats</h5>
-                <div>
-                    <strong>Tournaments:</strong> <span th:text="${tournamentCount}"/>
-                </div>
-                <div>
-                    <strong>Standings:</strong> <span th:text="${standingCount}"/>
-                </div>
-                <div>
-                    <strong>Decks:</strong> <span th:text="${deckCount}"/>
-                </div>
-                <div>
-                    <strong>Players:</strong> <span th:text="${playerCount}"/>
-                </div>
-                <hr/>
-                <div>
-                    <strong>WinRateUsed</strong> stat for <strong>factions</strong>: <span th:text="${factionStatCount}"/><br/>
-                    <strong>WinRateUsed</strong> stat for <strong>IDs</strong>: <span th:text="${idStatCount}"/><br/>
-                </div>
             </div>
         </div>
         <!-- TEMP -->

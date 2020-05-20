@@ -1,7 +1,9 @@
 package com.madarasz.knowthemeta.database.serializer;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
+import java.text.Normalizer.Form;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -11,6 +13,12 @@ import com.madarasz.knowthemeta.database.DOs.Meta;
 public class MetaSerializer extends StdSerializer<Meta> {
 
     private final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    public static String toPrettyURL(String string) {
+        return Normalizer.normalize(string.toLowerCase(), Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+            .replaceAll("[^\\p{Alnum}]+", "-");
+    }
 
     public MetaSerializer() {
         this(null);
@@ -33,6 +41,7 @@ public class MetaSerializer extends StdSerializer<Meta> {
         gen.writeNumberField("standings", value.getStandingsCount());
         gen.writeNumberField("decks", value.getDecksPlayedCount());
         gen.writeNumberField("matches", value.getMatchesCount());
+        gen.writeStringField("file", toPrettyURL(value.getTitle()) + ".json");
         gen.writeStringField("lastUpdate", simpleDateFormat.format(value.getLastUpdate()));
         gen.writeEndObject();
     }
