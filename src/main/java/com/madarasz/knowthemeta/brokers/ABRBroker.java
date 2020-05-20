@@ -119,7 +119,7 @@ public class ABRBroker {
         try {
             matchData = httpBroker
                     .readJSONFromURL(
-                            ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", new Integer(tournamentId).toString()))
+                            ABR_MATCHES_URL.replaceAll("\\{TOURNAMENT_ID\\}", String.valueOf(tournamentId)))
                     .getAsJsonObject();
         } catch (Exception e) {
             log.error("Cannot read matches JSON for tournament #" + tournamentId + " from ABR");
