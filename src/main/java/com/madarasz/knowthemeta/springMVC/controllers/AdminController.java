@@ -7,6 +7,7 @@ import com.madarasz.knowthemeta.TimeStamper;
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
@@ -113,6 +114,23 @@ public class AdminController {
         Meta meta = metaRepository.findByTitle(title);
         String message = metaOperations.getMetaData(meta);
         redirectAttributes.addFlashAttribute("message", message);
+        return new RedirectView("/");
+    }
+
+    @GetMapping("/delete-tournament")
+    public RedirectView getMeta(@RequestParam(name = "tournamentid") int tournamentid, RedirectAttributes redirectAttributes) {
+        final Tournament tournament = tournamentRepository.findById(tournamentid);
+        Meta meta = tournament.getMeta();
+        final long standingCount = standingRepository.count();
+        final long tournamentCount = tournamentRepository.count();
+        tournamentRepository.deleteTournament(tournamentid);
+        // set meta uncalculated
+        metaOperations.updateMetaCounts(meta);
+        meta.setStatsCalculated(false);
+        metaRepository.save(meta);
+        // redirect
+        redirectAttributes.addFlashAttribute("message", String.format("%d tournament, %d standings deleted - %s", 
+            tournamentCount - tournamentRepository.count(), standingCount - standingRepository.count(), tournament.getTitle()));
         return new RedirectView("/");
     }
 

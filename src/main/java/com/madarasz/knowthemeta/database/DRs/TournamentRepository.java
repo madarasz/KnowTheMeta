@@ -12,4 +12,7 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
 
     @Query("MATCH (m:Meta {title:$metaTitle})-[:META]-(t:Tournament) RETURN t")
     List<Tournament> listForMeta(String metaTitle);
+
+    @Query("MATCH (t:Tournament {id:$id})-[:TOURNAMENT]-(s:Standing) DETACH DELETE t,s")
+    void deleteTournament(int id);
 }

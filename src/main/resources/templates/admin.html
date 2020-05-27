@@ -14,7 +14,7 @@
             <div class="col">
                 <!-- NetrunnerDB -->
                 <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
+                    <div class="card-header bg-info text-white">
                         <div class="float-right">
                             <a href="/load-netrunnerdb" class="btn btn-primary">Update</a>
                         </div>
@@ -24,7 +24,8 @@
                                 last update: <em th:text="${stampNetrunnerDB}"/>
                             </small>
                         </h5>
-                        <hr/>
+                    </div>
+                    <div class="card-body">
                         <div>
                             <strong>CardCycles:</strong> <span th:text="${cycleCount}"/>
                             - last: <em th:text="${lastCycle}"/>
@@ -51,8 +52,10 @@
             <div class="col">
                 <!-- Stats -->
                 <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
+                    <div class="card-header bg-info text-white">
                         <h5>Stats</h5>
+                    </div>
+                    <div class="card-body">
                         <div>
                             <strong>Tournaments:</strong> <span th:text="${tournamentCount}"/>
                         </div>
@@ -77,8 +80,10 @@
         
         <!-- Meta -->
         <div class="card mb-3 shadow-sm">
-            <div class="card-body">
+            <div class="card-header bg-info text-white">
                 <h5>Metas</h5>
+            </div>
+            <div class="card-body">
                 <!-- New Meta form -->
                 <form class="form-inline" th:if="${packCount > 0}" action="/add-meta">
                     <input type="text" class="form-control mr-sm-2" id="metaTitle" name="metaTitle" placeholder="title of meta"/>
@@ -147,14 +152,34 @@
                 </table>
             </div>
         </div>
-        <!-- TEMP -->
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-                <a href="/temp">
-                    <button class="btn btn-primary btn-sm" type="button">Temp</button>
-                </a>
+        <div class="row">
+            <div class="col">
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        DELETE
+                    </div>
+                    <div class="card-body">
+                        <form class="form-inline" action="/delete-tournament">
+                            <input type="text" class="form-control mb-2 mr-sm-2" name="tournamentid" placeholder="tournament ID"/>
+                            <button type="submit" class="btn btn-danger mb-2">Delete</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </div>
+            <!-- TEMP -->
+            <div class="col">
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5>Temp</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="/temp">
+                            <button class="btn btn-primary btn-sm" type="button">Temp</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>  
     </div>
     
 </body>

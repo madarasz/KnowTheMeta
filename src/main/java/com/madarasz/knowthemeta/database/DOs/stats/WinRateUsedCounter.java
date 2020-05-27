@@ -16,6 +16,8 @@ public class WinRateUsedCounter extends Entity {
     private int drawCounter;
     private int lossCounter;
     private int usedCounter;
+    private float avgPerDeck;
+    private String tags;
     private Meta meta;
     private Entity statAbout;
 
@@ -33,6 +35,18 @@ public class WinRateUsedCounter extends Entity {
         this.drawCounter = drawCounter;
         this.lossCounter = lossCounter;
         this.usedCounter = usedCounter;
+        this.meta = meta;
+        this.statAbout = statAbout;
+    }
+
+    public WinRateUsedCounter(int winCounter, int drawCounter, int lossCounter, int usedCounter, float avgPerDeck,
+            String tags, Meta meta, Entity statAbout) {
+        this.winCounter = winCounter;
+        this.drawCounter = drawCounter;
+        this.lossCounter = lossCounter;
+        this.usedCounter = usedCounter;
+        this.avgPerDeck = avgPerDeck;
+        this.tags = tags;
         this.meta = meta;
         this.statAbout = statAbout;
     }
@@ -90,6 +104,8 @@ public class WinRateUsedCounter extends Entity {
         this.drawCounter = other.drawCounter;
         this.lossCounter = other.lossCounter;
         this.usedCounter = other.usedCounter;
+        this.avgPerDeck = other.avgPerDeck;
+        this.tags = other.tags;
     }
 
     @Override
@@ -131,5 +147,21 @@ public class WinRateUsedCounter extends Entity {
         return "WinRateUsedCounter [ meta=" + meta.getTitle() + ", statAbout=" + titleString 
                 + ", drawCounter=" + drawCounter + ", lossCounter=" + lossCounter 
                 + ", usedCounter=" + usedCounter + ", winCounter=" + winCounter + "]";
+    }
+
+    public float getAvgPerDeck() {
+        return avgPerDeck;
+    }
+
+    public void setAvgPerDeck(float avgPerDeck) {
+        this.avgPerDeck = avgPerDeck;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 }
