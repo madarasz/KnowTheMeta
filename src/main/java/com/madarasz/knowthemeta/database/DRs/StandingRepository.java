@@ -18,6 +18,13 @@ public interface StandingRepository extends CrudRepository<Standing, Long> {
     @Query("MATCH (f:Faction)-[r1:FACTION]-(i:Card)-[r2:IDENTITY]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) RETURN f,i,s,t,m,r1,r2,r3,r4")
     Set<Standing> findByMeta(String metaTitle);
 
+    @Query("MATCH (s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = true RETURN SUM(s.winCount)")
+    int countRunnerWinsInMeta(String metaTitle);
+    @Query("MATCH (s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = true RETURN SUM(s.lossCount)")
+    int countRunnerLossesInMeta(String metaTitle);
+    @Query("MATCH (s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = true RETURN SUM(s.drawCount)")
+    int countRunnerDrawsInMeta(String metaTitle);
+
     @Query("MATCH (c:Card {title: $cardTitle})-[r1:CARD_IN_DECK]-(d:Deck)-[r4:DECK]-(s:Standing)-[r2:TOURNAMENT]-(t:Tournament)-[r3:META]-(m:Meta {title:$0}) RETURN c,s,t,m,d,r1,r2,r3,r4")
     Set<Standing> findByMetaAndCard(String metaTitle, String cardTitle);
 }

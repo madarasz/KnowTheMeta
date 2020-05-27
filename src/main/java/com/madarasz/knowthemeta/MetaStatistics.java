@@ -2,6 +2,7 @@ package com.madarasz.knowthemeta;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,10 @@ public class MetaStatistics {
     @Autowired WinRateUsedCounterRepository winRateUsedCounterRepository;
     @Autowired Searcher searcher;
     private static final Logger log = LoggerFactory.getLogger(MetaStatistics.class);
+    private static final double minimumCardPopularity = 0.05; // cards won't be tagged under this popularity
+    private static final double minimumWinrateMultiplier = 1.3; // cards wont't be tagged as winning if they do not get at least faction_winrate*multiplier
+    private static final List<String> pseudoBreakers = new ArrayList<String>(Arrays.asList("Always Be Running", "Boomerang", "D4v1d", "e3 Feedback Implants", "Gbahali", 
+        "Grappling Hook", "Kongamato"));
 
 
     public void calculateStats(String metaTitle) {
@@ -46,8 +51,19 @@ public class MetaStatistics {
         Set<Card> cards = cardRepository.findByMeta(metaTitle);
         Set<Faction> factions = standings.stream().map(x -> x.getIdentity().getFaction()).collect(Collectors.toSet());
         factions = factions.stream().filter(x -> !x.getFactionCode().contains("neutral")).collect(Collectors.toSet()); // filter out neutral factions
-        Set<WinRateUsedCounter> existingIDStats = winRateUsedCounterRepository.listIDStatsForMeta(metaTitle);
+        Set<WinRateUsedCounter> existingCardStats = winRateUsedCounterRepository.listCardStatsForMeta(metaTitle);
         Set<WinRateUsedCounter> existingFactionStats = winRateUsedCounterRepository.listFactionStatsForMeta(metaTitle);
+
+        // get side winrates
+        final int runnerWins = standingRepository.countRunnerWinsInMeta(metaTitle);
+        final int runnerLosses = standingRepository.countRunnerLossesInMeta(metaTitle);
+        final int runnerDraws = standingRepository.countRunnerDrawsInMeta(metaTitle);
+        final int allRunnerMatches = runnerWins + runnerLosses + runnerDraws;
+        final double runnerWinrate = (double)runnerWins / allRunnerMatches;
+        final double corpWinrate = (double)runnerLosses / allRunnerMatches;
+        log.debug(String.format("Runner wins: %d, losses: %d, draws: %d", runnerWins, runnerLosses, runnerDraws));
+        meta.setRunnerWinRate(runnerWinrate);
+        meta.setCorpWinRate(corpWinrate);
 
         // iterate on factions
         log.debug("Factions found: " + factions.size());
@@ -69,7 +85,7 @@ public class MetaStatistics {
         log.debug("IDs found: " + identities.size());
         for (Card identity : identities) {
             WinRateUsedCounter tempStat = idStatsFromStandings(standings, identity, meta);
-            WinRateUsedCounter idStat = searcher.getStatsByCardTitle(existingIDStats, identity.getTitle());
+            WinRateUsedCounter idStat = searcher.getStatsByCardTitle(existingCardStats, identity.getTitle());
             if (idStat == null) {
                 // new stat
                 idStat = tempStat;
@@ -93,6 +109,7 @@ public class MetaStatistics {
             int lossCount = 0;
             int perDeckCount = 0;
             final int deckCount = card.getSide_code().equals("runner") ? runnerDeckCount : corpDeckCount;
+            final double factionWinRate = card.getSide_code().equals("runner") ? runnerWinrate : corpWinrate;
             List<String> tags = new ArrayList<String>();
             for (Standing standing : cardStandings) {
                 winCount += standing.getWinCount();
@@ -103,26 +120,42 @@ public class MetaStatistics {
             }
             final float popularity = ((float)cardStandings.size()) / deckCount;
             final double winrate = (double)winCount/(winCount+drawCount+lossCount)*100.0;
-            // popular
-            if (popularity > 0.05 && cardsInPack.stream().filter(x -> x.getTitle().equals(cardTitle)).findFirst().isPresent()) {
-                tags.add("popular-in-pack");
+            // add tags
+            if (popularity > minimumCardPopularity) {
+                // popular in pack
+                if (cardsInPack.stream().filter(x -> x.getTitle().equals(cardTitle)).findFirst().isPresent()) {
+                    tags.add("popular-in-pack");
+                }
+                // winning
+                if (winrate > factionWinRate * minimumWinrateMultiplier * 100) {
+                    tags.add("winning");
+                }
+                // icebreaker
+                if (card.getKeywords() != null && card.getKeywords().contains("Icebreaker")) {
+                    tags.add("icebreaker-" + card.getKeywords().split(" - ")[1]);
+                }
+                // pseudo icebreaker
+                if (pseudoBreakers.stream().anyMatch(cardTitle::equals)) {
+                    tags.add("icebreaker-" + card.getType_code());
+                }
+                // ICE
+                if (card.getType_code().equals("ice")) {
+                    tags.add("ice");
+                }
             }
-            // winning
-            if (popularity > 0.05 && winrate > 65) {
-                tags.add("winning");
+            
+            // save/update
+            WinRateUsedCounter cardStat = searcher.getStatsByCardTitle(existingCardStats, cardTitle);
+            if (cardStat == null) {
+                cardStat = new WinRateUsedCounter(meta, card);
             }
-            // TODO: add pseudo ice breakers
-            if (card.getKeywords() != null && card.getKeywords().contains("Icebreaker") && popularity > 0.05) {
-                tags.add("icebreaker");
-            }
-            if (card.getType_code().equals("ice") && popularity > 0.05) {
-                tags.add("ice");
-            }
-            if ((winCount+drawCount+lossCount > 0) && (cardStandings.size() > 0) && (tags.size() > 0)) {
-                log.debug(String.format("Card '%s' used: %d, winrate: %.1f, avg used: %.2f, popularity: %.1f - %s", 
-                    cardTitle, cardStandings.size(), winrate, 
-                    ((float)perDeckCount / cardStandings.size()), popularity * 100.0, String.join(",", tags)));
-            }
+            cardStat.setAvgPerDeck((float)perDeckCount / cardStandings.size());
+            cardStat.setTags(String.join(",", tags));
+            cardStat.setUsedCounter(cardStandings.size());
+            cardStat.setWinCounter(winCount);
+            cardStat.setDrawCounter(drawCount);
+            cardStat.setLossCounter(lossCount);
+            winRateUsedCounterRepository.save(cardStat);
         }
 
         meta.setStatsCalculated(true);
