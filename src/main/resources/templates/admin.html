@@ -72,6 +72,7 @@
                         <div>
                             <strong>WinRateUsed</strong> stat for <strong>factions</strong>: <span th:text="${factionStatCount}"/><br/>
                             <strong>WinRateUsed</strong> stat for <strong>IDs</strong>: <span th:text="${idStatCount}"/><br/>
+                            <strong>WinRateUsed</strong> stat for <strong>cards</strong> (non-ID): <span th:text="${cardStatCount}"/>
                         </div>
                     </div>
                 </div>
@@ -136,7 +137,7 @@
                             <td th:text="${meta.runnerDecksCount + meta.corpDecksCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
                             <td class="text-center">
-                                <span th:if="${meta.statsCalculated}">&#9728;</span>
+                                <a th:if="${meta.statsCalculated}" th:href="${'/uncalculate?title=' + #strings.replace(meta.title,'+','%2B')}">&#9728;</a>
                                 <span th:if="${!meta.statsCalculated}">&#9729;</span>
                             </td>
                             <td>

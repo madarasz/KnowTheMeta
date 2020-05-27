@@ -68,6 +68,7 @@ public class AdminController {
         model.addAttribute("mwlCount", mwlCount);
         model.addAttribute("factionCount", factionCount);
         model.addAttribute("idStatCount", winRateUsedCounterRepository.countIDStats());
+        model.addAttribute("cardStatCount", winRateUsedCounterRepository.countCardStats());
         model.addAttribute("factionStatCount", winRateUsedCounterRepository.countFactionStats());
         model.addAttribute("lastCycle", cycleCount > 0 ? cardCycleRepository.findLast().getName() : "none");
         model.addAttribute("lastPack", packCount > 0 ? cardPackRepository.findLast().getName() : "none");
@@ -106,6 +107,15 @@ public class AdminController {
     public RedirectView deleteMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
         metaOperations.deleteMeta(title);
         redirectAttributes.addFlashAttribute("message", "Meta deleted");
+        return new RedirectView("/");
+    }
+
+    @GetMapping("/uncalculate")
+    public RedirectView uncalculateMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
+        Meta meta = metaRepository.findByTitle(title);
+        meta.setStatsCalculated(false);
+        metaRepository.save(meta);
+        redirectAttributes.addFlashAttribute("message", "Meta flagged as uncalculated");
         return new RedirectView("/");
     }
 
