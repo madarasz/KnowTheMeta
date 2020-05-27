@@ -39,7 +39,8 @@ public class MetaSerializer extends StdSerializer<Meta> {
         gen.writeBooleanField("newCards", value.getNewCards());
         gen.writeNumberField("tournaments", value.getTournamentCount());
         gen.writeNumberField("standings", value.getStandingsCount());
-        gen.writeNumberField("decks", value.getDecksPlayedCount());
+        gen.writeNumberField("runnerDecks", value.getRunnerDecksCount());
+        gen.writeNumberField("corpDecks", value.getCorpDecksCount());
         gen.writeNumberField("matches", value.getMatchesCount());
         gen.writeStringField("file", toPrettyURL(value.getTitle()) + ".json");
         gen.writeStringField("lastUpdate", simpleDateFormat.format(value.getLastUpdate()));

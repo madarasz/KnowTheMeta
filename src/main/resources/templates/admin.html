@@ -128,7 +128,7 @@
                             </td>
                             <td th:text="${meta.tournamentCount}" class="text-center"/>
                             <td th:text="${meta.standingsCount}" class="text-center"/>
-                            <td th:text="${meta.decksPlayedCount}" class="text-center"/>
+                            <td th:text="${meta.runnerDecksCount + meta.corpDecksCount}" class="text-center"/>
                             <td th:text="${meta.matchesCount}" class="text-center"/>
                             <td class="text-center">
                                 <span th:if="${meta.statsCalculated}">&#9728;</span>
