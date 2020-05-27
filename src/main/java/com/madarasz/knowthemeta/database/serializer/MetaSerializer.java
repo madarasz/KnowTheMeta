@@ -34,6 +34,7 @@ public class MetaSerializer extends StdSerializer<Meta> {
     public void serialize(Meta value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
         gen.writeStringField("title", value.getTitle());
+        gen.writeStringField("code", toPrettyURL(value.getTitle()));
         gen.writeStringField("cardpool", value.getCardpool().getName());
         gen.writeStringField("mwl", value.getMwl().getName());
         gen.writeBooleanField("newCards", value.getNewCards());
