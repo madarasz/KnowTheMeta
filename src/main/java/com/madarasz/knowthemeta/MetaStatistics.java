@@ -1,5 +1,7 @@
 package com.madarasz.knowthemeta;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,6 +11,7 @@ import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
+import com.madarasz.knowthemeta.database.DRs.CardRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.StandingRepository;
 import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
@@ -22,6 +25,7 @@ import org.springframework.util.StopWatch;
 
 @Service
 public class MetaStatistics {
+    @Autowired CardRepository cardRepository;
     @Autowired MetaRepository metaRepository;
     @Autowired StandingRepository standingRepository;
     @Autowired WinRateUsedCounterRepository winRateUsedCounterRepository;
@@ -38,6 +42,8 @@ public class MetaStatistics {
         Meta meta = metaRepository.findByTitle(metaTitle);
         Set<Standing> standings = standingRepository.findByMeta(metaTitle);
         Set<Card> identities = standings.stream().map(x -> x.getIdentity()).collect(Collectors.toSet());
+        Set<Card> cardsInPack = cardRepository.listForPack(meta.getCardpool().getCode());
+        Set<Card> cards = cardRepository.findByMeta(metaTitle);
         Set<Faction> factions = standings.stream().map(x -> x.getIdentity().getFaction()).collect(Collectors.toSet());
         factions = factions.stream().filter(x -> !x.getFactionCode().contains("neutral")).collect(Collectors.toSet()); // filter out neutral factions
         Set<WinRateUsedCounter> existingIDStats = winRateUsedCounterRepository.listIDStatsForMeta(metaTitle);
@@ -72,6 +78,51 @@ public class MetaStatistics {
                 idStat.copyFrom(tempStat);
             }
             winRateUsedCounterRepository.save(idStat); 
+        }
+
+        // iterate on non-ID cards
+        final int runnerDeckCount = meta.getRunnerDecksCount();
+        final int corpDeckCount = meta.getCorpDecksCount();
+        log.debug(String.format("Cards found: %d / %d - decks: %d", cards.size(), cardRepository.count(), runnerDeckCount));
+        for (Card card : cards) {
+            final String cardTitle = card.getTitle();
+            final Set<Standing> cardStandings = standingRepository.findByMetaAndCard(metaTitle, cardTitle);
+            
+            int winCount = 0;
+            int drawCount = 0;
+            int lossCount = 0;
+            int perDeckCount = 0;
+            final int deckCount = card.getSide_code().equals("runner") ? runnerDeckCount : corpDeckCount;
+            List<String> tags = new ArrayList<String>();
+            for (Standing standing : cardStandings) {
+                winCount += standing.getWinCount();
+                drawCount += standing.getDrawCount();
+                lossCount += standing.getLossCount();
+                perDeckCount += standing.getDeck().getCards().stream()
+                    .filter(x -> x.getCard().getTitle().equals(cardTitle)).findFirst().get().getQuantity();
+            }
+            final float popularity = ((float)cardStandings.size()) / deckCount;
+            final double winrate = (double)winCount/(winCount+drawCount+lossCount)*100.0;
+            // popular
+            if (popularity > 0.05 && cardsInPack.stream().filter(x -> x.getTitle().equals(cardTitle)).findFirst().isPresent()) {
+                tags.add("popular-in-pack");
+            }
+            // winning
+            if (popularity > 0.05 && winrate > 65) {
+                tags.add("winning");
+            }
+            // TODO: add pseudo ice breakers
+            if (card.getKeywords() != null && card.getKeywords().contains("Icebreaker") && popularity > 0.05) {
+                tags.add("icebreaker");
+            }
+            if (card.getType_code().equals("ice") && popularity > 0.05) {
+                tags.add("ice");
+            }
+            if ((winCount+drawCount+lossCount > 0) && (cardStandings.size() > 0) && (tags.size() > 0)) {
+                log.debug(String.format("Card '%s' used: %d, winrate: %.1f, avg used: %.2f, popularity: %.1f - %s", 
+                    cardTitle, cardStandings.size(), winrate, 
+                    ((float)perDeckCount / cardStandings.size()), popularity * 100.0, String.join(",", tags)));
+            }
         }
 
         meta.setStatsCalculated(true);
