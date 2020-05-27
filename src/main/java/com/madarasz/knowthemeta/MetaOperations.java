@@ -265,11 +265,12 @@ public class MetaOperations {
      * Updates counters of meta in DB.
      * @param meta meta in question
      */
-    private void updateMetaCounts(Meta meta) {
+    public void updateMetaCounts(Meta meta) {
         String metaTitle = meta.getTitle();
         meta.setTournamentCount(metaRepository.countTournaments(metaTitle));
         meta.setStandingsCount(metaRepository.countStandings(metaTitle));
-        meta.setDecksPlayedCount(metaRepository.countDecks(metaTitle));
+        meta.setRunnerDecksCount(metaRepository.countRunnerDecks(metaTitle));
+        meta.setCorpDecksCount(metaRepository.countCorpDecks(metaTitle));
         meta.setMatchesCount(metaRepository.countMatches(metaTitle));
         meta.setLastUpdate(new Date());
         if (tournamentCreatedCount + standingCreatedCount + deckCreatedCount + matchUpdatedCount > 0) meta.setStatsCalculated(false);

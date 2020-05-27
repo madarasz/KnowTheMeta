@@ -22,8 +22,11 @@ public interface MetaRepository extends CrudRepository<Meta, Long> {
     @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(s)")
     int countStandings(String title);
 
-    @Query("MATCH (d:Deck)-[:DECK]-(:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(d)")
-    int countDecks(String title);
+    @Query("MATCH (d:Deck)-[:DECK]-(:Standing {isRunner: true})-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(d)")
+    int countRunnerDecks(String title);
+
+    @Query("MATCH (d:Deck)-[:DECK]-(:Standing {isRunner: false})-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(d)")
+    int countCorpDecks(String title);
 
     @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN SUM(s.winCount+s.lossCount+s.drawCount)")
     int countMatches(String title);

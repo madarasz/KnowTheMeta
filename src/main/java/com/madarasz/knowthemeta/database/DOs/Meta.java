@@ -20,7 +20,8 @@ public class Meta extends Entity {
     private String title;
     @DateString("yyyy-MM-dd HH:mm:ss") @Nullable Date lastUpdate;
     private int tournamentCount = 0;
-    private int decksPlayedCount = 0;
+    private int runnerDecksCount = 0;
+    private int corpDecksCount = 0;
     private int matchesCount = 0;
     private int standingsCount = 0;
 
@@ -74,12 +75,20 @@ public class Meta extends Entity {
         this.tournamentCount = tournamentCount;
     }
 
-    public int getDecksPlayedCount() {
-        return decksPlayedCount;
+    public int getRunnerDecksCount() {
+        return runnerDecksCount;
     }
 
-    public void setDecksPlayedCount(int decksPlayedCount) {
-        this.decksPlayedCount = decksPlayedCount;
+    public void setRunnerDecksCount(int runnerDecksCount) {
+        this.runnerDecksCount = runnerDecksCount;
+    }
+
+    public int getCorpDecksCount() {
+        return corpDecksCount;
+    }
+
+    public void setCorpDecksCount(int corpDecksCount) {
+        this.corpDecksCount = corpDecksCount;
     }
 
     public int getMatchesCount() {

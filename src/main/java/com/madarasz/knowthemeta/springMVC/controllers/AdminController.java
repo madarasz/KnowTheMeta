@@ -7,6 +7,7 @@ import com.madarasz.knowthemeta.TimeStamper;
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
 import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
@@ -67,6 +68,7 @@ public class AdminController {
         model.addAttribute("mwlCount", mwlCount);
         model.addAttribute("factionCount", factionCount);
         model.addAttribute("idStatCount", winRateUsedCounterRepository.countIDStats());
+        model.addAttribute("cardStatCount", winRateUsedCounterRepository.countCardStats());
         model.addAttribute("factionStatCount", winRateUsedCounterRepository.countFactionStats());
         model.addAttribute("lastCycle", cycleCount > 0 ? cardCycleRepository.findLast().getName() : "none");
         model.addAttribute("lastPack", packCount > 0 ? cardPackRepository.findLast().getName() : "none");
@@ -108,11 +110,37 @@ public class AdminController {
         return new RedirectView("/");
     }
 
+    @GetMapping("/uncalculate")
+    public RedirectView uncalculateMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
+        Meta meta = metaRepository.findByTitle(title);
+        meta.setStatsCalculated(false);
+        metaRepository.save(meta);
+        redirectAttributes.addFlashAttribute("message", "Meta flagged as uncalculated");
+        return new RedirectView("/");
+    }
+
     @GetMapping("/get-meta")
     public RedirectView getMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
         Meta meta = metaRepository.findByTitle(title);
         String message = metaOperations.getMetaData(meta);
         redirectAttributes.addFlashAttribute("message", message);
+        return new RedirectView("/");
+    }
+
+    @GetMapping("/delete-tournament")
+    public RedirectView getMeta(@RequestParam(name = "tournamentid") int tournamentid, RedirectAttributes redirectAttributes) {
+        final Tournament tournament = tournamentRepository.findById(tournamentid);
+        Meta meta = tournament.getMeta();
+        final long standingCount = standingRepository.count();
+        final long tournamentCount = tournamentRepository.count();
+        tournamentRepository.deleteTournament(tournamentid);
+        // set meta uncalculated
+        metaOperations.updateMetaCounts(meta);
+        meta.setStatsCalculated(false);
+        metaRepository.save(meta);
+        // redirect
+        redirectAttributes.addFlashAttribute("message", String.format("%d tournament, %d standings deleted - %s", 
+            tournamentCount - tournamentRepository.count(), standingCount - standingRepository.count(), tournament.getTitle()));
         return new RedirectView("/");
     }
 

@@ -24,6 +24,9 @@ public interface WinRateUsedCounterRepository extends CrudRepository<WinRateUsed
     @Query("MATCH (:Card {type_code:'identity'})-[:STAT_ABOUT]-(w:WinRateUsedCounter) RETURN COUNT(w)")
     int countIDStats();
 
+    @Query("MATCH (c:Card)-[:STAT_ABOUT]-(w:WinRateUsedCounter) WHERE c.type_code <> 'identity' RETURN COUNT(w)")
+    int countCardStats();
+
     @Query("MATCH (:Faction)-[:STAT_ABOUT]-(w:WinRateUsedCounter) RETURN COUNT(w)")
     int countFactionStats();
 }
