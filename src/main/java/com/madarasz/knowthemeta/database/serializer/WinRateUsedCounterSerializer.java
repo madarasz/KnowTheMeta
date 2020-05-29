@@ -37,6 +37,10 @@ public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCount
         gen.writeNumberField("wins", value.getWinCounter());
         gen.writeNumberField("draws", value.getDrawCounter());
         gen.writeNumberField("losses", value.getLossCounter());
+        if (!card.getType_code().equals("identity")) {
+            gen.writeNumberField("avgPerDeck", value.getAvgPerDeck());
+            gen.writeStringField("tags", value.getTags());
+        }
         gen.writeEndObject();
     }
     

@@ -132,7 +132,8 @@ public class MetaStatistics {
                 }
                 // icebreaker
                 if (card.getKeywords() != null && card.getKeywords().contains("Icebreaker")) {
-                    tags.add("icebreaker-" + card.getKeywords().split(" - ")[1]);
+                    String subtype = card.getKeywords().split(" - ").length > 1 ? card.getKeywords().split(" - ")[1] : card.getKeywords();
+                    tags.add("icebreaker-" + subtype);
                 }
                 // pseudo icebreaker
                 if (pseudoBreakers.stream().anyMatch(cardTitle::equals)) {
