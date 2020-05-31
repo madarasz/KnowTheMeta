@@ -33,7 +33,7 @@ public class MetaStatistics {
     @Autowired Searcher searcher;
     private static final Logger log = LoggerFactory.getLogger(MetaStatistics.class);
     private static final double minimumCardPopularity = 0.05; // cards won't be tagged under this popularity
-    private static final double minimumWinrateMultiplier = 1.3; // cards wont't be tagged as winning if they do not get at least faction_winrate*multiplier
+    private static final double minimumAdditionalWinrate = 0.12; // cards wont't be tagged as winning if they do not get at least faction_winrate+additional
     private static final List<String> pseudoBreakers = new ArrayList<String>(Arrays.asList("Always Be Running", "Boomerang", "D4v1d", "e3 Feedback Implants", "Gbahali", 
         "Grappling Hook", "Kongamato"));
 
@@ -127,7 +127,7 @@ public class MetaStatistics {
                     tags.add("popular-in-pack");
                 }
                 // winning
-                if (winrate > factionWinRate * minimumWinrateMultiplier * 100) {
+                if (winrate > (factionWinRate + minimumAdditionalWinrate) * 100) {
                     tags.add("winning");
                 }
                 // icebreaker
@@ -141,7 +141,8 @@ public class MetaStatistics {
                 }
                 // ICE
                 if (card.getType_code().equals("ice")) {
-                    tags.add("ice");
+                    String subtype = card.getKeywords() == null ? "" : "-" + card.getKeywords().split(" - ")[0];
+                    tags.add("ice" + subtype);
                 }
             }
             
