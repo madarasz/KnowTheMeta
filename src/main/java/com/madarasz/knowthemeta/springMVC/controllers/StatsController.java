@@ -2,7 +2,7 @@ package com.madarasz.knowthemeta.springMVC.controllers;
 
 import java.util.List;
 
-import com.madarasz.knowthemeta.MetaResults;
+import com.madarasz.knowthemeta.meta.MetaResults;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.stats.CardStats;
 import com.madarasz.knowthemeta.database.DOs.stats.MetaCards;

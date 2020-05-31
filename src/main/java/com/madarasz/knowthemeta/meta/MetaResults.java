@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.meta;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,6 +22,9 @@ import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Generating meta data output for endpoints.
+ */
 @Service
 public class MetaResults {
     @Autowired MetaRepository metaRepository;

@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.meta;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -24,6 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
+/**
+ * Calculating meta statistics.
+ */
 @Service
 public class MetaStatistics {
     @Autowired CardRepository cardRepository;

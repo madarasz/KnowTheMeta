@@ -1,4 +1,4 @@
-package com.madarasz.knowthemeta;
+package com.madarasz.knowthemeta.meta;
 
 import java.util.Date;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
 /**
- * Class for operations related to Meta entities.
+ * Class for operations related to Meta entities. Add, delete meta and get meta data from ABR.
  */
 @Service
 public class MetaOperations {

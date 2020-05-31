@@ -1,8 +1,8 @@
 package com.madarasz.knowthemeta.springMVC.controllers;
 
 import com.madarasz.knowthemeta.NetrunnerDBUpdater;
-import com.madarasz.knowthemeta.MetaOperations;
-import com.madarasz.knowthemeta.MetaStatistics;
+import com.madarasz.knowthemeta.meta.MetaOperations;
+import com.madarasz.knowthemeta.meta.MetaStatistics;
 import com.madarasz.knowthemeta.TimeStamper;
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
