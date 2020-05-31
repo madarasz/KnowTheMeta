@@ -1,5 +1,6 @@
 package com.madarasz.knowthemeta.database.DRs;
 
+import java.util.List;
 import java.util.Set;
 
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
@@ -13,6 +14,9 @@ public interface CardInPackRepository extends CrudRepository<CardInPack, Long>{
 
     @Query("MATCH (n:Card)-[r:CARD_IN_PACK]-(p:CardPack) RETURN p, n, r")
     Set<CardInPack> listAll();
+
+    @Query("MATCH (n:Card {title: $title})-[r:CARD_IN_PACK]-(p:CardPack) RETURN p, n, r ORDER BY r.code DESC")
+    List<CardInPack> findAllByTitle(String title);
 
     // for testing
     @Query("MATCH (:Card)-[c:CARD_IN_PACK {code:$0}]-(:CardPack) RETURN c LIMIT 1")

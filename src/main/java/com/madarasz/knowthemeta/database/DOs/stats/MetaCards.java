@@ -4,9 +4,9 @@ import com.madarasz.knowthemeta.database.DOs.Meta;
 
 public class MetaCards {
     private Meta meta;
-    private CardStats factions;
-    private CardStats identities;
-    private CardStats cards;
+    private SideStats factions;
+    private SideStats identities;
+    private SideStats cards;
 
     public MetaCards() {
     }
@@ -23,27 +23,27 @@ public class MetaCards {
         this.meta = meta;
     }
 
-    public CardStats getFactions() {
+    public SideStats getFactions() {
         return factions;
     }
 
-    public void setFactions(CardStats factions) {
+    public void setFactions(SideStats factions) {
         this.factions = factions;
     }
 
-    public CardStats getIdentities() {
+    public SideStats getIdentities() {
         return identities;
     }
 
-    public void setIdentities(CardStats identities) {
+    public void setIdentities(SideStats identities) {
         this.identities = identities;
     }
 
-    public CardStats getCards() {
+    public SideStats getCards() {
         return cards;
     }
 
-    public void setCards(CardStats cards) {
+    public void setCards(SideStats cards) {
         this.cards = cards;
     }
 

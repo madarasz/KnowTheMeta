@@ -109,7 +109,6 @@
                         <th>title</th>
                         <th>cardpool</th>
                         <th>MWL</th>
-                        <th class="text-center">new cards</th>
                         <th class="text-center">update</th>
                         <th class="text-center">tourn.</th>
                         <th class="text-center">stand.</th>
@@ -126,9 +125,6 @@
                             <td th:text="${meta.cardpool?.name}"/>
                             <td th:text="${meta.mwl?.name}"/>
                             <td class="text-center">
-                                <span th:if="${meta.newCards}">&#10004;</span>
-                            </td>
-                            <td>
                                 <em th:if="${meta.lastUpdate == null}">no data</em>
                                 <span th:if="${meta.lastUpdate != null}" th:text="${#dates.format(meta.lastUpdate, 'yyyy-MM-dd HH:mm')}"/>
                             </td>

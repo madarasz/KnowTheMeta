@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.madarasz.knowthemeta.MetaResults;
 import com.madarasz.knowthemeta.database.DOs.Meta;
+import com.madarasz.knowthemeta.database.DOs.stats.CardStats;
 import com.madarasz.knowthemeta.database.DOs.stats.MetaCards;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 
@@ -28,5 +29,11 @@ public class StatsController {
     @ResponseBody
     public List<Meta> getMetaList() {
         return metaRepository.listMetas();
+    }
+
+    @GetMapping(path = "/stats/cards/{cardcode}", produces = "application/json")
+    @ResponseBody
+    public CardStats getCardStats(@PathVariable String cardcode) {
+        return metaResults.getCardStats(cardcode.split("-")[0]);
     }
 }

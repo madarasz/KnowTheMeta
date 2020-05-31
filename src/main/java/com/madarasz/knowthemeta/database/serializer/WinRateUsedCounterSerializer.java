@@ -30,9 +30,11 @@ public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCount
         Card card = (Card)value.getStatAbout();
         String title = card.getTitle();
         gen.writeStartObject();
-        gen.writeStringField("title", title);
-        gen.writeStringField("code", cardRepository.getLastCode(title));
-        gen.writeStringField("faction", card.getFaction() == null ? "" : card.getFaction().getFactionCode());
+        if (card.getFaction() != null) {
+            gen.writeStringField("title", title);
+            gen.writeStringField("code", cardRepository.getLastCode(title));
+            gen.writeStringField("faction", card.getFaction().getFactionCode());
+        }
         gen.writeNumberField("used", value.getUsedCounter());
         gen.writeNumberField("wins", value.getWinCounter());
         gen.writeNumberField("draws", value.getDrawCounter());

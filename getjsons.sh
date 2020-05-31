@@ -1,6 +1,7 @@
 #!/bin/bash
 # you need "jq" installed to run this script
 rm -rf ./output/*
+mkdir ./output/cards
 
 # download meta list
 curl http://localhost:8080/stats > ./output/metas.json
@@ -8,17 +9,25 @@ curl http://localhost:8080/stats > ./output/metas.json
 metafiles=( $(cat ./output/metas.json | jq -r '.[].file' ) )
 metanames=( $(cat ./output/metas.json | jq -r '.[].title' | sed "s/ /%20/g" ) )
 
-# iterate over cards
+# iterate over metas
 i=0;
 for metafile in "${metafiles[@]}"
 do
     metaname=${metanames[$i]}
-    echo "http://localhost:8080/stats/$metaname"
+    echo "Getting meta: $metaname"
     curl "http://localhost:8080/stats/$metaname" > "./output/$metafile"
     ((i++))
 done
 
-for metaname in "${metanames[@]}"
+# iterate over cards
+titles=( $(curl https://netrunnerdb.com/api/2.0/public/cards | jq -r '.data[].title' | tr -s ' ' | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | sed "s/[^a-z0-9-]//g" ) )
+codes=( $(curl https://netrunnerdb.com/api/2.0/public/cards | jq -r '.data[].code' ) )
+
+i=0;
+for title in "${titles[@]}"
 do
-    echo $metaname
+    code=${codes[$i]}
+    echo "Getting card: $code - $title"
+    curl "http://localhost:8080/stats/cards/$code-$title" > "./output/cards/$code-$title.json"
+    ((i++))
 done
