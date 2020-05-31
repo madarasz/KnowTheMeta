@@ -1,5 +1,8 @@
 #!/bin/bash
 # you need "jq" installed to run this script
+
+start=$SECONDS
+
 rm -rf ./output/*
 mkdir ./output/cards
 
@@ -31,3 +34,7 @@ do
     curl "http://localhost:8080/stats/cards/$code-$title" > "./output/cards/$code-$title.json"
     ((i++))
 done
+
+secs=$(( $SECONDS-$start ))
+echo "JSON export ran:"
+printf '%02dh:%02dm:%02ds\n' $(($secs/3600)) $(($secs%3600/60)) $(($secs%60))

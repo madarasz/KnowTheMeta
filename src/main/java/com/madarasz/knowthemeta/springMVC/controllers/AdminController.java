@@ -1,5 +1,7 @@
 package com.madarasz.knowthemeta.springMVC.controllers;
 
+import java.util.List;
+
 import com.madarasz.knowthemeta.NetrunnerDBUpdater;
 import com.madarasz.knowthemeta.meta.MetaOperations;
 import com.madarasz.knowthemeta.meta.MetaStatistics;
@@ -24,6 +26,7 @@ import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -123,6 +126,25 @@ public class AdminController {
     public RedirectView getMeta(@RequestParam(name = "title") String title, RedirectAttributes redirectAttributes) {
         Meta meta = metaRepository.findByTitle(title);
         String message = metaOperations.getMetaData(meta);
+        redirectAttributes.addFlashAttribute("message", message);
+        return new RedirectView("/");
+    }
+
+    @GetMapping("/refresh-all-metas")
+    public RedirectView refreshAllMetas(RedirectAttributes redirectAttributes) {
+        List<Meta> metas = metaRepository.listMetas();
+        String message = "";
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        for (Meta meta : metas) {
+            message += metaOperations.getMetaData(meta) + "\r\n";
+        }
+
+        stopWatch.stop();
+        message += String.format("All meta refreshed (%d min %.3f sec)", (int) Math.floor(stopWatch.getTotalTimeSeconds() / 60), stopWatch.getTotalTimeSeconds() % 60);
+
         redirectAttributes.addFlashAttribute("message", message);
         return new RedirectView("/");
     }

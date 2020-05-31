@@ -102,7 +102,14 @@
                 </form>
                 <em th:if="${packCount == 0}">Update NetrunnerDB first!</em>
                 <hr/>
-                Meta list: <a href="/stats">metas.json</a>
+                <!-- Overall meta -->
+                <div class="text-center">
+                    Meta list: <a href="/stats">metas.json</a>
+                    <a href="/refresh-all-metas">
+                        <button class="btn btn-primary btn-sm" type="button">&#8634; Refresh all metas</button>
+                    </a>
+                </div>
+                <hr/>
                 <!-- Existing Metas -->
                 <table class="table">
                     <thead class="thead-dark">
