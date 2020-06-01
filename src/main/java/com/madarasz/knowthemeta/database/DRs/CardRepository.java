@@ -28,6 +28,9 @@ public interface CardRepository extends CrudRepository<Card, Long> {
     @Query("MATCH (c:Card)-[:CARD_IN_DECK]-(:Deck)-[:DECK]-(:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(:Meta {title:$0}) RETURN c")
     Set<Card> findByMeta(String metaTitle);
 
+    @Query("MATCH (c:Card)-[:CARD_IN_DECK]-(:Deck)-[:DECK]-(:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(:Meta {title:$0}) WHERE c.type_code <> 'identity' RETURN c")
+    Set<Card> findNonIDByMeta(String metaTitle);
+
     @Query("MATCH (c:Card)-[:CARD_IN_PACK]-(:CardPack {code: $packCode}) RETURN c")
     Set<Card> listForPack(String packCode);
 }

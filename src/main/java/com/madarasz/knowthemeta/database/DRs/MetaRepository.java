@@ -19,7 +19,8 @@ public interface MetaRepository extends CrudRepository<Meta, Long> {
     @Query("MATCH (t:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(t)")
     int countTournaments(String title);
 
-    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(s)")
+    // filter out neurtal standings
+    @Query("MATCH (f:Faction)-[:FACTION]-(c:Card)-[:IDENTITY]-(s:Standing)-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) WHERE (NOT(f.factionCode CONTAINS 'neutral')) RETURN COUNT(s)")
     int countStandings(String title);
 
     @Query("MATCH (d:Deck)-[:DECK]-(:Standing {isRunner: true})-[:TOURNAMENT]-(:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(d)")

@@ -139,7 +139,7 @@ public class AdminController {
         stopWatch.start();
 
         for (Meta meta : metas) {
-            message += metaOperations.getMetaData(meta) + "\r\n";
+            message += metaOperations.getMetaData(meta) + "<br/>";
         }
 
         stopWatch.stop();
