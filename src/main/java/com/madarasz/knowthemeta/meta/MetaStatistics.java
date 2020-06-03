@@ -48,7 +48,7 @@ public class MetaStatistics {
 
         // gather data
         Meta meta = metaRepository.findByTitle(metaTitle);
-        Set<Standing> standings = standingRepository.findByMeta(metaTitle);
+        Set<Standing> standings = standingRepository.findByMeta(metaTitle); // all standings in the meta
         Set<Card> identities = standings.stream().map(x -> x.getIdentity()).collect(Collectors.toSet());
         Set<Card> cardsInPack = cardRepository.listForPack(meta.getCardpool().getCode());
         Set<Card> cards = cardRepository.findNonIDByMeta(metaTitle);
@@ -67,6 +67,17 @@ public class MetaStatistics {
         log.debug(String.format("Runner wins: %d, losses: %d, draws: %d", runnerWins, runnerLosses, runnerDraws));
         meta.setRunnerWinRate(runnerWinrate);
         meta.setCorpWinRate(corpWinrate);
+        // get side winrates with decks
+        final int runnerDeckWins = standingRepository.countRunnerWinsWithDeckInMeta(metaTitle);
+        final int allRunnerDeckMatches = standingRepository.countRunnerAllWithDeckInMeta(metaTitle);
+        final int corpDeckWins = standingRepository.countCorpWinsWithDeckInMeta(metaTitle);
+        final int allCorpDeckMatches = standingRepository.countCorpAllWithDeckInMeta(metaTitle);
+        final double runnerDeckWinrate = (double)runnerDeckWins / allRunnerDeckMatches;
+        final double corpDeckWinrate = (double)corpDeckWins / allCorpDeckMatches;
+        log.debug(String.format("Runner deck matches: %d, corp deck matches: %d", allRunnerDeckMatches, allCorpDeckMatches));
+        log.debug(String.format("Runner deck winrate: %.3f, corp deck winrate: %.3f", runnerDeckWinrate, corpDeckWinrate));
+        meta.setRunnerDeckWinRate(runnerDeckWinrate);
+        meta.setCorpDeckWinRate(corpDeckWinrate);
 
         // iterate on factions
         log.debug("Factions found: " + factions.size());

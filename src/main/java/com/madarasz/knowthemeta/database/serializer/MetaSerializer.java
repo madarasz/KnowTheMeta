@@ -45,6 +45,8 @@ public class MetaSerializer extends StdSerializer<Meta> {
         gen.writeNumberField("matches", value.getMatchesCount());
         gen.writeNumberField("runnerWinRate", value.getRunnerWinRate());
         gen.writeNumberField("corpWinRate", value.getCorpWinRate());
+        gen.writeNumberField("runnerDeckWinRate", value.getRunnerDeckWinRate());
+        gen.writeNumberField("corpDeckWinRate", value.getCorpDeckWinRate());
         gen.writeStringField("file", toPrettyURL(value.getTitle()) + ".json");
         gen.writeStringField("lastUpdate", simpleDateFormat.format(value.getLastUpdate()));
         gen.writeEndObject();

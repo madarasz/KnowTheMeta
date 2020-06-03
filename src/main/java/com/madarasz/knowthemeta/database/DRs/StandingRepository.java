@@ -24,6 +24,14 @@ public interface StandingRepository extends CrudRepository<Standing, Long> {
     int countRunnerLossesInMeta(String metaTitle);
     @Query("MATCH (s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = true RETURN SUM(s.drawCount)")
     int countRunnerDrawsInMeta(String metaTitle);
+    @Query("MATCH (:Deck)-[:DECK]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = true RETURN SUM(s.winCount)")
+    int countRunnerWinsWithDeckInMeta(String metaTitle);
+    @Query("MATCH (:Deck)-[:DECK]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = true RETURN SUM(s.winCount+s.lossCount+s.drawCount)")
+    int countRunnerAllWithDeckInMeta(String metaTitle);
+    @Query("MATCH (:Deck)-[:DECK]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = false RETURN SUM(s.winCount)")
+    int countCorpWinsWithDeckInMeta(String metaTitle);
+    @Query("MATCH (:Deck)-[:DECK]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) WHERE s.isRunner = false RETURN SUM(s.winCount+s.lossCount+s.drawCount)")
+    int countCorpAllWithDeckInMeta(String metaTitle);
 
     @Query("MATCH (c:Card {title: $cardTitle})-[r1:CARD_IN_DECK]-(d:Deck)-[r4:DECK]-(s:Standing)-[r2:TOURNAMENT]-(t:Tournament)-[r3:META]-(m:Meta {title:$0}) RETURN c,s,t,m,d,r1,r2,r3,r4")
     Set<Standing> findByMetaAndCard(String metaTitle, String cardTitle);

@@ -26,6 +26,8 @@ public class Meta extends Entity {
     private int standingsCount = 0;
     private double runnerWinRate;
     private double corpWinRate;
+    private double runnerDeckWinRate;
+    private double corpDeckWinRate;
 
     public Meta(){
     }
@@ -193,6 +195,22 @@ public class Meta extends Entity {
 
     public void setCorpWinRate(double corpWinRate) {
         this.corpWinRate = corpWinRate;
+    }
+
+    public double getRunnerDeckWinRate() {
+        return runnerDeckWinRate;
+    }
+
+    public void setRunnerDeckWinRate(double runnerDeckWinRate) {
+        this.runnerDeckWinRate = runnerDeckWinRate;
+    }
+
+    public double getCorpDeckWinRate() {
+        return corpDeckWinRate;
+    }
+
+    public void setCorpDeckWinRate(double corpDeckWinRate) {
+        this.corpDeckWinRate = corpDeckWinRate;
     }
 
 }
