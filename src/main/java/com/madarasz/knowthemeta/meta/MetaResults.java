@@ -10,11 +10,13 @@ import java.util.stream.Collectors;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DOs.Card;
+import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.stats.SideStats;
 import com.madarasz.knowthemeta.database.DOs.stats.CardStats;
 import com.madarasz.knowthemeta.database.DOs.stats.MetaCards;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
+import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
@@ -32,6 +34,7 @@ public class MetaResults {
     @Autowired WinRateUsedCounterRepository winRateUsedCounterRepository;
     @Autowired CardInPackRepository cardInPackRepository;
     @Autowired CardRepository cardRepository;
+    @Autowired CardPackRepository cardPackRepository;
 
     public MetaCards getCardResultsForMeta(String metaTitle) {
         Meta meta = metaRepository.findByTitle(metaTitle);
@@ -74,13 +77,17 @@ public class MetaResults {
     public CardStats getCardStats(String cardcode) {
         Card card = cardRepository.findByCode(cardcode);
         List<CardInPack> prints = cardInPackRepository.findAllByTitle(card.getTitle());
+        CardPack firstPrintPack = prints.get(prints.size()-1).getCardPack();
         CardStats cardStats = new CardStats();
         cardStats.setCard(card);
         cardStats.setPrints(prints);
         List<Meta> metaList = metaRepository.listMetas();
         Map<String, WinRateUsedCounter> metaData = new LinkedHashMap<String, WinRateUsedCounter>();
         for (Meta meta : metaList) {
-            metaData.put(meta.getTitle(), metaStatistics.calculateCardStats(meta, card));
+            // don't add meta info if the card is not yet printed for the first time
+            if (!meta.getCardpool().isOlderThan(firstPrintPack)) {
+                metaData.put(meta.getTitle(), metaStatistics.calculateCardStats(meta, card));
+            }
         }
         cardStats.setMetaData(metaData);
         return cardStats;

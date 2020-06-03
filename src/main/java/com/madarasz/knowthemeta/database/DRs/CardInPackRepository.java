@@ -15,7 +15,7 @@ public interface CardInPackRepository extends CrudRepository<CardInPack, Long>{
     @Query("MATCH (n:Card)-[r:CARD_IN_PACK]-(p:CardPack) RETURN p, n, r")
     Set<CardInPack> listAll();
 
-    @Query("MATCH (n:Card {title: $title})-[r:CARD_IN_PACK]-(p:CardPack) RETURN p, n, r ORDER BY r.code DESC")
+    @Query("MATCH (n:Card {title: $title})-[r:CARD_IN_PACK]-(p:CardPack)-[r2:CYCLE]-(y:CardCycle) RETURN p, n, r, r2, y ORDER BY y.position DESC, p.position DESC")
     List<CardInPack> findAllByTitle(String title);
 
     // for testing

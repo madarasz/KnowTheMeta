@@ -15,7 +15,7 @@ public interface MetaRepository extends CrudRepository<Meta, Long> {
 
     Optional<Meta> findById(Long id);
 
-    @Query("MATCH (a:MWL)-[w:MWL]-(m:Meta)-[p:CARDPOOL]-(b:CardPack) RETURN m, p, w, b, a ORDER BY b.date_release DESC, a.date_start DESC")
+    @Query("MATCH (a:MWL)-[w:MWL]-(m:Meta)-[p:CARDPOOL]-(b:CardPack)-[r:CYCLE]-(y:CardCycle) RETURN m, p, w, b, a, y, r ORDER BY b.date_release DESC, a.date_start DESC")
     List<Meta> listMetas();
 
     @Query("MATCH (t:Tournament)-[:META]-(m:Meta {title:$0}) RETURN COUNT(t)")

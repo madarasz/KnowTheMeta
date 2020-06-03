@@ -82,6 +82,16 @@ public class CardPack extends Entity {
         this.date_release = date_release;
     }
 
+    public boolean isOlderThan(CardPack other) {
+        if (this.getCycle().getPosition() < other.getCycle().getPosition()) {
+            return true;
+        }
+        if (this.getCycle().getPosition() == other.getCycle().getPosition() && this.getPosition() < other.getPosition()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "CardPack [code=" + code + ", name=" + name + ", position=" + position + ", date_release=" + date_release + "]";

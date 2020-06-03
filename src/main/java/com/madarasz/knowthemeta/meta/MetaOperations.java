@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
-import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.MWL;
