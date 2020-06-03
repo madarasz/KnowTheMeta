@@ -176,7 +176,7 @@ public class NetrunnerDBBroker {
                 if (penalty.has("global_penalty")) mwlCard.setGlobal_penalty(true);
                 if (penalty.has("universal_faction_cost")) mwlCard.setUniversal_faction_cost(penalty.get("universal_faction_cost").getAsInt());
                 if (penalty.has("is_restricted")) mwlCard.setIs_restricted(true);
-                if (penalty.has("deck_limit")) mwlCard.setIs_restricted(true);
+                if (penalty.has("deck_limit")) mwlCard.setDeck_limit(true);
                 // add to MWL
                 mwl.addCard(mwlCard);
             }

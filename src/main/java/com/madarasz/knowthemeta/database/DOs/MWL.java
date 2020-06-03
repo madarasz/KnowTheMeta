@@ -130,4 +130,8 @@ public class MWL extends Entity {
             return false;
         return true;
     }
+
+    public void setCards(Set<MWLCard> cards) {
+        this.cards = cards;
+    }
 }
