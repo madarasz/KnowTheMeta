@@ -2,7 +2,9 @@ package com.madarasz.knowthemeta.database.DRs;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 
 import org.springframework.data.neo4j.annotation.Query;
@@ -34,4 +36,7 @@ public interface MetaRepository extends CrudRepository<Meta, Long> {
 
     @Query("MATCH (m:Meta {title:$0}) OPTIONAL MATCH (s:Standing)-[:TOURNAMENT]-(t:Tournament)-[:META]-(m) DETACH DELETE s,t,m")
     void deleteMeta(String title);
+
+    @Query("MATCH (m:Meta {title:$0})-[:MWL]-(w:MWL)-[:MWL_CARD {deck_limit: true}]-(c:Card) RETURN c")
+    Set<Card> getBannedCards(String metaTitle);
 }

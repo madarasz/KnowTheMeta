@@ -3,9 +3,11 @@ package com.madarasz.knowthemeta.meta;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.madarasz.knowthemeta.brokers.ABRBroker;
 import com.madarasz.knowthemeta.brokers.NetrunnerDBBroker;
+import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.MWL;
@@ -13,6 +15,7 @@ import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.Tournament;
 import com.madarasz.knowthemeta.database.DOs.User;
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInDeck;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DRs.AdminStampRepository;
 import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
@@ -122,6 +125,7 @@ public class MetaOperations {
         List<User> existingUsers = userRepository.listAll();
         Set<Deck> existingDecks = deckRepository.listAll();
         List<Tournament> tournaments = abrBroker.getTournamentData(meta);
+        Set<String> bannedCardTitles = metaRepository.getBannedCards(meta.getTitle()).stream().map(x -> {return x.getTitle();}).collect(Collectors.toSet());
         log.info("*** Starting meta update for " + meta.getTitle());
         log.info(String.format("Existing tournaments for meta: %d", existingTournaments.size()));
 
@@ -132,7 +136,7 @@ public class MetaOperations {
             log.debug(String.format("%d / %d Looking at tournament %s (#%d)", ++counter, tournaments.size(), tournament.getTitle(), tournament.getId()));
             updateTournaments(existingTournaments, tournament);
             // standings
-            updateStandings(tournament, identities, cards, existingDecks, existingUsers);
+            updateStandings(tournament, identities, cards, existingDecks, existingUsers, bannedCardTitles);
         }
         // update meta counters
         updateMetaCounts(meta);
@@ -170,18 +174,21 @@ public class MetaOperations {
      * @param existingDecks
      * @param existingUsers
      */
-    private void updateStandings(Tournament tournament, Set<CardInPack> identities, Set<CardInPack> cards, Set<Deck> existingDecks, List<User> existingUsers) {
+    private void updateStandings(Tournament tournament, Set<CardInPack> identities, Set<CardInPack> cards, Set<Deck> existingDecks, List<User> existingUsers, 
+            Set<String> bannedCardTitles) {
         int tournamentId = tournament.getId();
         List<Standing> standings = abrBroker.getStadingData(tournament, identities, cards, existingDecks);
         Set<Standing> existingStandings = standingRepository.findByTournament(tournamentId);
         for (Standing standing : standings) {
             // decks
             if (standing.getDeck() != null) {
-                Deck deck = standing.getDeck();     
-                // player
-                updateDeckWithPlayer(existingUsers, deck);
-                // deck
-                updateStandingWithDeck(existingDecks, standing, deck);
+                Deck deck = standing.getDeck();
+                if (isDeckValid(bannedCardTitles, deck)) {     
+                    // player
+                    updateDeckWithPlayer(existingUsers, deck);
+                    // deck
+                    updateStandingWithDeck(existingDecks, standing, deck);
+                }
             }
             Standing existingStanding = searcher.getStadingByRankSide(existingStandings, standing.getRank(), standing.getIsRunner());
             if (existingStanding == null) {
@@ -195,6 +202,37 @@ public class MetaOperations {
         if (tournament.isMatchDataAvailable()) {
             updateStandingsWithMatchData(tournamentId, existingStandings);
         }
+    }
+
+    /**
+     * Checks decks for validity.
+     * Currently only checks for MWL banned cards
+     * @param bannedCards
+     * @param deck
+     * @return
+     */
+    public boolean isDeckValid(Set<String> bannedCardTitles, Deck deck) {
+        // if deck was already existing, its cards are empty because of lazy loading
+        if (deck.getCards().size() == 0) {
+            deck = deckRepository.findById(deck.getId());
+        }
+        // check identity for banned
+        for(String title : bannedCardTitles) {
+            if (title.equals(deck.getIdentity().getTitle())) {
+                log.error(deck.getName() + " contains banned ID: " + deck.getIdentity().getTitle());
+                return false;
+            }
+        }
+        // check cards for banned items
+        for (CardInDeck card : deck.getCards()) {
+            for(String title : bannedCardTitles) {
+                if (title.equals(card.getCard().getTitle())) {
+                    log.error(deck.getName() + " contains banned card: " + card.getCard().getTitle());
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     
