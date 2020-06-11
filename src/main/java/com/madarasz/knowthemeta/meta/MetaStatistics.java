@@ -49,7 +49,7 @@ public class MetaStatistics {
         // gather data
         Meta meta = metaRepository.findByTitle(metaTitle);
         Set<Standing> standings = standingRepository.findByMeta(metaTitle); // all standings in the meta
-        Set<Card> identities = standings.stream().map(x -> x.getIdentity()).collect(Collectors.toSet());
+        Set<Card> identities = standings.stream().map(x -> x.getIdentity()).filter(x -> !x.getFaction().getFactionCode().contains("neutral")).collect(Collectors.toSet());
         Set<Card> cardsInPack = cardRepository.listForPack(meta.getCardpool().getCode());
         Set<Card> cards = cardRepository.findNonIDByMeta(metaTitle);
         Set<Faction> factions = standings.stream().map(x -> x.getIdentity().getFaction()).collect(Collectors.toSet());
