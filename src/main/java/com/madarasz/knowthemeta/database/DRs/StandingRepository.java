@@ -12,7 +12,7 @@ public interface StandingRepository extends CrudRepository<Standing, Long> {
     @Query("MATCH (s:Standing {isRunner: $isRunner, rank: $rank})-[:TOURNAMENT]-(:Tournament {id:$0}) RETURN s LIMIT 1")
     Standing findByTournamentSideRank(int tournamentId, boolean isRunner, int rank);
 
-    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament {id: $0}) RETURN s")
+    @Query("MATCH (s:Standing)-[:TOURNAMENT]-(:Tournament {id: $0}) OPTIONAL MATCH (d:Deck)-[:DECK]-(s) RETURN s, d")
     Set<Standing> findByTournament(int tournamentId);
 
     @Query("MATCH (f:Faction)-[r1:FACTION]-(i:Card)-[r2:IDENTITY]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title:$0}) RETURN f,i,s,t,m,r1,r2,r3,r4")

@@ -195,6 +195,11 @@ public class MetaOperations {
                 standingRepository.save(standing);
                 existingStandings.add(standing);
                 standingCreatedCount++;
+            } else if (existingStanding.getDeck() == null && standing.getDeck() != null) { // TODO: this fires every time
+                // add deck to existing standing 
+                existingStanding.setDeck(standing.getDeck());
+                standingRepository.save(existingStanding);
+                log.debug("Adding deck to existing standing");
             }
         }
         // matches
