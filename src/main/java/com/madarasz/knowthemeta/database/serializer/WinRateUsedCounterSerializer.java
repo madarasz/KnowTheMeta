@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.madarasz.knowthemeta.database.DOs.Card;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
 
@@ -27,23 +28,37 @@ public class WinRateUsedCounterSerializer extends StdSerializer<WinRateUsedCount
 
     @Override
     public void serialize(WinRateUsedCounter value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        Card card = (Card)value.getStatAbout();
-        String title = card.getTitle();
-        gen.writeStartObject();
-        if (card.getFaction() != null) {
-            gen.writeStringField("title", title);
-            gen.writeStringField("code", cardRepository.getLastCode(title));
-            gen.writeStringField("faction", card.getFaction().getFactionCode());
+        if (value.getStatAbout() instanceof Card) {
+            // for cards
+            Card card = (Card)value.getStatAbout();
+            String title = card.getTitle();
+            gen.writeStartObject();
+            if (card.getFaction() != null) {
+                gen.writeStringField("title", title);
+                gen.writeStringField("code", cardRepository.getLastCode(title));
+                gen.writeStringField("faction", card.getFaction().getFactionCode());
+            }
+            gen.writeNumberField("used", value.getUsedCounter());
+            gen.writeNumberField("wins", value.getWinCounter());
+            gen.writeNumberField("draws", value.getDrawCounter());
+            gen.writeNumberField("losses", value.getLossCounter());
+            if (!card.getType_code().equals("identity")) {
+                gen.writeNumberField("avgPerDeck", value.getAvgPerDeck());
+                gen.writeStringField("tags", value.getTags());
+            }
+            gen.writeEndObject();
+        } else if (value.getStatAbout() instanceof Faction) {
+            // for factions
+            Faction faction = (Faction)value.getStatAbout();
+            gen.writeStartObject();
+            gen.writeStringField("faction", faction.getName());
+            gen.writeStringField("code", faction.getFactionCode());
+            gen.writeNumberField("used", value.getUsedCounter());
+            gen.writeNumberField("wins", value.getWinCounter());
+            gen.writeNumberField("draws", value.getDrawCounter());
+            gen.writeNumberField("losses", value.getLossCounter());
+            gen.writeEndObject();
         }
-        gen.writeNumberField("used", value.getUsedCounter());
-        gen.writeNumberField("wins", value.getWinCounter());
-        gen.writeNumberField("draws", value.getDrawCounter());
-        gen.writeNumberField("losses", value.getLossCounter());
-        if (!card.getType_code().equals("identity")) {
-            gen.writeNumberField("avgPerDeck", value.getAvgPerDeck());
-            gen.writeStringField("tags", value.getTags());
-        }
-        gen.writeEndObject();
     }
     
 }

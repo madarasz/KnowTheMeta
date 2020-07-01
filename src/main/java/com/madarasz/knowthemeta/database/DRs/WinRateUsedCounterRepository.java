@@ -24,7 +24,7 @@ public interface WinRateUsedCounterRepository extends CrudRepository<WinRateUsed
     @Query("MATCH (f:Faction)-[r:STAT_ABOUT]-(w:WinRateUsedCounter)-[r2:META]-(m:Meta {title:$0}) RETURN r,r2,m,w,f")
     Set<WinRateUsedCounter> listFactionStatsForMeta(String metaTitle);
 
-    @Query("MATCH (f:Faction)-[r:STAT_ABOUT]-(w:WinRateUsedCounter)-[r2:META]-(m:Meta {title:$0}) RETURN r,r2,m,w,f ORDERED BY w.usedCounter DESC")
+    @Query("MATCH (f:Faction)-[r:STAT_ABOUT]-(w:WinRateUsedCounter)-[r2:META]-(m:Meta {title:$0}) RETURN r,r2,m,w,f ORDER BY w.usedCounter DESC")
     List<WinRateUsedCounter> listFactionStatsForMetaOrdered(String metaTitle);
 
     @Query("MATCH (:Card {type_code:'identity'})-[:STAT_ABOUT]-(w:WinRateUsedCounter) RETURN COUNT(w)")

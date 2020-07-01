@@ -9,7 +9,7 @@
 <body>
     <div class="container-fluid">
         <h3 class="m-2 mb-4">Admin page</h2>
-        <div class="alert alert-success" role="alert" th:text="${message}" th:if="${message != null}"/>
+        <div class="alert alert-success" role="alert" th:utext="${message}" th:if="${message != null}"/>
         <div class="row">
             <div class="col">
                 <!-- NetrunnerDB -->

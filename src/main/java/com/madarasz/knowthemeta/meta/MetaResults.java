@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// import com.madarasz.knowthemeta.database.DOs.Faction;
+import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
 import com.madarasz.knowthemeta.database.DOs.Card;
@@ -44,8 +44,11 @@ public class MetaResults {
         }
 
         MetaCards result = new MetaCards(meta);
-        // List<WinRateUsedCounter> factionStats = winRateUsedCounterRepository.listFactionStatsForMetaOrdered(metaTitle);
-        // List<WinRateUsedCounter> runnerFactionStats = factionStats.stream().filter(x -> ((Faction)x.getStatAbout())
+        List<WinRateUsedCounter> factionStats = winRateUsedCounterRepository.listFactionStatsForMetaOrdered(metaTitle);
+        List<WinRateUsedCounter> runnerFactionStats = factionStats.stream().filter(x -> ((Faction)x.getStatAbout()).isRunner())
+            .collect(Collectors.toList());
+        List<WinRateUsedCounter> corpFactionStats = factionStats.stream().filter(x -> !((Faction)x.getStatAbout()).isRunner())
+            .collect(Collectors.toList());
         List<WinRateUsedCounter> idStats = winRateUsedCounterRepository.listIDStatsForMetaOrdered(metaTitle);
         Set<WinRateUsedCounter> cardStats = winRateUsedCounterRepository.listNonIDCardStatsForMeta(metaTitle);
         System.out.println("cardstats:" + cardStats.size());
@@ -65,12 +68,16 @@ public class MetaResults {
         // set values
         SideStats idStat = new SideStats();
         SideStats cardStat = new SideStats();
+        SideStats factionStat = new SideStats();
         idStat.setRunner(runnerIdStats);
         idStat.setCorp(corpIdStats);
         result.setIdentities(idStat);
         cardStat.setRunner(runnerCardStats);
         cardStat.setCorp(corpCardStats);
         result.setCards(cardStat);
+        factionStat.setRunner(runnerFactionStats);
+        factionStat.setCorp(corpFactionStats);
+        result.setFactions(factionStat);
         return result;
     }
 
