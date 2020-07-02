@@ -14,8 +14,10 @@ import com.madarasz.knowthemeta.database.DRs.CardCycleRepository;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckIdentityRepository;
 import com.madarasz.knowthemeta.database.DRs.FactionRepository;
 import com.madarasz.knowthemeta.database.DRs.DeckRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckStatsRepository;
 import com.madarasz.knowthemeta.database.DRs.MWLRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.StandingRepository;
@@ -45,6 +47,8 @@ public class AdminController {
     @Autowired FactionRepository factionRepository;
     @Autowired TournamentRepository tournamentRepository;
     @Autowired StandingRepository standingRepository;
+    @Autowired DeckStatsRepository deckStatsRepository;
+    @Autowired DeckIdentityRepository deckIdentityRepository;
     @Autowired DeckRepository deckRepository;
     @Autowired UserRepository userRepository;
     @Autowired NetrunnerDBUpdater netrunnerDBUpdater;
@@ -73,6 +77,8 @@ public class AdminController {
         model.addAttribute("idStatCount", winRateUsedCounterRepository.countIDStats());
         model.addAttribute("cardStatCount", winRateUsedCounterRepository.countCardStats());
         model.addAttribute("factionStatCount", winRateUsedCounterRepository.countFactionStats());
+        model.addAttribute("deckStatCount", deckStatsRepository.count());
+        model.addAttribute("deckIdentityCount", deckIdentityRepository.count());
         model.addAttribute("lastCycle", cycleCount > 0 ? cardCycleRepository.findLast().getName() : "none");
         model.addAttribute("lastPack", packCount > 0 ? cardPackRepository.findLast().getName() : "none");
         model.addAttribute("lastPrint", cardCount > 0 ? cardRepository.findLast().getTitle() : "none");

@@ -1,5 +1,6 @@
 package com.madarasz.knowthemeta.meta;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +14,14 @@ import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.CardPack;
 import com.madarasz.knowthemeta.database.DOs.stats.SideStats;
 import com.madarasz.knowthemeta.database.DOs.stats.CardStats;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckIdentity;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckSideStats;
 import com.madarasz.knowthemeta.database.DOs.stats.MetaCards;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
 import com.madarasz.knowthemeta.database.DRs.CardInPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardPackRepository;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckIdentityRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
 
@@ -35,6 +39,7 @@ public class MetaResults {
     @Autowired CardInPackRepository cardInPackRepository;
     @Autowired CardRepository cardRepository;
     @Autowired CardPackRepository cardPackRepository;
+    @Autowired DeckIdentityRepository deckIdentityRepository;
 
     public MetaCards getCardResultsForMeta(String metaTitle) {
         Meta meta = metaRepository.findByTitle(metaTitle);
@@ -51,8 +56,9 @@ public class MetaResults {
             .collect(Collectors.toList());
         List<WinRateUsedCounter> idStats = winRateUsedCounterRepository.listIDStatsForMetaOrdered(metaTitle);
         Set<WinRateUsedCounter> cardStats = winRateUsedCounterRepository.listNonIDCardStatsForMeta(metaTitle);
+        Set<DeckIdentity> deckIdentities = deckIdentityRepository.findByMetaTitle(metaTitle);
         System.out.println("cardstats:" + cardStats.size());
-        // filter out neutral IDs - TODO: don't save in the first place
+        // filter out neutral IDs
         idStats = idStats.stream().filter(x -> !((Card)x.getStatAbout()).getFaction().getFactionCode().contains("neutral")).collect(Collectors.toList());
 
         // filter
@@ -64,11 +70,14 @@ public class MetaResults {
             .collect(Collectors.toList());
         List<WinRateUsedCounter> corpCardStats = cardStats.stream().filter(x -> ((Card)x.getStatAbout()).getSide_code().equals("corp"))
             .collect(Collectors.toList());
+        List<DeckIdentity> runnerDecks = deckIdentities.stream().filter(x -> x.getIdentity().getSide_code().equals("runner")).collect(Collectors.toList());
+        List<DeckIdentity> corpDecks = deckIdentities.stream().filter(x -> x.getIdentity().getSide_code().equals("corp")).collect(Collectors.toList());
 
         // set values
         SideStats idStat = new SideStats();
         SideStats cardStat = new SideStats();
         SideStats factionStat = new SideStats();
+        DeckSideStats deckSideStats = new DeckSideStats();
         idStat.setRunner(runnerIdStats);
         idStat.setCorp(corpIdStats);
         result.setIdentities(idStat);
@@ -78,6 +87,9 @@ public class MetaResults {
         factionStat.setRunner(runnerFactionStats);
         factionStat.setCorp(corpFactionStats);
         result.setFactions(factionStat);
+        deckSideStats.setRunner(runnerDecks);
+        deckSideStats.setCorp(corpDecks);
+        result.setDecks(deckSideStats);
         return result;
     }
 

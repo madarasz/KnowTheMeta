@@ -12,6 +12,8 @@ import com.madarasz.knowthemeta.database.DOs.MWL;
 import com.madarasz.knowthemeta.database.DOs.Standing;
 import com.madarasz.knowthemeta.database.DOs.User;
 import com.madarasz.knowthemeta.database.DOs.relationships.CardInPack;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckIdentity;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckStats;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
 
 import org.springframework.stereotype.Service;
@@ -82,6 +84,17 @@ public class Searcher {
 
     public WinRateUsedCounter getStatsByFactionName(Collection<WinRateUsedCounter> searchFrom, String factionName) {
         Optional<WinRateUsedCounter> result = searchFrom.stream().filter(x -> ((Faction)x.getStatAbout()).getName().equals(factionName)).findFirst();
+        return safeGet(result);
+    }
+
+    public DeckStats getDeckStatsByDeckRankTournament(Collection<DeckStats> searchFrom, int deckId, int rank, int tournamentId) {
+        Optional<DeckStats> result = searchFrom.stream().filter(x -> x.getDeck().getId() == deckId && x.getRank() == rank && x.getTournamentId() == tournamentId)
+            .findFirst();
+        return safeGet(result);
+    }
+
+    public DeckIdentity getDeckIdentityByIdentity(Collection<DeckIdentity> searchFrom, String identityTitle) {
+        Optional<DeckIdentity> result = searchFrom.stream().filter(x -> x.getIdentity().getTitle().equals(identityTitle)).findFirst();
         return safeGet(result);
     }
 

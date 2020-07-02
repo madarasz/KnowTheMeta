@@ -7,6 +7,7 @@ public class MetaCards {
     private SideStats factions;
     private SideStats identities;
     private SideStats cards;
+    private DeckSideStats decks;
 
     public MetaCards() {
     }
@@ -47,5 +48,12 @@ public class MetaCards {
         this.cards = cards;
     }
 
+    public DeckSideStats getDecks() {
+        return decks;
+    }
+
+    public void setDecks(DeckSideStats decks) {
+        this.decks = decks;
+    }
     
 }

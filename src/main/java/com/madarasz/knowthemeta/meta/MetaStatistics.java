@@ -11,8 +11,12 @@ import com.madarasz.knowthemeta.database.DOs.Card;
 import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckIdentity;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckStats;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
 import com.madarasz.knowthemeta.database.DRs.CardRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckIdentityRepository;
+import com.madarasz.knowthemeta.database.DRs.DeckStatsRepository;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 import com.madarasz.knowthemeta.database.DRs.StandingRepository;
 import com.madarasz.knowthemeta.database.DRs.WinRateUsedCounterRepository;
@@ -33,6 +37,8 @@ public class MetaStatistics {
     @Autowired MetaRepository metaRepository;
     @Autowired StandingRepository standingRepository;
     @Autowired WinRateUsedCounterRepository winRateUsedCounterRepository;
+    @Autowired DeckStatsRepository deckStatsRepository;
+    @Autowired DeckIdentityRepository deckIdentityRepository;
     @Autowired Searcher searcher;
     private static final Logger log = LoggerFactory.getLogger(MetaStatistics.class);
     private static final double minimumCardPopularity = 0.05; // cards won't be tagged under this popularity
@@ -56,6 +62,8 @@ public class MetaStatistics {
         factions = factions.stream().filter(x -> !x.getFactionCode().contains("neutral")).collect(Collectors.toSet()); // filter out neutral factions
         Set<WinRateUsedCounter> existingCardStats = winRateUsedCounterRepository.listCardStatsForMeta(metaTitle);
         Set<WinRateUsedCounter> existingFactionStats = winRateUsedCounterRepository.listFactionStatsForMeta(metaTitle);
+        Set<DeckStats> existingDeckStats = deckStatsRepository.findByMetaTitle(metaTitle);
+        Set<DeckIdentity> existingDeckIdentities = deckIdentityRepository.findByMetaTitle(metaTitle);
 
         // get side winrates
         final int runnerWins = standingRepository.countRunnerWinsInMeta(metaTitle);
@@ -92,7 +100,6 @@ public class MetaStatistics {
                 factionStat.copyFrom(tempStat);
             }
             winRateUsedCounterRepository.save(factionStat);
-            log.debug(factionStat.toString());
         }
         
         // iterate on identities
@@ -107,7 +114,34 @@ public class MetaStatistics {
                 // update existing stat
                 idStat.copyFrom(tempStat);
             }
-            winRateUsedCounterRepository.save(idStat); 
+            winRateUsedCounterRepository.save(idStat);
+
+            // get deckstats for the identity
+            // the same deck can be listed multiple times if used by multiple players
+            DeckIdentity deckIdentity = searcher.getDeckIdentityByIdentity(existingDeckIdentities, identity.getTitle());
+            Set<Standing> standingsWithDecks = standingRepository.findWithDecksByMetaAndID(metaTitle, identity.getTitle());
+            if (standingsWithDecks.size() > 0) {
+                if (deckIdentity == null) {
+                    deckIdentity = new DeckIdentity(identity, meta);
+                }
+                for (Standing standing : standingsWithDecks) {
+                    double successScore = calculateDeckScore(standing);
+                    DeckStats deckStat = new DeckStats(standing.getDeck(), successScore, standing.getRank(), standing.getTournament().getId());
+                    deckStat.setRankSummary(calculateRankSummary(standing));
+                    deckStat.setDeckSummary(calculateDeckSummary(standing));
+                    DeckStats existing = searcher.getDeckStatsByDeckRankTournament(existingDeckStats, deckStat.getDeck().getId(), deckStat.getRank(), deckStat.getTournamentId());
+                    if (existing == null) {
+                        deckStatsRepository.save(deckStat);
+                    }
+                    DeckStats member = searcher.getDeckStatsByDeckRankTournament(deckIdentity.getDecks(), 
+                        deckStat.getDeck().getId(), deckStat.getRank(), deckStat.getTournamentId());
+                    if (member == null) {
+                        deckIdentity.addDeck(deckStat);
+                    }
+                }
+                deckIdentity.sortDecks();
+                deckIdentityRepository.save(deckIdentity);
+            }
         }
 
         // iterate on non-ID cards
@@ -123,6 +157,23 @@ public class MetaStatistics {
         metaRepository.save(meta);
         stopWatch.stop();
         log.info(String.format("Meta statistics calculation finished (%.3f sec)", stopWatch.getTotalTimeSeconds()));
+    }
+
+    private String calculateDeckSummary(Standing standing) {
+        return String.format("winrate: %.3f", (float)standing.getWinCount() / 
+            (standing.getWinCount() + standing.getDrawCount() + standing.getLossCount())); // TODO: modify
+    }
+
+    private String calculateRankSummary(Standing standing) {
+        return String.format("<a href=\"https://alwaysberunning.net/tournaments/%d\">%s</a> - rank: #%d / %d", 
+            standing.getTournament().getId(), standing.getTournament().getTitle(),
+            standing.getRank(), standing.getTournament().getPlayers_count());
+    }
+
+    public double calculateDeckScore(Standing standing) {
+        int allMatches = standing.getDrawCount() + standing.getLossCount() + standing.getWinCount();
+        if (allMatches == 0) return 0;
+        return (double)standing.getWinCount() / Math.sqrt(allMatches) / Math.sqrt((double)standing.getRank() / Math.sqrt(standing.getTournament().getPlayers_count()));
     }
 
     public WinRateUsedCounter calculateCardStats(Meta meta, Card card) {
