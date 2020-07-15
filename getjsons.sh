@@ -5,6 +5,7 @@ start=$SECONDS
 
 rm -rf ./output/*
 mkdir ./output/cards
+mkdir ./output/decks
 
 # download meta list
 curl http://localhost:8080/stats > ./output/metas.json
@@ -19,6 +20,7 @@ do
     metaname=${metanames[$i]}
     echo "Getting meta: $metaname"
     curl "http://localhost:8080/stats/$metaname" > "./output/$metafile"
+    curl "http://localhost:8080/stats/decks/$metaname" > "./output/decks/$metafile"
     ((i++))
 done
 

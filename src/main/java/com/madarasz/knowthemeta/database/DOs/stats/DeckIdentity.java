@@ -64,6 +64,10 @@ public class DeckIdentity extends Entity{
         this.decks.sort(Comparator.comparing(DeckStats::getSuccessScore).reversed());
     }
 
+    public int getDeckCount() {
+        return this.decks.size();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

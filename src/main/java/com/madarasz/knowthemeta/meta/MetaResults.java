@@ -55,8 +55,7 @@ public class MetaResults {
         List<WinRateUsedCounter> corpFactionStats = factionStats.stream().filter(x -> !((Faction)x.getStatAbout()).isRunner())
             .collect(Collectors.toList());
         List<WinRateUsedCounter> idStats = winRateUsedCounterRepository.listIDStatsForMetaOrdered(metaTitle);
-        Set<WinRateUsedCounter> cardStats = winRateUsedCounterRepository.listNonIDCardStatsForMeta(metaTitle);
-        Set<DeckIdentity> deckIdentities = deckIdentityRepository.findByMetaTitle(metaTitle);
+        Set<WinRateUsedCounter> cardStats = winRateUsedCounterRepository.listNonIDCardStatsForMeta(metaTitle);        
         System.out.println("cardstats:" + cardStats.size());
         // filter out neutral IDs
         idStats = idStats.stream().filter(x -> !((Card)x.getStatAbout()).getFaction().getFactionCode().contains("neutral")).collect(Collectors.toList());
@@ -70,14 +69,11 @@ public class MetaResults {
             .collect(Collectors.toList());
         List<WinRateUsedCounter> corpCardStats = cardStats.stream().filter(x -> ((Card)x.getStatAbout()).getSide_code().equals("corp"))
             .collect(Collectors.toList());
-        List<DeckIdentity> runnerDecks = deckIdentities.stream().filter(x -> x.getIdentity().getSide_code().equals("runner")).collect(Collectors.toList());
-        List<DeckIdentity> corpDecks = deckIdentities.stream().filter(x -> x.getIdentity().getSide_code().equals("corp")).collect(Collectors.toList());
 
         // set values
         SideStats idStat = new SideStats();
         SideStats cardStat = new SideStats();
         SideStats factionStat = new SideStats();
-        DeckSideStats deckSideStats = new DeckSideStats();
         idStat.setRunner(runnerIdStats);
         idStat.setCorp(corpIdStats);
         result.setIdentities(idStat);
@@ -87,9 +83,6 @@ public class MetaResults {
         factionStat.setRunner(runnerFactionStats);
         factionStat.setCorp(corpFactionStats);
         result.setFactions(factionStat);
-        deckSideStats.setRunner(runnerDecks);
-        deckSideStats.setCorp(corpDecks);
-        result.setDecks(deckSideStats);
         return result;
     }
 
@@ -110,5 +103,24 @@ public class MetaResults {
         }
         cardStats.setMetaData(metaData);
         return cardStats;
+    }
+
+    public DeckSideStats getDeckStats(String metaTitle) {
+        DeckSideStats result = new DeckSideStats();
+        Set<DeckIdentity> deckIdentities = deckIdentityRepository.findByMetaTitle(metaTitle);
+        List<DeckIdentity> runnerDecks = deckIdentities.stream().filter(x -> x.getIdentity().getSide_code().equals("runner")).collect(Collectors.toList());
+        List<DeckIdentity> corpDecks = deckIdentities.stream().filter(x -> x.getIdentity().getSide_code().equals("corp")).collect(Collectors.toList());
+        sortDeckStats(runnerDecks);
+        sortDeckStats(corpDecks);
+        result.setRunner(runnerDecks);
+        result.setCorp(corpDecks);
+        return result;
+    }
+
+    private void sortDeckStats(List<DeckIdentity> deckIdentities) {
+        deckIdentities.sort(Comparator.comparing(DeckIdentity::getDeckCount).reversed());
+        for (DeckIdentity deckId : deckIdentities) {
+            deckId.sortDecks();
+        }
     }
 }

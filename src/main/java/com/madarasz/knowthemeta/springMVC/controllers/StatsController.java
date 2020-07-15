@@ -5,6 +5,7 @@ import java.util.List;
 import com.madarasz.knowthemeta.meta.MetaResults;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.stats.CardStats;
+import com.madarasz.knowthemeta.database.DOs.stats.DeckSideStats;
 import com.madarasz.knowthemeta.database.DOs.stats.MetaCards;
 import com.madarasz.knowthemeta.database.DRs.MetaRepository;
 
@@ -23,6 +24,12 @@ public class StatsController {
     @ResponseBody
     public MetaCards getMetaStats(@PathVariable String metaTitle) {
         return metaResults.getCardResultsForMeta(metaTitle);
+    }
+
+    @GetMapping(path = "/stats/decks/{metaTitle}", produces = "application/json")
+    @ResponseBody
+    public DeckSideStats getMetaDeckStats(@PathVariable String metaTitle) {
+        return metaResults.getDeckStats(metaTitle);
     }
 
     @GetMapping(path = "/stats", produces = "application/json")

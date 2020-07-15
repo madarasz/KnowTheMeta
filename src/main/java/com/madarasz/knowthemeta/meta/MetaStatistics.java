@@ -131,7 +131,12 @@ public class MetaStatistics {
                     deckStat.setDeckSummary(calculateDeckSummary(standing));
                     DeckStats existing = searcher.getDeckStatsByDeckRankTournament(existingDeckStats, deckStat.getDeck().getId(), deckStat.getRank(), deckStat.getTournamentId());
                     if (existing == null) {
+                        // new
                         deckStatsRepository.save(deckStat);
+                    } else if (existing.getSuccessScore() != deckStat.getSuccessScore()) {
+                        // update
+                        existing.setSuccessScore(deckStat.getSuccessScore());
+                        deckStatsRepository.save(existing);
                     }
                     DeckStats member = searcher.getDeckStatsByDeckRankTournament(deckIdentity.getDecks(), 
                         deckStat.getDeck().getId(), deckStat.getRank(), deckStat.getTournamentId());
@@ -173,7 +178,7 @@ public class MetaStatistics {
     public double calculateDeckScore(Standing standing) {
         int allMatches = standing.getDrawCount() + standing.getLossCount() + standing.getWinCount();
         if (allMatches == 0) return 0;
-        return (double)standing.getWinCount() / Math.sqrt(allMatches) / Math.sqrt((double)standing.getRank() / Math.sqrt(standing.getTournament().getPlayers_count()));
+        return (double)standing.getWinCount() / Math.sqrt(allMatches) / Math.cbrt((double)standing.getRank() / Math.sqrt(standing.getTournament().getPlayers_count()));
     }
 
     public WinRateUsedCounter calculateCardStats(Meta meta, Card card) {
