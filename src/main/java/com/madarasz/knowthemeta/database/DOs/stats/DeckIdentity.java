@@ -20,7 +20,6 @@ public class DeckIdentity extends Entity{
     private Card identity;
     @JsonIgnore
     private Meta meta;
-    // TODO: private distanceMatrix
     @Relationship(type = "DECKSTAT")
     private List<DeckStats> decks = new ArrayList<>();
 
@@ -97,8 +96,5 @@ public class DeckIdentity extends Entity{
         } else if (!meta.getTitle().equals(other.meta.getTitle()))
             return false;
         return true;
-    }
-
-    
-    
+    }  
 }

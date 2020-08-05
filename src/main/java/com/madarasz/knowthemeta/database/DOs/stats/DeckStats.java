@@ -1,12 +1,15 @@
 package com.madarasz.knowthemeta.database.DOs.stats;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.Deck;
+import com.madarasz.knowthemeta.database.serializer.DeckMinimalSerializer;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
 public class DeckStats extends Entity {
+    @JsonSerialize(using = DeckMinimalSerializer.class)
     private Deck deck;
     private double successScore;
     private String deckSummary;

@@ -118,6 +118,7 @@
                 <table class="table">
                     <thead class="thead-dark">
                         <th>title</th>
+                        <th></th>
                         <th>cardpool</th>
                         <th>MWL</th>
                         <th class="text-center">update</th>
@@ -132,6 +133,9 @@
                         <tr th:each="meta : ${metas}">
                             <td>
                                 <a th:href="${'/stats/' + #strings.replace(meta.title,'+','%2B')}" th:text="${meta.title}"/>
+                            </td>
+                            <td>
+                                <a th:href="${'/stats/decks/' + #strings.replace(meta.title,'+','%2B')}" th:if="${meta.statsCalculated}">decks</a>
                             </td>
                             <td th:text="${meta.cardpool?.name}"/>
                             <td th:text="${meta.mwl?.name}"/>

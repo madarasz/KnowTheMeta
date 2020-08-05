@@ -36,6 +36,7 @@ public interface StandingRepository extends CrudRepository<Standing, Long> {
     @Query("MATCH (c:Card {title: $cardTitle})-[r1:CARD_IN_DECK]-(d:Deck)-[r4:DECK]-(s:Standing)-[r2:TOURNAMENT]-(t:Tournament)-[r3:META]-(m:Meta {title:$0}) RETURN c,s,t,m,d,r1,r2,r3,r4")
     Set<Standing> findByMetaAndCard(String metaTitle, String cardTitle);
 
-    @Query("MATCH (i:Card {title: $identityTitle})-[r1:IDENTITY]-(d:Deck)-[r2:DECK]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title: $metaTitle}) RETURN d,s,t,i,r1,r2,r3,r4")
+    @Query("MATCH (f2:Faction)-[r8:FACTION]-(i:Card {title: $identityTitle})-[r1:IDENTITY]-(d:Deck)-[r2:DECK]-(s:Standing)-[r3:TOURNAMENT]-(t:Tournament)-[r4:META]-(m:Meta {title: $metaTitle}), " +
+            "(d)-[r5:CARD_IN_DECK]-(c:Card)-[r7:FACTION]-(f1:Faction), (d)-[r6:PLAYER]-(u:User) RETURN d,s,t,i,c,u,f1,f2,r1,r2,r3,r4,r5,r6,r7,r8")
     Set<Standing> findWithDecksByMetaAndID(String metaTitle, String identityTitle);
 }

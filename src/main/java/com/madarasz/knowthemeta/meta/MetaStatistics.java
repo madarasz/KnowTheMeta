@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 
 import com.madarasz.knowthemeta.database.Entity;
 import com.madarasz.knowthemeta.database.DOs.Card;
+import com.madarasz.knowthemeta.database.DOs.Deck;
 import com.madarasz.knowthemeta.database.DOs.Faction;
 import com.madarasz.knowthemeta.database.DOs.Meta;
 import com.madarasz.knowthemeta.database.DOs.Standing;
+import com.madarasz.knowthemeta.database.DOs.relationships.CardInDeck;
 import com.madarasz.knowthemeta.database.DOs.stats.DeckIdentity;
 import com.madarasz.knowthemeta.database.DOs.stats.DeckStats;
 import com.madarasz.knowthemeta.database.DOs.stats.WinRateUsedCounter;
@@ -40,6 +42,7 @@ public class MetaStatistics {
     @Autowired DeckStatsRepository deckStatsRepository;
     @Autowired DeckIdentityRepository deckIdentityRepository;
     @Autowired Searcher searcher;
+    @Autowired DeckDistance deckDistance;
     private static final Logger log = LoggerFactory.getLogger(MetaStatistics.class);
     private static final double minimumCardPopularity = 0.05; // cards won't be tagged under this popularity
     private static final double minimumAdditionalWinrate = 0.12; // cards wont't be tagged as winning if they do not get at least faction_winrate+additional
@@ -128,14 +131,15 @@ public class MetaStatistics {
                     double successScore = calculateDeckScore(standing);
                     DeckStats deckStat = new DeckStats(standing.getDeck(), successScore, standing.getRank(), standing.getTournament().getId());
                     deckStat.setRankSummary(calculateRankSummary(standing));
-                    deckStat.setDeckSummary(calculateDeckSummary(standing));
+                    deckStat.setDeckSummary(calculateDeckSummary(standing.getDeck()));
                     DeckStats existing = searcher.getDeckStatsByDeckRankTournament(existingDeckStats, deckStat.getDeck().getId(), deckStat.getRank(), deckStat.getTournamentId());
                     if (existing == null) {
                         // new
                         deckStatsRepository.save(deckStat);
-                    } else if (existing.getSuccessScore() != deckStat.getSuccessScore()) {
+                    } else if (existing.getSuccessScore() != deckStat.getSuccessScore() || !existing.getDeckSummary().equals(deckStat.getDeckSummary())) {
                         // update
                         existing.setSuccessScore(deckStat.getSuccessScore());
+                        existing.setDeckSummary(deckStat.getDeckSummary());
                         deckStatsRepository.save(existing);
                     }
                     DeckStats member = searcher.getDeckStatsByDeckRankTournament(deckIdentity.getDecks(), 
@@ -145,6 +149,7 @@ public class MetaStatistics {
                     }
                 }
                 deckIdentity.sortDecks();
+                deckDistance.calculateDeckCoordinates(deckIdentity);
                 deckIdentityRepository.save(deckIdentity);
             }
         }
@@ -164,9 +169,19 @@ public class MetaStatistics {
         log.info(String.format("Meta statistics calculation finished (%.3f sec)", stopWatch.getTotalTimeSeconds()));
     }
 
-    private String calculateDeckSummary(Standing standing) {
-        return String.format("winrate: %.3f", (float)standing.getWinCount() / 
-            (standing.getWinCount() + standing.getDrawCount() + standing.getLossCount())); // TODO: modify
+    private String calculateDeckSummary(Deck deck) {
+        String summary = "";
+        String factionCode = deck.getIdentity().getFaction().getFactionCode();
+        for (CardInDeck cardInDeck : deck.getCards()) {
+            if (!cardInDeck.getCard().getFaction().getFactionCode().equals(factionCode) && cardInDeck.getCard().getFaction_cost() > 0) {
+                summary += cardInDeck.getQuantity() + "x " + cardInDeck.getCard().getTitle() + ", ";
+            }
+        }
+        if (summary.length() == 0) {
+            log.error("Error calculating summary for deck #" + deck.getId());
+            return "";
+        }
+        return summary.substring(0, summary.length() - 2);
     }
 
     private String calculateRankSummary(Standing standing) {

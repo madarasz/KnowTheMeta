@@ -97,6 +97,26 @@ public class Deck extends Entity {
         return result;
     }
 
+    public Boolean doesContainCard(Card card) {
+        String title = card.getTitle();
+        for (CardInDeck deckCard : this.deckCards) {
+            if (deckCard.getCard().getTitle().equals(title)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getCardQuantity(Card card) {
+        String title = card.getTitle();
+        for (CardInDeck deckCard : this.deckCards) {
+            if (deckCard.getCard().getTitle().equals(title)) {
+                return deckCard.getQuantity();
+            }
+        }
+        return 0;
+    }
+
     @Override
     public String toString() {
         return "Deck [date_update=" + date_update + ", id=" + id + ", identity=" + identity.getTitle() + ", name=" + name + ", size=" + cardCount() + ", player=" + player.getUser_name() + "]";
