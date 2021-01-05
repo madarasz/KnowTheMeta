@@ -144,13 +144,13 @@ public class ABRBroker {
 
     private void readMatchRounds(Set<Standing> stadings, JsonObject matchItem) {
         // get player Ids
-        log.trace("Table #" + (matchItem.get("table").isJsonNull() ? "null" : matchItem.get("table").getAsString()));
+        // log.trace("Table #" + (matchItem.get("table").isJsonNull() ? "null" : matchItem.get("table").getAsString()));
         JsonObject player1 = matchItem.get("player1").getAsJsonObject();
         JsonObject player2 = matchItem.get("player2").getAsJsonObject();
         int player1Id = player1.get("id").isJsonNull() ? 0 : player1.get("id").getAsInt();
         int player2Id = player2.get("id").isJsonNull() ? 0 : player2.get("id").getAsInt();
         // check if it was bye or intentional draw (does not count for stats)
-        if (matchItem.get("intentionalDraw").getAsBoolean() || player1Id == 0 || player2Id == 0) {
+        if (matchItem.has("intentionalDraw") && (matchItem.get("intentionalDraw").getAsBoolean() || player1Id == 0 || player2Id == 0)) {
             // bye or intentionalDraw
             log.trace("bye or intentional draw");
         } else {
@@ -172,10 +172,10 @@ public class ABRBroker {
     private void readMatchSwiss(JsonObject player1, JsonObject player2, Standing player1Runner, Standing player1Corp,
             Standing player2Runner, Standing player2Corp) {
         // get scores
-        int player1RunnerScore = player1.get("runnerScore").isJsonNull() ? 0 :  player1.get("runnerScore").getAsInt();
-        int player2RunnerScore = player2.get("runnerScore").isJsonNull() ? 0 :  player2.get("runnerScore").getAsInt();
-        int player1CorpScore = player1.get("corpScore").isJsonNull() ? 0 :  player1.get("corpScore").getAsInt();
-        int player2CorpScore = player2.get("corpScore").isJsonNull() ? 0 :  player2.get("corpScore").getAsInt();
+        int player1RunnerScore = (!player1.has("runnerScore") || player1.get("runnerScore").isJsonNull()) ? 0 :  player1.get("runnerScore").getAsInt();
+        int player2RunnerScore = (!player2.has("runnerScore") || player2.get("runnerScore").isJsonNull()) ? 0 :  player2.get("runnerScore").getAsInt();
+        int player1CorpScore = (!player1.has("corpScore") || player1.get("corpScore").isJsonNull()) ? 0 :  player1.get("corpScore").getAsInt();
+        int player2CorpScore = (!player1.has("corpScore") || player2.get("corpScore").isJsonNull()) ? 0 :  player2.get("corpScore").getAsInt();
         // decide if NRTM or Cobr.ai, apply match scores
         if (player1.has("combinedScore") && player2.has("combinedScore") 
                 && !player1.get("combinedScore").isJsonNull() && !player2.get("combinedScore").isJsonNull()) {
