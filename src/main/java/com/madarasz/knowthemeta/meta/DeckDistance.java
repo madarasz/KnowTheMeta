@@ -11,10 +11,13 @@ import com.madarasz.knowthemeta.database.DOs.stats.DeckIdentity;
 import com.madarasz.knowthemeta.database.DOs.stats.DeckStats;
 import mdsj.MDSJ;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DeckDistance {
+    private final static Logger log = LoggerFactory.getLogger(DeckDistance.class);
     public final static double influenceSensisitivity = 1.2; // cards costing influence result in bigger distance
 
     public void calculateDeckCoordinates(DeckIdentity deckIdentity) {
@@ -45,7 +48,14 @@ public class DeckDistance {
             return 0;
         }
         // TODO: influence sensitivity
-        boolean sameIdentity = deckA.getIdentity().getTitle().equals(deckB.getIdentity().getTitle());
+        // error handling
+        boolean sameIdentity = true;
+        try {
+            sameIdentity = deckA.getIdentity().getTitle().equals(deckB.getIdentity().getTitle());
+        } catch(Exception e) {
+            log.error("Could not get identites for decks #" + deckA.getId() + " and #" + deckB.getId());
+        }
+        
         double influencePower = sameIdentity ? influenceSensisitivity : 1;
         String deckFactionCode = deckA.getIdentity().getFaction().getFactionCode();
         double distance = 0;
