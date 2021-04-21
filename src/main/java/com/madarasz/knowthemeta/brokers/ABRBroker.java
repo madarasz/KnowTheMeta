@@ -126,6 +126,11 @@ public class ABRBroker {
             return stadings;
         }
 
+        // if there are no matches to parse
+        if (!matchData.has("rounds")) {
+            return stadings;
+        }
+
         // parse players
         matchData.get("players").getAsJsonArray().forEach(playerItem -> readMatchPlayers(stadings, playerItem.getAsJsonObject()));
         // pase rounds
