@@ -192,7 +192,7 @@ public class MetaStatistics {
 
     public double calculateDeckScore(Standing standing) {
         int allMatches = standing.getDrawCount() + standing.getLossCount() + standing.getWinCount();
-        if (allMatches == 0) return 0;
+        if (allMatches == 0) return 1 / Math.cbrt((double)standing.getRank() / Math.sqrt(standing.getTournament().getPlayers_count()));
         return (double)standing.getWinCount() / Math.sqrt(allMatches) / Math.cbrt((double)standing.getRank() / Math.sqrt(standing.getTournament().getPlayers_count()));
     }
 
