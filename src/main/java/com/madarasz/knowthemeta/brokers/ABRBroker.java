@@ -150,27 +150,55 @@ public class ABRBroker {
     private void readMatchRounds(Set<Standing> stadings, JsonObject matchItem) {
         // get player Ids
         // log.trace("Table #" + (matchItem.get("table").isJsonNull() ? "null" : matchItem.get("table").getAsString()));
-        JsonObject player1 = matchItem.get("player1").getAsJsonObject();
-        JsonObject player2 = matchItem.get("player2").getAsJsonObject();
-        int player1Id = player1.get("id").isJsonNull() ? 0 : player1.get("id").getAsInt();
-        int player2Id = player2.get("id").isJsonNull() ? 0 : player2.get("id").getAsInt();
-        // check if it was bye or intentional draw (does not count for stats)
-        if (matchItem.has("intentionalDraw") && (matchItem.get("intentionalDraw").getAsBoolean() || player1Id == 0 || player2Id == 0)) {
-            // bye or intentionalDraw
-            log.trace("bye or intentional draw");
-        } else {
-            // get player standing objects
-            Standing player1Runner = stadings.stream().filter(x -> x.getPlayerId() == player1Id && x.getIsRunner()).findFirst().get();
-            Standing player1Corp = stadings.stream().filter(x -> x.getPlayerId() == player1Id && !x.getIsRunner()).findFirst().get();
-            Standing player2Runner = stadings.stream().filter(x -> x.getPlayerId() == player2Id && x.getIsRunner()).findFirst().get();
-            Standing player2Corp = stadings.stream().filter(x -> x.getPlayerId() == player2Id && !x.getIsRunner()).findFirst().get();                
-            if (matchItem.get("eliminationGame").getAsBoolean()) {
-                // top cut
-                readMatchTopCut(player1, player2, player1Id, player2Id, player1Runner, player1Corp, player2Runner, player2Corp);
+
+        // Cobra.ai
+        if (matchItem.has("player1") && matchItem.has("player2")) {
+            JsonObject player1 = matchItem.get("player1").getAsJsonObject();
+            JsonObject player2 = matchItem.get("player2").getAsJsonObject();
+            int player1Id = player1.get("id").isJsonNull() ? 0 : player1.get("id").getAsInt();
+            int player2Id = player2.get("id").isJsonNull() ? 0 : player2.get("id").getAsInt();
+            // check if it was bye or intentional draw (does not count for stats)
+            if (matchItem.has("intentionalDraw") && (matchItem.get("intentionalDraw").getAsBoolean() || player1Id == 0 || player2Id == 0)) {
+                // bye or intentionalDraw
+                log.trace("bye or intentional draw");
             } else {
-                // swiss
-                readMatchSwiss(player1, player2, player1Runner, player1Corp, player2Runner, player2Corp);
+                // get player standing objects
+                Standing player1Runner = stadings.stream().filter(x -> x.getPlayerId() == player1Id && x.getIsRunner()).findFirst().get();
+                Standing player1Corp = stadings.stream().filter(x -> x.getPlayerId() == player1Id && !x.getIsRunner()).findFirst().get();
+                Standing player2Runner = stadings.stream().filter(x -> x.getPlayerId() == player2Id && x.getIsRunner()).findFirst().get();
+                Standing player2Corp = stadings.stream().filter(x -> x.getPlayerId() == player2Id && !x.getIsRunner()).findFirst().get();                
+                if (matchItem.get("eliminationGame").getAsBoolean()) {
+                    // top cut
+                    readMatchTopCut(player1, player2, player1Id, player2Id, player1Runner, player1Corp, player2Runner, player2Corp);
+                } else {
+                    // swiss
+                    readMatchSwiss(player1, player2, player1Runner, player1Corp, player2Runner, player2Corp);
+                }
             }
+        }
+
+        // sass https://github.com/Chemscribbler/sass
+        else if (matchItem.has("corp") && matchItem.has("runner")) {
+            JsonObject corp = matchItem.get("corp").getAsJsonObject();
+            JsonObject runner = matchItem.get("runner").getAsJsonObject();
+            int corpId = corp.get("id").getAsInt();
+            int runnerId = runner.get("id").getAsInt();
+            int corpScore = corp.get("score").getAsInt();
+            int runnerScore = runner.get("score").getAsInt();
+            Standing corpPlayer = stadings.stream().filter(x -> x.getPlayerId() == corpId && !x.getIsRunner()).findFirst().get();
+            Standing runnerPlayer = stadings.stream().filter(x -> x.getPlayerId() == runnerId && x.getIsRunner()).findFirst().get();
+            if (corpScore > runnerScore) {
+                corpPlayer.incWinCount();
+                runnerPlayer.incLossCount();
+            } else if (runnerScore > corpScore) {
+                corpPlayer.incLossCount();
+                runnerPlayer.incWinCount();
+            } else {
+                corpPlayer.incDrawCount();
+                runnerPlayer.incDrawCount();
+            }
+        } else {
+            log.error("Could not read match");
         }
     }
 
